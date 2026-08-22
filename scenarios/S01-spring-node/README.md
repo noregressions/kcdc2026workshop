@@ -28,8 +28,8 @@ For the full trace:
 ## Build
 
 ```bash
-./scripts/build.sh
 ./scripts/clean.sh
+./scripts/build.sh
 ```
 
 The first build uses `npm install` because this generated lab does not ship a pre-fabricated npm lockfile. That creates `frontend/package-lock.json`; from that point use it as normal evidence and, for a real repository, commit it.

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TraceController {
 
     @GetMapping("/trace")
-    public Map<String, Object> trace(@RequestParam(defaultValue = "  Hello   Supply Chain  ") String value) {
+    public Map<String, Object> trace(@RequestParam(name="value",defaultValue = "  Hello   Supply Chain  ") String value) {
         var normalized = TraceNormalizer.normalize(value);
         return Map.of(
                 "input", value,

@@ -4,3 +4,4 @@ trace-output/
 .runtime.log
 __pycache__/
 *.pyc
+.maven-repo/

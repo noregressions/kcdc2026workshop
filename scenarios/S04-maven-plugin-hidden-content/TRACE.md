@@ -1,6 +1,7 @@
 ---
 id: s04-maven-plugin-hidden-content
 oneliner: "Traces runtime capability that enters through Maven plugin execution rather than the dependency graph, and survives as compiled bytecode."
+track: core
 ---
 
 # S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab

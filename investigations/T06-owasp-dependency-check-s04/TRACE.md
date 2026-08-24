@@ -1,6 +1,7 @@
 ---
 id: t06-owasp-dependency-check-s04
 oneliner: "Distinguishes application dependencies, plugin dependencies, plugin execution and final bytes — and which of them the scan can actually see."
+track: reference
 ---
 
 # T06 — OWASP Dependency-Check / S04

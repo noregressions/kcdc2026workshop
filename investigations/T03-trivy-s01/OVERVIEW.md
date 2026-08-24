@@ -1,9 +1,12 @@
 ---
 id: t03-trivy-s01-overview
 oneliner: "Trivy against S01: scope, tool version and how to run it."
+track: reference
 ---
 
 # T03 — Trivy / S01: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 One CVE tool against one supply-chain scenario.
 

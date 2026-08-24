@@ -1,6 +1,7 @@
 ---
 id: t04-grype-s02
 oneliner: "Separates how Grype constructs a software inventory from how it matches vulnerabilities against that inventory."
+track: reference
 ---
 
 # T04 — Grype / S02

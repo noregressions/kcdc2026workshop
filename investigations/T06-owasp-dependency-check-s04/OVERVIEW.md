@@ -1,9 +1,12 @@
 ---
 id: t06-owasp-dependency-check-s04-overview
 oneliner: "OWASP Dependency-Check against S04: scope, the NVD key that selects the tool version, and how to run it."
+track: reference
 ---
 
 # T06 — OWASP Dependency-Check / S04: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 ## Scenario
 

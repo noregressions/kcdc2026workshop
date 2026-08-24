@@ -1,9 +1,12 @@
 ---
 id: t05-pip-audit-s03-overview
 oneliner: "pip-audit against S03: scope and how to run it."
+track: reference
 ---
 
 # T05 — pip-audit / S03: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 ## Scenario
 

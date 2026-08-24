@@ -1,6 +1,7 @@
 ---
 id: t01-s03-python-pep517
 oneliner: "Snyk against S03, where a transitive dependency executes build code during installation."
+track: reference
 ---
 
 # T01 / S03 — Snyk Against Python + PEP 517

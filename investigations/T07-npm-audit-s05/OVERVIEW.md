@@ -1,9 +1,12 @@
 ---
 id: t07-npm-audit-s05-overview
 oneliner: "npm audit against S05: scope and how to run it."
+track: reference
 ---
 
 # T07 — npm audit / S05: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 ## Scenario
 

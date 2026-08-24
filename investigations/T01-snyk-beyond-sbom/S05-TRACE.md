@@ -1,6 +1,7 @@
 ---
 id: t01-s05-node-prepack
 oneliner: "Snyk against S05, from package source through the packed tarball to the installed package."
+track: reference
 ---
 
 # T01 / S05 — Snyk Against npm `prepack`

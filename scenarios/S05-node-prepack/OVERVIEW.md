@@ -1,9 +1,12 @@
 ---
 id: s05-node-prepack-overview
 oneliner: "An npm package that generates its own dist/ while being packed: prerequisites and how to run it."
+track: core
 ---
 
 # S05 — Node npm `prepack` Supply Chain Trace Lab: Overview
+
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
 
 This scenario traces runtime code that is **generated during package creation**, rather than simply being copied from the package source tree.
 

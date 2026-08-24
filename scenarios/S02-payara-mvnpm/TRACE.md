@@ -1,6 +1,7 @@
 ---
 id: s02-payara-mvnpm
 oneliner: "Traces an ordinary Maven dependency alongside an mvnpm package that reaches the browser bundle only through a plugin execution realm."
+track: optional
 ---
 
 # S02 — Payara + mvnpm Supply Chain Trace Lab

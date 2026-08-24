@@ -1,6 +1,7 @@
 ---
 id: t02-docker-scout
 oneliner: "Treats the finished container as the evidence source, and asks what the shipped image can still explain about its own contents."
+track: reference
 ---
 
 # T02 — Docker Scout: What Does the Final Container Know?

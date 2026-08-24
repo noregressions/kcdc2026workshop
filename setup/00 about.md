@@ -1,6 +1,7 @@
 ---
 id: setup-about
 oneliner: "What this workshop is for, how the labs work, and how to read a trace."
+track: core
 ---
 
 # About This Workshop

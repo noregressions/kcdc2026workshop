@@ -1,6 +1,7 @@
 ---
 id: t03-trivy-s01
 oneliner: "Asks whether the vulnerability answer changes when the same software is observed as a dependency model, a Java archive, a browser bundle, or an image."
+track: reference
 ---
 
 # T03 — Trivy Across S01 Boundaries

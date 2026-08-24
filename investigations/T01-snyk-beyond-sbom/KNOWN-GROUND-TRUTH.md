@@ -1,6 +1,7 @@
 ---
 id: t01-known-ground-truth
 oneliner: "The S04 facts T01 begins with — plugin, payload and generated route — established before any tool is pointed at anything."
+track: instructor-demo
 ---
 
 # T01 Known Ground Truth — S04

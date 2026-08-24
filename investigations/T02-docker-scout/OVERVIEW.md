@@ -1,9 +1,12 @@
 ---
 id: t02-docker-scout-overview
 oneliner: "Docker Scout against the two scenarios that produce container images: scope and how to run it."
+track: reference
 ---
 
 # T02 — Docker Scout: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 Docker Scout investigation for the container-producing workshop scenarios.
 

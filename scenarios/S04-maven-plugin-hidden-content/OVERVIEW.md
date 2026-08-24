@@ -1,9 +1,12 @@
 ---
 id: s04-maven-plugin-hidden-content-overview
 oneliner: "An application with an empty dependency tree whose JAR still gained a route: prerequisites and how to run it."
+track: core
 ---
 
 # S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab: Overview
+
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
 
 This scenario shows build-time software introducing runtime capability into a Java application.
 

@@ -1,9 +1,12 @@
 ---
 id: t04-grype-s02-overview
 oneliner: "Grype against S02: scope and how to run it."
+track: reference
 ---
 
 # T04 — Grype / S02: Overview
+
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
 
 One CVE tool against one supply-chain scenario.
 

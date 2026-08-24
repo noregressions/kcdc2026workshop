@@ -37,6 +37,12 @@ The workshop's recurring finding is that **software presence and software
 identifiability are different questions.** A build can preserve behaviour
 perfectly while destroying every trace of where that behaviour came from.
 
+## Attending the workshop?
+
+**Go straight to [`WORKSHOP.md`](./WORKSHOP.md)** — the timed, canonical route.
+You are not expected to work through every scenario and investigation in this
+repository; the workshop route selects what matters and links to the rest.
+
 ## Getting started
 
 You need a JDK 21+, Maven 3.9+, Node.js 20+, Python 3.11+ and Docker. Full

@@ -1,6 +1,7 @@
 ---
 id: setup-intro
 oneliner: "Required tool versions, the versions these walkthroughs were recorded against, and what is not pinned."
+track: core
 ---
 # KCDC Workshop Prerequisites
 

@@ -1,9 +1,12 @@
 ---
 id: s02-payara-mvnpm-overview
 oneliner: "Four kinds of software into one WAR and one Payara container: prerequisites and how to run it."
+track: optional
 ---
 
 # S02 — Payara + mvnpm Supply Chain Trace Lab: Overview
+
+> **Workshop track: OPTIONAL** — not part of the timed route. Visit this lab if you use Jakarta EE: it shows the same identification problems crossing into a WAR and an application server.
 
 A deliberately small mixed-stack application for tracing software through a different set of supply-chain boundaries:
 

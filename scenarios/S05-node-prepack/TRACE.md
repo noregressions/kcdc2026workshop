@@ -1,6 +1,7 @@
 ---
 id: s05-node-prepack
 oneliner: "Follows a package through the prepack lifecycle hook into a tarball, into node_modules, and into a live endpoint."
+track: core
 ---
 
 # S05 — Node npm `prepack` Supply Chain Trace Lab

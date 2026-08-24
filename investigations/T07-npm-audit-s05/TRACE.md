@@ -1,6 +1,7 @@
 ---
 id: t07-npm-audit-s05
 oneliner: "Distinguishes npm dependency metadata from physical package contents, and both from evidence that a lifecycle script ever ran."
+track: reference
 ---
 
 # T07 — `npm audit` / S05

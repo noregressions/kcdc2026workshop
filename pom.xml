@@ -52,56 +52,86 @@
                             <sidebar>true</sidebar>
                         </vars>
                         <parts>
+                            <!--
+                                The book embodies the workshop route: setup, then one part per
+                                workshop part (presentation placeholder first, its labs after),
+                                then appendices for everything off the timed route. Explicit
+                                includes throughout — order is meaning here, and globs sweep.
+                            -->
                             <part>
                                 <title>Introduction and Setup</title>
                                 <includes>
-                                    <include>setup/**/*.md</include>
+                                    <include>setup/00 about.md</include>
+                                    <include>setup/01 getting-started.md</include>
+                                    <include>setup/01 intro.md</include>
+                                    <include>setup/02 tools.md</include>
+                                    <include>setup/03 ACCOUNTS-AND-KEYS.md</include>
+                                    <include>setup/04 PREPULL-PREWARM.md</include>
                                 </includes>
                             </part>
                             <part>
-                                <title>Scenarios</title>
+                                <title>Part 1 — Supply-Chain Fundamentals</title>
                                 <includes>
-                                    <!--
-                                        Explicit, in reading order: each scenario's
-                                        overview then its walkthrough.
-
-                                        Deliberately not a glob. Paperband claims
-                                        cards pattern-by-pattern, so two globs would
-                                        emit all five overviews before any
-                                        walkthrough. A single scenarios/**/*.md would
-                                        also sweep 80+ files out of node_modules and
-                                        .venv.
-                                    -->
+                                    <include>workshop/01-supply-chain.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Part 2 — Can We Identify What We Ship?</title>
+                                <includes>
+                                    <include>workshop/02-identification.md</include>
                                     <include>scenarios/S01-spring-node/OVERVIEW.md</include>
                                     <include>scenarios/S01-spring-node/TRACE.md</include>
-                                    <include>scenarios/S02-payara-mvnpm/OVERVIEW.md</include>
-                                    <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
-                                    <include>scenarios/S03-python-pep517/OVERVIEW.md</include>
-                                    <include>scenarios/S03-python-pep517/TRACE.md</include>
                                     <include>scenarios/S04-maven-plugin-hidden-content/OVERVIEW.md</include>
                                     <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
                                     <include>scenarios/S05-node-prepack/OVERVIEW.md</include>
                                     <include>scenarios/S05-node-prepack/TRACE.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/OVERVIEW.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/KNOWN-GROUND-TRUTH.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
                                 </includes>
                             </part>
                             <part>
-                                <title>Investigations</title>
+                                <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
                                 <includes>
-                                    <!--
-                                        Explicit, in reading order: each
-                                        investigation's overview first, then its
-                                        evidence, then its conclusions. T01 spans
-                                        every scenario, so its ground truth and
-                                        per-scenario traces sit between its overview
-                                        and its summary.
-                                    -->
-                                    <include>investigations/T01-snyk-beyond-sbom/OVERVIEW.md</include>
-                                    <include>investigations/T01-snyk-beyond-sbom/KNOWN-GROUND-TRUTH.md</include>
+                                    <include>workshop/03-vulnerabilities.md</include>
+                                    <include>investigations/CVE-tomcat-85/OVERVIEW.md</include>
+                                    <include>investigations/CVE-tomcat-85/TRACE.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Part 4 — CVEs Aren't Enough</title>
+                                <includes>
+                                    <include>workshop/04-project-health-eol.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Part 5 — What If Someone Exploits the Gaps?</title>
+                                <includes>
+                                    <include>workshop/05-integrity-provenance.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Part 6 — Wrap-Up</title>
+                                <includes>
+                                    <include>workshop/06-wrap-up.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Appendix — Optional Labs</title>
+                                <includes>
+                                    <include>scenarios/S02-payara-mvnpm/OVERVIEW.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
+                                    <include>scenarios/S03-python-pep517/OVERVIEW.md</include>
+                                    <include>scenarios/S03-python-pep517/TRACE.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Appendix — Reference Investigations</title>
+                                <includes>
                                     <include>investigations/T01-snyk-beyond-sbom/S01-TRACE.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/S02-TRACE.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/S03-TRACE.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/S05-TRACE.md</include>
-                                    <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
                                     <include>investigations/T02-docker-scout/OVERVIEW.md</include>
                                     <include>investigations/T02-docker-scout/TRACE.md</include>
                                     <include>investigations/T03-trivy-s01/OVERVIEW.md</include>

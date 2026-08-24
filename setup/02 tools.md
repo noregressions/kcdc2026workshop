@@ -1,6 +1,7 @@
 ---
 id: setup-tools
 oneliner: "Install commands for macOS and Linux, plus what Podman can and cannot substitute for."
+track: core
 ---
 
 # Install Before the Workshop

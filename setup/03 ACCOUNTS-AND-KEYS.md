@@ -1,6 +1,7 @@
 ---
 id: setup-accounts-and-keys
 oneliner: "Snyk authentication and the NVD API key — the two credentials some investigations need."
+track: core
 ---
 
 # Accounts and Keys

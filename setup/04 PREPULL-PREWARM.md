@@ -1,6 +1,7 @@
 ---
 id: setup-prepull-prewarm
 oneliner: "Pull the images and warm the scanner databases before the workshop, in one command or by hand."
+track: core
 ---
 
 # Pre-Pull and Pre-Warm

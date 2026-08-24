@@ -1,9 +1,12 @@
 ---
 id: t01-snyk-beyond-sbom-overview
 oneliner: "Snyk across all five scenarios: scope, the ground truth it starts from, and the scripts that produce each run."
+track: instructor-demo
 ---
 
 # T01 — Snyk Beyond the SBOM: Overview
+
+> **Workshop track: INSTRUCTOR DEMO** — shown live during the workshop against S04 ground truth. You don't need to run it yourself; the per-scenario traces are reference material.
 
 T01 is an **investigation** over S04 rather than another synthetic supply-chain scenario.
 

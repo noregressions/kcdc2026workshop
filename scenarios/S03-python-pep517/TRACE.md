@@ -1,6 +1,7 @@
 ---
 id: s03-python-pep517
 oneliner: "Follows a direct dependency into a transitive sdist, through PEP 517 backend execution, into site-packages and into runtime behaviour."
+track: optional
 ---
 
 # S03 — Python PEP 517 Supply Chain Trace Lab

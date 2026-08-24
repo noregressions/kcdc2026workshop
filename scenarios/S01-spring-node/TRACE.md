@@ -1,6 +1,7 @@
 ---
 id: s01-spring-node
 oneliner: "Follows jackson-databind, commons-codec and lodash from declaration to container image, then strips metadata to prove what a scanner was relying on."
+track: core
 ---
 # S01 — Software Supply Chain Trace Lab
 

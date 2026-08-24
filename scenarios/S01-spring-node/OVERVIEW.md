@@ -1,9 +1,12 @@
 ---
 id: s01-spring-node-overview
 oneliner: "Three tracer components through Maven, Vite and Shade: prerequisites, build sequence and the scripts that drive it."
+track: core
 ---
 
 # S01 — Software Supply Chain Trace Lab: Overview
+
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
 
 A deliberately small, mixed-ecosystem application for tracing software through declaration, resolution, transformation, packaging, SBOM generation, and an OCI image.
 
@@ -14,6 +17,30 @@ The lab keeps three tracer components alive throughout the investigation:
 - `commons-codec`: a Maven dependency that the Shade Plugin relocates from `org.apache.commons.codec` to `com.acme.internal.codec` inside the `normalizer` module.
 
 The point is not to find three components three times. It is to see which claims can still be proved after each transformation.
+
+## The workshop exercise (15 minutes)
+
+The canonical exercise lives in [`WORKSHOP.md`](../../WORKSHOP.md) Part 2,
+Step 1. Three legs, one conclusion:
+
+```text
+control          jackson-databind agrees in resolver and artefact scan
+shading          commons-codec identified — until only its metadata is removed
+bundling         lodash's fingerprints are in the bundle; no package identified
+```
+
+Everything below and in [`TRACE.md`](./TRACE.md) is the full investigation
+behind those fifteen minutes.
+
+### Explore later
+
+The TRACE steps the exercise deliberately skips:
+
+- steps 4–6 — how each of the three components was resolved
+- steps 17–18 — why *two versions* of commons-codec legitimately coexist in
+  the shipped JAR
+- steps 19–22 — the Maven-model vs artefact-derived SBOM comparison
+- step 23 — crossing the container-image boundary
 
 ## Prerequisites
 

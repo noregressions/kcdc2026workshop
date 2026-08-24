@@ -1,6 +1,7 @@
 ---
 id: t01-s01-spring-node
 oneliner: "Snyk against S01's four tracer states, including the shaded JAR and the bundled frontend."
+track: reference
 ---
 
 # T01 / S01 — Snyk Against Spring + Node

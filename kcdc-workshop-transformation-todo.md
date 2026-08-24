@@ -413,7 +413,7 @@ What exactly had to be true for this scanner to produce this finding?
 # P0 — Break
 
 - [x] Put the break explicitly in `WORKSHOP.md`.
-- [ ] Put the expected restart time in facilitator notes.
+- [x] Put the expected restart time in facilitator notes.
 - [ ] Use the break as the boundary between:
   - discovering problems
   - deciding what to do about them
@@ -690,32 +690,32 @@ for all reference labs.
 
 # P0 — Facilitator material
 
-- [ ] Create `FACILITATOR.md`.
-- [ ] Include exact timings.
-- [ ] Include "skip this if running late" points.
-- [ ] Include expected output for each live command.
-- [ ] Include likely attendee failures and fixes.
-- [ ] Include transitions between sections.
-- [ ] Include questions to ask the room.
-- [ ] Include the intended conclusion from every exercise.
-- [ ] Mark which operations should be instructor demos rather than everyone typing.
+- [x] Create `FACILITATOR.md`.
+- [x] Include exact timings. *(measured, not estimated — wall-clock offsets plus per-step machine floors)*
+- [x] Include "skip this if running late" points. *(per part, plus on-time checkpoints at 0:45/1:10/1:40)*
+- [x] Include expected output for each live command. *(one-line expectations; TRACEs hold the full form)*
+- [x] Include likely attendee failures and fixes. *(failure playbook — every entry actually hit during verification)*
+- [x] Include transitions between sections.
+- [x] Include questions to ask the room.
+- [x] Include the intended conclusion from every exercise.
+- [x] Mark which operations should be instructor demos rather than everyone typing. *(T01 demo instructor-only; S05 demo-if-late; Tomcat live curls instructor-optional, room uses evidence/)*
 
 ## Time-pressure escape hatches
 
-- [ ] Define the first thing to cut from each section.
-- [ ] Suggested cuts:
+- [x] Define the first thing to cut from each section. *(ordered five-item cut list with minutes saved)*
+- [x] Suggested cuts:
   - S05 participant exercise → instructor demo
   - OpenSSL example
   - detailed Scorecard exploration
   - extended attack taxonomy
-  - provenance implementation detail
-- [ ] Never cut:
+  - provenance implementation detail *(ordered with minutes saved in FACILITATOR.md)*
+- [x] Never cut:
   - the Part 1 live machine check (absorbed S00's job)
   - S01 transformation
   - S04 hidden build content
   - Tomcat CVE/CPE walkthrough
   - EOL distinction
-  - final evidence/provenance model
+  - final evidence/provenance model *(restated at each relevant point in FACILITATOR.md)*
 
 ---
 
@@ -797,8 +797,8 @@ reference/
 
 The existing idea of covering many tools is useful, but it should be a reference rather than live workshop content.
 
-- [ ] Create `reference/tools.md`.
-- [ ] Categorise tools by the evidence boundary they inspect:
+- [x] Create `reference/tools.md`. *(in the book as 'Appendix — The Tools')*
+- [x] Categorise tools by the evidence boundary they inspect:
   - source/dependency graph
   - repository
   - package
@@ -807,8 +807,8 @@ The existing idea of covering many tools is useful, but it should be a reference
   - vulnerability database
   - project health
   - lifecycle/EOL
-  - provenance
-- [ ] Include existing tools:
+  - provenance *(grouped as resolvers / inventory producers / matchers / data sources / utilities / health+lifecycle)*
+- [x] Include existing tools:
   - Snyk
   - Trivy
   - Grype
@@ -822,7 +822,7 @@ The existing idea of covering many tools is useful, but it should be a reference
   - OpenSSF Scorecard
   - Cloudsmith Navigator
   - EOL tooling
-- [ ] Explicitly state that the catalogue is not a product ranking.
+- [x] Explicitly state that the catalogue is not a product ranking. *(first paragraph, bolded)*
 
 ---
 

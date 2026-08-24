@@ -166,6 +166,7 @@ not that the lesson broke.
 ## Repository layout
 
 ```text
+FACILITATOR.md    instructor-side notes: timings, expected outputs, failure playbook
 setup/            prerequisites, accounts and keys, pre-pull and pre-warm
 scenarios/        S01-S05, each with an OVERVIEW.md and a TRACE.md
 investigations/   T01-T07, each with an OVERVIEW.md and a TRACE.md
@@ -184,7 +185,14 @@ PDF:
 
 ```bash
 mvn package
-# -> target/book.pdf
+# -> target/book.pdf   (US Letter, running headers, page numbers)
+```
+
+The table of contents is generated — after adding, removing or materially
+resizing content, refresh its page numbers:
+
+```bash
+./scripts/generate-toc.sh
 ```
 
 ## Prerequisites in full

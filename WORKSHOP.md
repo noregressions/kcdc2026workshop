@@ -459,5 +459,9 @@ Nothing below is part of the timed route.
 - [T06 — OWASP Dependency-Check](./investigations/T06-owasp-dependency-check-s04/OVERVIEW.md)
 - [T07 — npm audit](./investigations/T07-npm-audit-s05/OVERVIEW.md)
 
+**Tool reference:** [`reference/tools.md`](./reference/tools.md) — every
+tool the workshop touches, grouped by the evidence boundary it observes,
+with the blind spot each lab demonstrated.
+
 Every lab's `TRACE.md` is the full annotated walkthrough behind the short
 exercise you did here.

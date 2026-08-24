@@ -1,0 +1,5 @@
+# Workshop theme (copy of the built-in `workshop` theme from paperband 0.1.0)
+# plus this book's page-matter templates (templates/page-header.html,
+# templates/page-footer.html). If the plugin version changes, re-extract
+# theme.css:  unzip -p .../layout-<v>.jar themes/workshop/theme.css
+theme.css

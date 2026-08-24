@@ -1,3 +1,8 @@
+---
+id: t05-pip-audit-s03
+oneliner: "Separates dependency identity from vulnerability matching and from PEP 517 build execution, as distinct facts about one environment."
+---
+
 # T05 — pip-audit / S03
 
 ## Objective

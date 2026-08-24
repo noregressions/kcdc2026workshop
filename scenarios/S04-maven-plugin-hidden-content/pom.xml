@@ -10,7 +10,7 @@
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Maven Plugin Hidden Content Trace Lab</name>
+    <name>S04 Maven Plugin Hidden Content Trace Lab</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

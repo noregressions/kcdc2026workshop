@@ -1,4 +1,9 @@
-# Maven Plugin Hidden-Content Supply Chain Trace Lab
+---
+id: s04-maven-plugin-hidden-content
+oneliner: "Traces runtime capability that enters through Maven plugin execution rather than the dependency graph, and survives as compiled bytecode."
+---
+
+# S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab
 
 This lab follows runtime capability that enters a Java application through **Maven plugin execution**, rather than through the application's normal dependency graph.
 
@@ -54,6 +59,29 @@ In this lab, the application POM declares `trace-injector-maven-plugin`, but doe
 
 Separate source-controlled content from previous generated build output.
 
+Most of the evidence in this lab is generated during the build. If output from an earlier run survives, we cannot tell which build produced the bytes we are inspecting.
+
+## How we're going to do it
+
+`clean.sh` removes the generated state of all three modules in this scenario:
+
+```text
+target/                  the application build output
+tooling/plugin/target/   the Maven plugin build output
+tooling/payload/target/  the plugin's transitive payload build output
+trace-output/            captured trace evidence
+```
+
+It also stops any runtime left over from a previous walkthrough and removes the `.runtime.pid` and `.runtime.log` files that track it.
+
+It deliberately **keeps** `.maven-repo/`, the scenario-local Maven repository. That directory is where the plugin and payload fixtures are installed, and every Maven command in this lab passes `-Dmaven.repo.local="$PWD/.maven-repo"` to read from it. Keeping it means we never resolve these fixtures from a public repository, and it keeps the lab runnable offline.
+
+If you want a cold dependency-resolution run, remove it as well:
+
+```bash
+rm -rf .maven-repo
+```
+
 ## Run
 
 ```bash
@@ -62,7 +90,15 @@ Separate source-controlled content from previous generated build output.
 
 ## Observed output
 
-The cleanup script completed successfully during the walkthrough.
+```text
+S04 clean.
+
+Kept the scenario-local Maven repository:
+  .maven-repo/
+
+Remove it too if you want a cold Maven dependency-resolution run:
+  rm -rf .maven-repo
+```
 
 ## Establish
 
@@ -70,7 +106,97 @@ The application can be rebuilt from the checked-in scenario sources and local Ma
 
 ---
 
-# 2. Look at the application dependency graph
+# 2. Build the plugin, the payload, and the application
+
+## Why we need to do this
+
+Everything after this step inspects build output, so we have to produce it first.
+
+This scenario has two build domains, and they must be built in order:
+
+```text
+tooling/payload   the data the plugin reads
+tooling/plugin    the plugin that reads it and generates application code
+        ↓  installed into .maven-repo/
+application       declares the plugin, declares no dependencies
+```
+
+The plugin cannot be declared by the application until it exists in a repository Maven can resolve. That is why the tooling is built and installed first.
+
+## How we're going to do it
+
+`build.sh` runs both phases against the scenario-local repository rather than the developer's `~/.m2`:
+
+1. `mvn -Dmaven.repo.local="$PWD/.maven-repo" -f tooling/pom.xml install` builds `trace-route-payload` and `trace-injector-maven-plugin` and installs both into `.maven-repo/`. The payload is declared as an ordinary `compile` dependency of the plugin — that is what makes it *transitive plugin* software later.
+2. `mvn -Dmaven.repo.local="$PWD/.maven-repo" clean package` builds the application, which resolves the plugin from `.maven-repo/`, executes its `inject-route` goal during `generate-sources`, and packages the generated output.
+
+Using a scenario-local repository matters for the trace: it guarantees the plugin being executed is the fixture in `tooling/`, not a same-named artefact cached from somewhere else.
+
+## Run
+
+```bash
+./scripts/build.sh
+```
+
+## Observed output
+
+The tooling phase installs both fixtures:
+
+```text
+== Build the Maven plugin and its transitive payload ==
+
+[INFO] Reactor Summary for s04-build-tooling 1.0.0:
+[INFO]
+[INFO] s04-build-tooling .................................. SUCCESS [  0.100 s]
+[INFO] S04 Trace Route Payload ............................ SUCCESS [  0.647 s]
+[INFO] S04 Trace Injector Maven Plugin .................... SUCCESS [  0.649 s]
+[INFO] BUILD SUCCESS
+```
+
+The application phase shows the plugin executing inside the normal lifecycle:
+
+```text
+== Build the application ==
+
+[INFO] --------< dev.noregressions.trace:maven-plugin-hidden-content >---------
+[INFO] Building S04 Maven Plugin Hidden Content Trace Lab 1.0.0
+
+[INFO] --- trace-injector:1.0.0:inject-route (inject-build-route) @ maven-plugin-hidden-content ---
+[INFO] Injected TraceRoute source from plugin payload: trace-route-payload
+[INFO] Injected route: /hidden/build-info
+
+[INFO] --- resources:3.4.0:resources (default-resources) @ maven-plugin-hidden-content ---
+[INFO] Copying 2 resources from target/generated-resources/trace-injector to target/classes
+
+[INFO] --- compiler:3.14.1:compile (default-compile) @ maven-plugin-hidden-content ---
+[INFO] Compiling 3 source files with javac [debug release 21] to target/classes
+
+[INFO] --- jar:3.4.2:jar (default-jar) @ maven-plugin-hidden-content ---
+[INFO] Building jar: target/maven-plugin-hidden-content-1.0.0.jar
+[INFO] BUILD SUCCESS
+```
+
+Note the compiler line: three source files were compiled, but only two exist in `src/`. The third was generated moments earlier by the plugin.
+
+## Establish
+
+Both fixtures are installed in `.maven-repo/`, and `target/maven-plugin-hidden-content-1.0.0.jar` exists.
+
+The build log already shows the transformation this lab investigates:
+
+```text
+trace-route-payload (plugin dependency)
+        ↓
+inject-route goal, generate-sources phase
+        ↓
+generated Java + ServiceLoader metadata
+        ↓
+compiled and packaged as ordinary application content
+```
+
+---
+
+# 3. Look at the application dependency graph
 
 ## Why we need to do this
 
@@ -88,7 +214,7 @@ mvn \
 
 ```text
 [INFO] --------< dev.noregressions.trace:maven-plugin-hidden-content >---------
-[INFO] Building Maven Plugin Hidden Content Trace Lab 1.0.0
+[INFO] Building S04 Maven Plugin Hidden Content Trace Lab 1.0.0
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 
@@ -110,7 +236,7 @@ Neither `trace-injector-maven-plugin` nor `trace-route-payload` appears as an ap
 
 ---
 
-# 3. Ask Maven about plugin dependencies instead
+# 4. Ask Maven about plugin dependencies instead
 
 ## Why we need to do this
 
@@ -151,7 +277,7 @@ Maven knows about the payload, but not as an application dependency.
 
 ---
 
-# 4. Inspect the actual plugin execution realm
+# 5. Inspect the actual plugin execution realm
 
 ## Why we need to do this
 
@@ -194,7 +320,7 @@ plugin execution realm
 
 ---
 
-# 5. Inspect the generated Java source
+# 6. Inspect the generated Java source
 
 ## Why we need to do this
 
@@ -254,7 +380,7 @@ route        = /hidden/build-info
 
 ---
 
-# 6. Inspect the generated activation metadata
+# 7. Inspect the generated activation metadata
 
 ## Why we need to do this
 
@@ -315,7 +441,7 @@ The ServiceLoader descriptor makes the generated implementation discoverable by 
 
 ---
 
-# 7. Prove the generated content entered the final JAR
+# 8. Prove the generated content entered the final JAR
 
 ## Why we need to do this
 
@@ -343,7 +469,7 @@ The generated implementation, activation metadata and provenance marker are all 
 
 ---
 
-# 8. Inspect the shipped bytecode
+# 9. Inspect the shipped bytecode
 
 ## Why we need to do this
 
@@ -391,7 +517,7 @@ The runtime behaviour survived the transformation even though the build-time pac
 
 ---
 
-# 9. Scan the final JAR with Syft
+# 10. Scan the final JAR with Syft
 
 ## Why we need to do this
 
@@ -430,7 +556,7 @@ The bytes are present. Their build provenance is not recovered as package identi
 
 ---
 
-# 10. Generate a Maven-model CycloneDX SBOM
+# 11. Generate a Maven-model CycloneDX SBOM
 
 ## Why we need to do this
 
@@ -485,11 +611,21 @@ Syft JAR scan             → application archive only
 
 ---
 
-# 11. Run the application
+# 12. Run the application
 
 ## Why we need to do this
 
 The final test is whether the generated, packaged bytes actually change runtime capability.
+
+## How we're going to do it
+
+`run.sh` starts the packaged JAR — not a recompiled classpath — so the runtime evidence comes from the same artefact Syft scanned in step 10.
+
+Three details of the script matter when reading the output:
+
+- It serves on port `8082` by default, chosen so it can coexist with S02 on `8080` and S03 on `8081`. Override with `PORT=8084 ./scripts/run.sh`.
+- It starts the JVM detached and records the process id in `.runtime.pid`, with output captured to `.runtime.log`. The JVM needs `--add-modules jdk.httpserver`, which the script supplies.
+- It then polls `/health` for up to 30 seconds and only reports success once that endpoint identifies itself as this application. This is why the reported PID is trustworthy evidence: the script refuses to start if the port is already serving HTTP, so we cannot accidentally interrogate an unrelated service.
 
 ## Run
 
@@ -509,9 +645,11 @@ Health: http://localhost:8082/health
 
 The application starts successfully from the final JAR on port `8082`.
 
+The PID is an observation from this run, not an invariant.
+
 ---
 
-# 12. Verify the source-defined application endpoint
+# 13. Verify the source-defined application endpoint
 
 ## Why we need to do this
 
@@ -538,7 +676,7 @@ The source-defined application is running normally.
 
 ---
 
-# 13. Request the build-supplied endpoint
+# 14. Request the build-supplied endpoint
 
 ## Why we need to do this
 
@@ -576,6 +714,38 @@ application JAR
         ↓
 /hidden/build-info
 ```
+
+---
+
+# 15. Stop the runtime
+
+## Why we need to do this
+
+The runtime started in step 12 is detached and will keep holding port `8082` after the walkthrough ends.
+
+Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to start when the port is already serving HTTP.
+
+## How we're going to do it
+
+`stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
+
+`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port.
+
+## Run
+
+```bash
+./scripts/stop.sh
+```
+
+## Observed output
+
+```text
+Stopped runtime PID 69945
+```
+
+## Establish
+
+Port `8082` is released and no scenario process remains from this walkthrough.
 
 ---
 

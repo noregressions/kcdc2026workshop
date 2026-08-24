@@ -1,115 +1,14 @@
-# Python PEP 517 Supply Chain Trace Lab
+# S03 — Python + PEP 517
 
-A deliberately small, Python-native supply-chain scenario.
+| | |
+|---|---|
+| [`OVERVIEW.md`](./OVERVIEW.md) | What this scenario is, and how to run it |
+| [`TRACE.md`](./TRACE.md) | The annotated step-by-step walkthrough |
 
-The local application declares one dependency:
+Start with `OVERVIEW.md`, then work through `TRACE.md`.
 
-```text
-reportkit==1.0.0
-```
+Scripts live in [`scripts/`](./scripts): `build.sh` to build, `clean.sh` to reset,
+and `proof-check.sh` to confirm the walkthrough's claims still hold.
 
-`reportkit` has a transitive dependency:
-
-```text
-tracehook-demo==1.0.0
-```
-
-That transitive dependency is supplied only as a Python source distribution
-(`sdist`). Installing it causes pip to invoke its PEP 517 build backend.
-
-The backend generates an importable Python package and a JSON marker that did
-**not** exist in the source distribution.
-
-The installed application then imports the direct dependency, which imports the
-generated transitive package, and exposes the generated trace at `/trace`.
-
-```text
-requirements.txt
-    |
-    v
-reportkit==1.0.0 wheel
-    |
-    | Requires-Dist
-    v
-tracehook-demo==1.0.0 sdist
-    |
-    | PEP 517
-    v
-tracehook_backend.build_wheel()
-    |
-    | generates package content
-    v
-.venv/site-packages/tracehook_demo/
-    |
-    v
-runtime import
-    |
-    v
-GET /trace
-```
-
-## Requirements
-
-- Python 3.11+
-- `curl`
-- `tar`
-- `unzip`
-- `jq` optional
-- Syft optional
-
-The package fixtures are local, so the build does not need PyPI access.
-
-## Build
-
-```bash
-./scripts/build.sh
-```
-
-## Run
-
-```bash
-./scripts/run.sh
-```
-
-Then:
-
-```bash
-curl -sS http://localhost:8081/trace | jq
-```
-
-Stop the runtime with:
-
-```bash
-./scripts/stop.sh
-```
-
-Return the whole scenario to its pre-build state with:
-
-```bash
-./scripts/clean.sh
-```
-
-Verify the complete scenario with:
-
-```bash
-./scripts/proof-check.sh
-```
-
-## Package fixtures
-
-`python-repo/` contains the exact package artefacts consumed by pip:
-
-```text
-reportkit-1.0.0-py3-none-any.whl
-tracehook_demo-1.0.0.tar.gz
-```
-
-`python-sources/` contains their auditable fixture source.
-
-If you deliberately change those fixtures, rebuild the local package repository:
-
-```bash
-python3 scripts/rebuild-python-repo.py
-```
-
-See `TRACE.md` for the walkthrough.
+Both files are chapters of the workshop book — see the
+[repository README](../../README.md) for the whole picture.

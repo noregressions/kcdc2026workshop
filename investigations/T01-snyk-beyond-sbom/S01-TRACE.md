@@ -1,3 +1,8 @@
+---
+id: t01-s01-spring-node
+oneliner: "Snyk against S01's four tracer states, including the shaded JAR and the bundled frontend."
+---
+
 # T01 / S01 — Snyk Against Spring + Node
 
 This is the S01 case inside **T01 — Snyk Beyond the SBOM**.
@@ -8,6 +13,7 @@ S01 contains four useful tracer states:
 jackson-databind 2.19.4
     ordinary Maven dependency
     survives as an intact nested JAR
+
 
 commons-codec 1.17.1
     resolved by normalizer

@@ -1,81 +1,14 @@
-# S05 — Node npm `prepack` Supply Chain Trace Lab
+# S05 — Node npm prepack
 
-This scenario traces runtime code that is **generated during package creation**, rather than simply being copied from the package source tree.
+| | |
+|---|---|
+| [`OVERVIEW.md`](./OVERVIEW.md) | What this scenario is, and how to run it |
+| [`TRACE.md`](./TRACE.md) | The annotated step-by-step walkthrough |
 
-```text
-package source
-    ↓
-package.json prepack lifecycle hook
-    ↓
-scripts/generate-dist.js executes
-    ↓
-generates dist/index.js + provenance metadata
-    ↓
-npm pack creates trace-route-package-1.0.0.tgz
-    ↓
-application installs tarball
-    ↓
-node_modules contains generated runtime code
-    ↓
-GET /hidden/prepack-info
-```
+Start with `OVERVIEW.md`, then work through `TRACE.md`.
 
-The package's `files` field deliberately publishes only `dist/`. The generator and its build input stay out of the tarball. This makes the source tree, lifecycle execution, packed package, installed package, inventory/SBOM views and runtime distinct evidence boundaries.
+Scripts live in [`scripts/`](./scripts): `build.sh` to build, `clean.sh` to reset,
+and `proof-check.sh` to confirm the walkthrough's claims still hold.
 
-## Requirements
-
-- Node.js 20+
-- npm
-- curl
-- tar
-- Syft for the scanner comparison
-- jq for the manual walkthrough formatting
-
-No external npm packages are required.
-
-## Build
-
-```bash
-./scripts/build.sh
-```
-
-## Run
-
-```bash
-./scripts/run.sh
-```
-
-Defaults to port `8083`.
-
-```bash
-curl -sS http://localhost:8083/health | jq
-curl -sS http://localhost:8083/hidden/prepack-info | jq
-```
-
-## Stop
-
-```bash
-./scripts/stop.sh
-```
-
-## Clean
-
-```bash
-./scripts/clean.sh
-```
-
-This removes generated and installed state, including the package's generated `dist/` directory.
-
-## Proof check
-
-After the walkthrough:
-
-```bash
-./scripts/proof-check.sh
-```
-
-The proof starts from the clean state, verifies `dist/` is absent before packing, exercises `prepack`, checks the tarball and installed package, validates npm/Syft evidence views, and runs the application on isolated port `18085`.
-
-Syft checks are skipped with a warning if Syft is not installed.
-
-See `TRACE.md` for the evidence walkthrough.
+Both files are chapters of the workshop book — see the
+[repository README](../../README.md) for the whole picture.

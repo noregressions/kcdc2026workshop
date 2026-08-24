@@ -1,3 +1,8 @@
+---
+id: t01-snyk-beyond-sbom
+oneliner: "What a commercial SCA tool knows beyond an SBOM, which transformations stay invisible even to it, and a cross-scenario matrix of both."
+---
+
 # T01 — Snyk Beyond the SBOM
 
 ## Question

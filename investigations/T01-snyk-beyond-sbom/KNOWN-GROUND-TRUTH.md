@@ -1,3 +1,8 @@
+---
+id: t01-known-ground-truth
+oneliner: "The S04 facts T01 begins with — plugin, payload and generated route — established before any tool is pointed at anything."
+---
+
 # T01 Known Ground Truth — S04
 
 T01 starts with facts already established by the completed S04 walkthrough.

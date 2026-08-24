@@ -1,3 +1,8 @@
+---
+id: t01-s02-payara-mvnpm
+oneliner: "Snyk against S02, where the missing software is an mvnpm package living in a plugin execution realm."
+---
+
 # T01 / S02 — Snyk Against Payara + mvnpm
 
 This is the second case inside **T01 — Snyk Beyond the SBOM**.

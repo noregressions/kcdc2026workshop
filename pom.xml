@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.noregressions.trace</groupId>
+    <artifactId>manual</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Software Supply Chain Trace Lab Manual</name>
+
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    </properties>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>dev.noregressions.paperband</groupId>
+                <artifactId>paperband-maven-plugin</artifactId>
+                <version>0.1.0</version>
+
+                <!--
+                    Shared by every goal: what the book is, and how it renders.
+                    Both executions below read this, and so does an ad-hoc
+                    `mvn paperband:structure` — which then describes exactly the
+                    book the PDF and site are built from.
+                -->
+                <configuration>
+                    <theme>workshop</theme>
+                    <margins>0</margins>
+                    <book>
+                        <root>${project.basedir}</root>
+                        <title>Software Supply Chain Trace Lab</title>
+                        <vars>
+                            <subtitle>Following three components through a real supply chain</subtitle>
+                            <author>Steve Poole</author>
+                            <!--
+                                Static-site navigator: a sidebar listing every part and
+                                the cards under it. Opt-in, and worth having at 21 cards.
+                                Add sidebar_sections_collapsed=false to ship every part
+                                expanded rather than click-to-open.
+                            -->
+                            <sidebar>true</sidebar>
+                        </vars>
+                        <parts>
+                            <part>
+                                <title>Introduction and Setup</title>
+                                <includes>
+                                    <include>setup/**/*.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Scenarios</title>
+                                <includes>
+                                    <!--
+                                        Explicit, in reading order: each scenario's
+                                        overview then its walkthrough.
+
+                                        Deliberately not a glob. Paperband claims
+                                        cards pattern-by-pattern, so two globs would
+                                        emit all five overviews before any
+                                        walkthrough. A single scenarios/**/*.md would
+                                        also sweep 80+ files out of node_modules and
+                                        .venv.
+                                    -->
+                                    <include>scenarios/S01-spring-node/OVERVIEW.md</include>
+                                    <include>scenarios/S01-spring-node/TRACE.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/OVERVIEW.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
+                                    <include>scenarios/S03-python-pep517/OVERVIEW.md</include>
+                                    <include>scenarios/S03-python-pep517/TRACE.md</include>
+                                    <include>scenarios/S04-maven-plugin-hidden-content/OVERVIEW.md</include>
+                                    <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
+                                    <include>scenarios/S05-node-prepack/OVERVIEW.md</include>
+                                    <include>scenarios/S05-node-prepack/TRACE.md</include>
+                                </includes>
+                            </part>
+                            <part>
+                                <title>Investigations</title>
+                                <includes>
+                                    <!--
+                                        Explicit, in reading order: each
+                                        investigation's overview first, then its
+                                        evidence, then its conclusions. T01 spans
+                                        every scenario, so its ground truth and
+                                        per-scenario traces sit between its overview
+                                        and its summary.
+                                    -->
+                                    <include>investigations/T01-snyk-beyond-sbom/OVERVIEW.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/KNOWN-GROUND-TRUTH.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/S01-TRACE.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/S02-TRACE.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/S03-TRACE.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/S05-TRACE.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
+                                    <include>investigations/T02-docker-scout/OVERVIEW.md</include>
+                                    <include>investigations/T02-docker-scout/TRACE.md</include>
+                                    <include>investigations/T03-trivy-s01/OVERVIEW.md</include>
+                                    <include>investigations/T03-trivy-s01/TRACE.md</include>
+                                    <include>investigations/T04-grype-s02/OVERVIEW.md</include>
+                                    <include>investigations/T04-grype-s02/TRACE.md</include>
+                                    <include>investigations/T05-pip-audit-s03/OVERVIEW.md</include>
+                                    <include>investigations/T05-pip-audit-s03/TRACE.md</include>
+                                    <include>investigations/T06-owasp-dependency-check-s04/OVERVIEW.md</include>
+                                    <include>investigations/T06-owasp-dependency-check-s04/TRACE.md</include>
+                                    <include>investigations/T07-npm-audit-s05/OVERVIEW.md</include>
+                                    <include>investigations/T07-npm-audit-s05/TRACE.md</include>
+                                </includes>
+                            </part>
+                        </parts>
+                    </book>
+                </configuration>
+
+                <executions>
+                    <!-- Each execution contributes only where its output goes. -->
+                    <execution>
+                        <id>pdf</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <output>${project.build.directory}/book.pdf</output>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site</outputDirectory>
+                            <!-- Drop stale card pages when a card is removed or renamed. -->
+                            <clean>true</clean>
+                        </configuration>
+                    </execution>
+                    <!--
+                        The same goal again, on Maven's `site` phase, so
+                        `mvn site` builds the book's site too. Without this
+                        `mvn site` runs only Maven's own reporting lifecycle,
+                        which has nothing to do with this book (see the
+                        maven-site-plugin entry below).
+                    -->
+                    <execution>
+                        <id>site-lifecycle</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site</outputDirectory>
+                            <clean>true</clean>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                `mvn site` means Maven's reporting lifecycle, not this book.
+                This project is documentation: no Java, no dependency reports
+                worth publishing, and project-info-reports 3.9.0 fails outright
+                against the Doxia the current site plugin ships. Pinned (an
+                unpinned version warns) and skipped, which leaves the `site`
+                phase to the book's own site execution above.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

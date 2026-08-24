@@ -1,4 +1,9 @@
-# Payara + mvnpm Supply Chain Trace Lab
+---
+id: s02-payara-mvnpm
+oneliner: "Traces an ordinary Maven dependency alongside an mvnpm package that reaches the browser bundle only through a plugin execution realm."
+---
+
+# S02 — Payara + mvnpm Supply Chain Trace Lab
 
 This lab follows four different kinds of software through one build and into one running container:
 
@@ -1034,7 +1039,19 @@ The application deliberately omitted Jakarta runtime APIs, and Payara itself bri
 
 ## How we're going to do it
 
-Build the project image and start the container with the supplied wrapper.
+`run.sh` moves the WAR into a running Payara server in three steps:
+
+1. If `target/payara-mvnpm-trace-lab-1.0.0.war` is missing it runs `mvn clean package` first, so the image is never built around a stale or absent WAR.
+2. `docker build -t payara-mvnpm-trace-lab:local .` builds the project image from the `Dockerfile`, which copies the WAR into Payara's auto-deploy directory. This is also where the base-image digest below comes from.
+3. It force-removes any container already named `payara-mvnpm-trace-lab`, then starts a new one detached with port `8080` published.
+
+The container is deliberately named rather than anonymous, so a re-run replaces the previous one instead of failing on a port clash or leaving orphans behind.
+
+Payara deploys the WAR asynchronously after the container starts, so the application context `/trace` becomes available a few seconds later. Follow the deployment with:
+
+```bash
+docker logs -f payara-mvnpm-trace-lab
+```
 
 ## Run
 
@@ -1230,6 +1247,34 @@ The application artefact is therefore not the whole deployed software inventory:
 ```text
 application SBOM != container/product SBOM
 ```
+
+---
+
+# 21. Stop the container
+
+## Why we need to do this
+
+The container started in step 18 runs detached and keeps holding port `8080` after the walkthrough ends.
+
+## How we're going to do it
+
+`stop.sh` force-removes the `payara-mvnpm-trace-lab` container. It is safe to run when nothing is running.
+
+The `payara-mvnpm-trace-lab:local` image is left in place, because rebuilding it is the slowest part of the lab. Remove it explicitly if you want the disk space back:
+
+```bash
+docker image rm payara-mvnpm-trace-lab:local
+```
+
+## Run
+
+```bash
+./scripts/stop.sh
+```
+
+## Establish
+
+Port `8080` is released and no scenario container remains from this walkthrough.
 
 ---
 

@@ -1,4 +1,9 @@
-# Python PEP 517 Supply Chain Trace Lab
+---
+id: s03-python-pep517
+oneliner: "Follows a direct dependency into a transitive sdist, through PEP 517 backend execution, into site-packages and into runtime behaviour."
+---
+
+# S03 — Python PEP 517 Supply Chain Trace Lab
 
 This lab follows a direct Python dependency into a transitive source distribution, through PEP 517 build execution, into the installed environment, and finally into runtime behaviour.
 
@@ -615,6 +620,42 @@ application runtime
         ↓
 GET /trace
 ```
+
+---
+
+# 15. Stop the runtime
+
+## Why we need to do this
+
+The application started in step 13 is detached and keeps holding port `8081` after the walkthrough ends.
+
+Leaving it running also blocks a later re-run: `run.sh` verifies the port before starting and refuses when something is already serving there.
+
+## How we're going to do it
+
+`stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
+
+`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. Note that this only works while `.runtime.pid` exists — if the file is deleted before the process is stopped, neither script can find the runtime and it has to be stopped by hand:
+
+```bash
+lsof -nP -iTCP:8081 -sTCP:LISTEN
+```
+
+## Run
+
+```bash
+./scripts/stop.sh
+```
+
+## Observed output
+
+```text
+Stopped runtime PID 68583
+```
+
+## Establish
+
+Port `8081` is released and no scenario process remains from this walkthrough.
 
 ---
 

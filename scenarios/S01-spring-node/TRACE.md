@@ -1,18 +1,20 @@
-# Software Supply Chain Trace Lab
+---
+id: s01-spring-node
+oneliner: "Follows jackson-databind, commons-codec and lodash from declaration to container image, then strips metadata to prove what a scanner was relying on."
+---
+# S01 — Software Supply Chain Trace Lab
 
-This lab follows three tracer components through a small but realistic software supply chain:
+This lab follows three specific components through a small but realistic software supply chain:
 
 - `jackson-databind` — an ordinary Java dependency whose version is selected by dependency management.
 - `commons-codec` — a Java dependency whose bytecode is shaded and relocated into another JAR.
 - `lodash` — an npm dependency that is bundled into frontend JavaScript and loses its package boundary.
 
-The point is not to teach Maven, npm, Docker, or SBOM basics. The point is to see **what evidence exists at each stage, what survives the next transformation, and what different tools can legitimately know**.
+The objective is to see **what evidence exists at each stage, what survives the next transformation, and what different tools can legitimately know**.
 
 The pattern throughout is:
 
 **Look → Run → Observe → Establish**
-
-The exercise ends at the container-image boundary. Reverse provenance from a binary/container back to a source repository and exact Git commit is deliberately left for a separate exercise.
 
 ---
 
@@ -26,7 +28,11 @@ We therefore begin by removing generated state while keeping source and lockfile
 
 ## How we're going to do it
 
-The project contains a `clean.sh` wrapper so every run starts from the same state. It removes Maven targets, npm-installed modules, frontend build output, SBOM output, and controlled-experiment output. It deliberately preserves `package-lock.json` because that is part of the dependency-resolution evidence.
+The project contains a `clean.sh` wrapper so every run starts from the same state. It removes Maven targets, npm-installed modules, frontend build output, SBOM output, and controlled-experiment output.
+
+It also removes `normalizer/dependency-reduced-pom.xml`. That file is written by the Maven Shade plugin, and Shade's rewriting is one of the things this lab examines, so we do not want a copy left over from an earlier build.
+
+It deliberately preserves `package-lock.json` because that is part of the dependency-resolution evidence.
 
 ## Run
 
@@ -112,6 +118,10 @@ Until those transformations happen, we only have configuration.
 ## How we're going to do it
 
 `build.sh` runs the project's normal build path in the correct order rather than reproducing it manually in the lab. The important thing is that we inspect the outputs produced by the same build path the application actually uses.
+
+The order matters: the frontend is installed and bundled first, because Maven packages the resulting `frontend/dist/` output into the service JAR.
+
+For the frontend install, the script prefers `npm ci`, which installs exactly what `package-lock.json` specifies. If no lockfile is present it falls back to `npm install` once, to create one. That fallback is worth knowing about, because step 1 preserved the lockfile precisely so that resolution is reproducible — on a fresh checkout without a lockfile, the versions observed later in this lab are whatever npm resolved at that moment rather than a pinned set.
 
 ## Run
 

@@ -1,3 +1,8 @@
+---
+id: t01-s05-node-prepack
+oneliner: "Snyk against S05, from package source through the packed tarball to the installed package."
+---
+
 # T01 / S05 — Snyk Against npm `prepack`
 
 This is the final scenario case inside **T01 — Snyk Beyond the SBOM**.

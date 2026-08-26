@@ -5,7 +5,7 @@ track: core
 status: placeholder
 ---
 
-# Part 3 — What Does a CVE Finding Actually Mean?
+# Introduction
 
 > **PLACEHOLDER** — presentation content to be written. Outline and timing
 > below are the working plan from the transformation TODO.
@@ -15,7 +15,7 @@ status: placeholder
 ## Planned content
 
 - Framing source: the foojay.io article *The Real Mechanics of
-  Vulnerabilities in an Upstream/Downstream, Topsy-Turvy EOL World* — the
+  Vulnerabilities in an Upstream/Downstream, Topsy-Turvy EOL World*: the
   delta model (forks/embeddings/repackagings, not a single river), "a CVE is
   not a demand for a patch", and silence as the real exposure. The
   presentation narrates the model; the investigation proves it from data.
@@ -32,5 +32,5 @@ status: placeholder
 - Closing exercise: what exactly had to be true for this scanner to produce
   this finding?
 
-**BREAK follows this part** — the boundary between discovering problems and
+**BREAK follows this part**: the boundary between discovering problems and
 deciding what to do about them.

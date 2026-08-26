@@ -53,6 +53,6 @@ For targeted reruns:
 ./scripts/run-trivy-archives-s01.sh
 ```
 
-Java archives are scanned with `trivy rootfs`; source dependency models use `trivy fs`; the container uses `trivy image --image-src docker`.
+Java archives use `trivy rootfs`; source dependency models use `trivy fs`; the container uses `trivy image --image-src docker`.
 
 See `TRACE.md` for the observed evidence and conclusions.

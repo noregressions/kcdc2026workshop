@@ -1,13 +1,50 @@
 ---
 id: setup-getting-started
-oneliner: "Clone the repository, check your tools, install what's missing, warm everything up — the four commands that make you workshop-ready."
+oneliner: "Clone the repository, check your tools, install what's missing, warm everything up: the four commands that make you workshop-ready."
 track: core
 ---
 
 # Getting Started
 
-Four steps. Do them before the workshop on a good network; the opening
-presentation includes time to re-run them and fix stragglers.
+Two ways in. **The container is the zero-install path** — the only thing
+your machine needs is Docker. The local install gives you everything
+natively.
+
+## Option A — the workshop container (install only Docker)
+
+Install Docker Desktop (or Docker Engine on Linux) and make sure the
+machine has **~20GB of free disk** — two container images plus build
+headroom. Then from the repository root:
+
+```bash
+./container/build.sh     # or: docker pull <published image, when available>
+./container/run.sh
+```
+
+Every tool is preinstalled, every lab prebuilt, and the scanner databases
+are already downloaded — the shell you land in is workshop-ready. Run
+`./scripts/tools-check.sh` inside it to confirm.
+
+It is two images under the hood — a big, rarely-changing tools image and a
+small workshop-code image on top — so when the workshop content updates,
+re-running `./container/build.sh` (or re-pulling) only fetches the small
+part.
+
+Two things to know:
+
+- The container drives **your** Docker daemon through a mounted socket, so
+  the images S01/S02 build appear on your machine and their published
+  ports are reachable from your own browser.
+- The S03/S04/S05 servers bind inside the container — run their `curl`
+  commands in the container shell, exactly as WORKSHOP.md prints them.
+
+Have a Snyk token or NVD key? Export `SNYK_TOKEN` / `NVD_API_KEY` before
+`./container/run.sh` and they pass through.
+
+## Option B — local install, four steps
+
+Do them before the workshop on a good network; the opening presentation
+includes time to re-run them and fix stragglers.
 
 ## 1. Clone the repository
 
@@ -35,7 +72,7 @@ nothing and changes nothing.
 ## 3. Install anything missing
 
 Follow the links `tools-check.sh` printed, or use the full install guide in
-the next chapter — it has copy-paste commands for macOS and Debian/Ubuntu.
+the next chapter: it has copy-paste commands for macOS and Debian/Ubuntu.
 
 Then re-run the check until it reports ready:
 
@@ -68,6 +105,7 @@ presentation deliberately leaves room to re-run these two commands and flag an
 instructor if either misbehaves.
 
 The remaining chapters in this section are the reference detail behind these
-four steps: exact version requirements, the full install guide, the two
-credentials some optional material uses, and the manual equivalent of
-`build-all.sh`.
+four steps: exact version requirements, the two credentials some optional
+material uses, and what `build-all.sh` warms up. The full per-OS install
+transcripts and the manual equivalent of every pre-warm step live alongside
+them in the repository, in `setup/INSTALL.md` and `setup/PREWARM-MANUAL.md`.

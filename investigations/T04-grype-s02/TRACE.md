@@ -34,13 +34,13 @@ Grype DB built 2026-08-22T06:14:16Z
 DB status: valid
 ```
 
-The same final image and the same Grype vulnerability database were used throughout.
+Every run used the same final image and the same Grype vulnerability database.
 
 ---
 
 # S02 ground truth
 
-## Look
+## Check
 
 S02 has three deliberately different kinds of software evidence.
 
@@ -170,7 +170,7 @@ Grype was run three ways:
 3. sbom:results/s02/baseline/image.cdx.json
 ```
 
-Two direct PURL controls were also used:
+The experiment also used two direct PURL controls:
 
 ```text
 pkg:maven/org.apache.commons/commons-lang3@3.18.0
@@ -261,7 +261,7 @@ Jakarta-named tracer pattern
 
 ## Establish
 
-The final-image vulnerability answer is dominated by the deployed runtime/base-image software universe, not merely the application WAR.
+The deployed runtime/base-image software universe, not merely the application WAR, dominates the final-image vulnerability answer.
 
 The harness did not expose a direct Grype package-catalogue count, so this investigation does not claim one.
 
@@ -302,7 +302,7 @@ Grype consumed the CycloneDX SBOM generated from the same image and again produc
 
 ## Establish
 
-The fact that the CycloneDX document contains 6014 components rather than the Syft JSON's 589 package artifacts did not produce a different vulnerability answer in this run.
+The CycloneDX document contains 6014 components rather than the Syft JSON's 589 package artifacts. In this run, that difference did not produce a different vulnerability answer.
 
 Those raw document counts therefore should not be interpreted as equivalent package counts.
 
@@ -377,9 +377,7 @@ The image/SBOM scans likewise produced no tracer-related vulnerability match for
 
 ## Establish
 
-This is not an inventory failure.
-
-Grype identifies the package in the final image inventory, but the observed Grype vulnerability database produced no match for that package/version.
+Grype identifies the package in the final image inventory, so the inventory is doing its job: the observed Grype vulnerability database simply produced no match for that package/version.
 
 ---
 

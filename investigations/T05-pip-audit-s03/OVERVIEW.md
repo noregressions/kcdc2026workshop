@@ -37,7 +37,7 @@ reportkit
 tracehook-demo
 ```
 
-Both private packages were identified but skipped because they were not found in PyPI's vulnerability service.
+pip-audit identified both private packages but skipped them because they were not found in PyPI's vulnerability service.
 
 The controlled execution probe proved:
 

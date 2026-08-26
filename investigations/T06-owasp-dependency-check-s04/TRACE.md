@@ -1,6 +1,6 @@
 ---
 id: t06-owasp-dependency-check-s04
-oneliner: "Distinguishes application dependencies, plugin dependencies, plugin execution and final bytes — and which of them the scan can actually see."
+oneliner: "Distinguishes application dependencies, plugin dependencies, plugin execution and final bytes, and which of them the scan can actually see."
 track: reference
 ---
 
@@ -58,7 +58,7 @@ walkthrough therefore used a valid NVD API key with 13.0.0.
 The NVD documents higher request limits when a key is supplied.
 
 For a workshop, the best option is normally to reuse a pre-populated
-Dependency-Check data directory so every attendee does not have to populate
+Dependency-Check data directory. That saves every attendee from populating
 the complete NVD database.
 
 ## Getting an NVD API key
@@ -91,7 +91,7 @@ Then:
 The activation link expires after seven days.
 
 The page used to display the key is single-use, so copy it to a secure secret
-store when it is displayed.
+store when it appears.
 
 Requesting and activating another key with the same email address invalidates
 the previous key.
@@ -137,8 +137,8 @@ The application dependency tree contained only the application itself:
 dev.noregressions.trace:maven-plugin-hidden-content:jar:1.0.0
 ```
 
-No normal application dependency on either controlled build-time tracer was
-present.
+Neither controlled build-time tracer appeared as a normal application
+dependency.
 
 ## Establish
 
@@ -207,9 +207,7 @@ from that ClassRealm.
 
 ## Establish
 
-The payload was not merely resolvable.
-
-It was present in the actual Maven ClassRealm used to execute the build plugin.
+The payload was not merely resolvable: it was present in the actual Maven ClassRealm used to execute the build plugin.
 
 ---
 
@@ -361,9 +359,7 @@ to:
 
 This is the strongest T06 result.
 
-The difference is not a different vulnerability database.
-
-It is a different dependency boundary.
+The difference is a different dependency boundary, not a different vulnerability database.
 
 ---
 
@@ -605,8 +601,8 @@ recoverable build provenance
 When shown the original plugin and payload JARs directly, Dependency-Check
 identified both.
 
-Therefore the missing identities in the final application JAR are caused by
-the transformation boundary, not by an inability to recognise the packages.
+Therefore the transformation boundary, not an inability to recognise the
+packages, explains the missing identities in the final application JAR.
 
 ---
 
@@ -622,9 +618,7 @@ plugin-aware Maven
     78 vulnerability records
 ```
 
-The decisive variable was not the CVE data.
-
-It was what software identities the scan admitted.
+The decisive variable was what software identities the scan admitted, not the CVE data.
 
 ---
 

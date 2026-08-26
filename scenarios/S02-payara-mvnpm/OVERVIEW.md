@@ -6,7 +6,7 @@ track: optional
 
 # S02 — Payara + mvnpm Supply Chain Trace Lab: Overview
 
-> **Workshop track: OPTIONAL** — not part of the timed route. Visit this lab if you use Jakarta EE: it shows the same identification problems crossing into a WAR and an application server.
+> **Workshop track: OPTIONAL**, not part of the timed route. Visit this lab if you use Jakarta EE: it shows the same identification problems crossing into a WAR and an application server.
 
 A deliberately small mixed-stack application for tracing software through a different set of supply-chain boundaries:
 
@@ -19,7 +19,7 @@ A deliberately small mixed-stack application for tracing software through a diff
 
 ## Why mvnpm is interesting here
 
-mvnpm makes npm packages available as Maven artifacts. In this project `org.mvnpm:lodash-es:4.17.21` is attached to the esbuild Maven plugin, so it is build-time software rather than a conventional application dependency. The package is resolved by Maven, used to build the browser bundle, and then its original package boundary is absent from the WAR.
+mvnpm makes npm packages available as Maven artifacts. In this project `org.mvnpm:lodash-es:4.17.21` is attached to the esbuild Maven plugin, so it is build-time software rather than a conventional application dependency. Maven resolves the package, esbuild uses it to build the browser bundle, and then its original package boundary is absent from the WAR.
 
 That gives the trace a useful distinction:
 

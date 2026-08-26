@@ -16,7 +16,7 @@ The lab keeps three tracer components alive throughout the investigation:
 - `lodash`: an npm dependency that Vite bundles into static JavaScript before the files enter the Spring Boot JAR.
 - `commons-codec`: a Maven dependency that the Shade Plugin relocates from `org.apache.commons.codec` to `com.acme.internal.codec` inside the `normalizer` module.
 
-The point is not to find three components three times. It is to see which claims can still be proved after each transformation.
+The point is to see which claims can still be proved after each transformation, rather than to find three components three times.
 
 ## The workshop exercise (15 minutes)
 
@@ -89,7 +89,7 @@ Then open <http://localhost:8080/>.
 
 ## Follow the trace
 
-`TRACE.md` is the annotated end-to-end investigation. The helper scripts perform the repetitive parts but the individual commands are left visible so the evidence is inspectable.
+`TRACE.md` is the annotated end-to-end investigation. The helper scripts perform the repetitive parts but the individual commands remain visible so the evidence is inspectable.
 
 A useful first pass after the build is:
 
@@ -153,7 +153,7 @@ This highlights differences between the Maven dependency-model SBOM and the fini
 ./scripts/proof-check.sh
 ```
 
-`proof-check.sh` re-runs the lab and asserts that it still produces the outcomes `TRACE.md` describes — the embedded `commons-codec` at `1.17.1`, the service's `1.18.0`, `jackson-databind` at `2.19.4`, `lodash` at `4.17.21`, and the normalizer at `1.0.0`. Use it after changing dependencies or tooling versions to find out whether the walkthrough text needs updating.
+`proof-check.sh` re-runs the lab and asserts that it still produces the outcomes `TRACE.md` describes: the embedded `commons-codec` at `1.17.1`, the service's `1.18.0`, `jackson-databind` at `2.19.4`, `lodash` at `4.17.21`, and the normalizer at `1.0.0`. Use it after changing dependencies or tooling versions to find out whether the walkthrough text needs updating.
 
 It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (the last being equivalent to `--skip-runtime --skip-image`) when you only need part of the check. Run `./scripts/proof-check.sh --help` for the full list.
 
@@ -163,6 +163,6 @@ It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (the las
 ./scripts/runtime-trace.sh
 ```
 
-`runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod — the difference between what was asked for and what is running.
+`runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod: the difference between what was asked for and what is running.
 
 Like `k8s/`, this is optional example material and is not part of the walkthrough in `TRACE.md`.

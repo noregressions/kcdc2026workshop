@@ -133,4 +133,4 @@ After the walkthrough, verify the demonstrated invariants automatically:
 ./scripts/proof-check.sh
 ```
 
-The proof uses an isolated runtime port (`18084` by default) and fails non-zero if a required claim no longer holds. Syft and `jq` checks are performed when those tools are installed.
+The proof uses an isolated runtime port (`18084` by default) and fails non-zero if a required claim no longer holds. The script runs the Syft and `jq` checks when those tools are installed.

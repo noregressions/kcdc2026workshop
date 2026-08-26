@@ -245,6 +245,13 @@ install_help() {
     brew)
       echo "https://brew.sh"
       ;;
+    disk)
+      echo "(free up disk space — no URL for that)"
+      echo "  Big reclaim candidates: docker system df && docker system prune;"
+      echo "  old container images; ~/Library/Caches. The workshop wants ~20GB"
+      echo "  free: two container images plus build headroom, or local builds"
+      echo "  plus scanner databases."
+      ;;
     nvd-key)
       echo "https://nvd.nist.gov/developers/request-an-api-key"
       echo "  export NVD_API_KEY=<your key>"
@@ -434,6 +441,40 @@ for t in grep find sort diff tee sed awk; do
     N_MISSING=$((N_MISSING + 1))
   fi
 done
+
+# --- machine ----------------------------------------------------------------
+
+section "Machine"
+
+# The workshop needs real disk headroom: two container images plus build
+# space (~20GB), or the scenario builds + scanner DBs locally (~10GB).
+# A full disk doesn't fail politely — Docker's VM goes read-only.
+# Check the repo's filesystem AND the home filesystem (Docker Desktop's
+# disk image lives under the home volume) — they are often different disks.
+check_disk() { # check_disk <label> <path>
+  local label="$1" path="$2" free_kb free_gb
+  free_kb=$(df -k "$path" 2>/dev/null | awk 'NR==2{print $4}')
+  [[ -n "${free_kb:-}" ]] || return 0
+  free_gb=$(( free_kb / 1024 / 1024 ))
+  if [[ $free_gb -ge 20 ]]; then
+    report "$label" ok "${free_gb}GB free" "20GB+ recommended"
+    N_OK=$((N_OK + 1))
+  elif [[ $free_gb -ge 8 ]]; then
+    report "$label" old "${free_gb}GB free" "20GB+ recommended"
+    record_problem disk old "have ${free_gb}GB free on ${path}; images plus build headroom want ~20GB"
+    N_OLD=$((N_OLD + 1))
+  else
+    report "$label" missing "${free_gb}GB free — too little" "20GB+ recommended"
+    record_problem disk missing "required"
+    N_MISSING=$((N_MISSING + 1))
+  fi
+}
+repo_dev=$(df -k . 2>/dev/null | awk 'NR==2{print $1}')
+home_dev=$(df -k "$HOME" 2>/dev/null | awk 'NR==2{print $1}')
+check_disk "disk (repo)" .
+if [[ -n "$home_dev" && "$home_dev" != "$repo_dev" ]]; then
+  check_disk "disk (home)" "$HOME"
+fi
 
 # --- credentials ----------------------------------------------------------
 

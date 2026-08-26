@@ -5,7 +5,7 @@ explain how CVEs against older software may or may not show up.
 explore how forks are or are not tracked...
 
 
-Talk about malicuous dependnecy types - typosquatting , dep confusion etc
+Talk about malicious dependency types - typosquatting , dep confusion etc
 
 - talk about KEV, gold eagle where CVE process is going
 
@@ -13,8 +13,6 @@ Choosing better components - stats on what you choose,  how to check whats avail
 - navigate a couple of websites providing cve+package info
 - So we need to think better about what we chose now, and look at how to assess a project for
 the chances of a project getting a CVE later.  So look at Scorecard
-
-- Go to cloudsmith navigator to look at a few things
 
 - Now lets look at EOL (Mention OpenEOX and the key stages)
    run EOL tool

@@ -84,6 +84,6 @@ After the walkthrough:
 
 The proof starts from the clean state, verifies `dist/` is absent before packing, exercises `prepack`, checks the tarball and installed package, validates npm/Syft evidence views, and runs the application on isolated port `18085`.
 
-Syft checks are skipped with a warning if Syft is not installed.
+If Syft is not installed, the proof skips the Syft checks with a warning.
 
 See `TRACE.md` for the evidence walkthrough.

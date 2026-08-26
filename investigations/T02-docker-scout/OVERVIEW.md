@@ -33,6 +33,6 @@ S02  Payara + mvnpm
 ./scripts/compare-s02.sh
 ```
 
-All Scout commands target `local://IMAGE` so the scan is performed against the exact locally built scenario image.
+All Scout commands target `local://IMAGE` so the scan runs against the exact locally built scenario image.
 
 See `TRACE.md` for the observed evidence and cross-tool conclusions.

@@ -40,7 +40,7 @@ This gives roughly **175–180 minutes including the break**, with a little flex
 
 These are the things that need doing before adding any more demonstrations.
 
-- [x] Create `WORKSHOP.md` as the single canonical attendee walkthrough. *(Done 2026-08-24 — complete six-part route; S00/Tomcat/S06/S07 stops marked ⚠ PLACEHOLDER.)*
+- [x] Create `WORKSHOP.md` as the single canonical attendee walkthrough. *(Done 2026-08-24: complete six-part route; S00/Tomcat/S06/S07 stops marked ⚠ PLACEHOLDER.)*
 - [x] Make `README.md` describe the repository and direct workshop attendees to `WORKSHOP.md`.
 - [x] Stop presenting S01–S05 and T01–T07 as a sequence attendees are expected to complete. *(WORKSHOP.md is the route; track tags + visible lines mark everything else optional/reference.)*
 - [x] Mark every existing scenario as one of:
@@ -54,7 +54,7 @@ These are the things that need doing before adding any more demonstrations.
   "Workshop track:" line under each OVERVIEW title. Assignments: S01/S04/S05
   and setup → core; S02/S03 → optional (Jakarta EE / Python pointers); T01
   main + ground truth → instructor-demo; T01 sub-traces and T02–T07 →
-  reference. Machine-usable via paperband select — a core-only attendee book:
+  reference. Machine-usable via paperband select. A core-only attendee book:
 
   ```bash
   mvn paperband:build -Dpaperband.output=target/book-core.pdf -Dpaperband.select=track=core
@@ -62,7 +62,7 @@ These are the things that need doing before adding any more demonstrations.
 
   Presentation placeholders exist under `workshop/01…06` (frontmatter, target
   durations, planned outline; `status: placeholder`). Deliberately not in the
-  pom yet — placeholder pages in a shareable PDF would be worse than absence.
+  pom yet: placeholder pages in a shareable PDF would be worse than absence.
 - [ ] Add expected duration to every core workshop section.
 - [ ] Add a clear "you should now know..." statement at the end of every section.
 - [ ] Add a clear transition from each section to the next.
@@ -152,8 +152,8 @@ workshop/
   01-supply-chain-fundamentals.md
 ```
 
-  *(Done 2026-08-24 as `workshop/01-supply-chain.md` … `06-wrap-up.md` —
-  placeholders with outlines and durations, now also in the book: one part per
+  *(Done 2026-08-24 as `workshop/01-supply-chain.md` … `06-wrap-up.md`.
+  Placeholders with outlines and durations, now also in the book: one part per
   workshop part, appendices for optional/reference material. Content itself is
   still to be written.)*
 
@@ -203,7 +203,7 @@ Original checklist kept for the record:
 ## Curate S01
 
 - [x] Stop treating all of S01 as mandatory. *(track tags + WORKSHOP.md route, 2026-08-24)*
-- [x] Open with `jackson-databind` as the agreement baseline — the control
+- [x] Open with `jackson-databind` as the agreement baseline: the control
       formerly assigned to S00. Show it agreeing in POM, tree, JAR and SBOM
       before breaking the other two tracers. *(resolver + artefact scanner agreement, WORKSHOP.md Step 1)*
 - [x] Extract one canonical exercise contrasting:
@@ -218,7 +218,7 @@ Original checklist kept for the record:
 software presence != software identifiability
 ``` *(Step 1 checkpoint)*
 
-- [x] Target attendee time: 15 minutes. *(measured machine time: 7s build + ~8s commands — budget is reading/typing)*
+- [x] Target attendee time: 15 minutes. *(measured machine time: 7s build + ~8s commands; the budget is reading/typing)*
 
 ## Curate S04
 
@@ -231,7 +231,7 @@ software presence != software identifiability
   - plugin dependency
   - generated source
   - generated service metadata
-  - final JAR *(compressed in the workshop step — the endpoint names its own chain and the JAR grep shows the generated class + ServiceLoader entry; full backward trace stays in TRACE.md as go-deeper)*
+  - final JAR *(compressed in the workshop step: the endpoint names its own chain and the JAR grep shows the generated class + ServiceLoader entry; full backward trace stays in TRACE.md as go-deeper)*
 - [x] Reduce the participant instructions to the shortest sequence that proves the point. *(six commands, verified end-to-end)*
 - [x] Target attendee time: 15 minutes. *(measured machine time: 5s build + ~2s commands)*
 
@@ -324,7 +324,7 @@ finding
 ## Build the Tomcat worked example
 
 - [x] Create `investigations/CVE-tomcat-85`.
-- [x] Select one canonical Tomcat CVE. *(CVE-2020-1938 Ghostcat — 8.5.0–8.5.50, KEV, 57 edits over six years)*
+- [x] Select one canonical Tomcat CVE. *(CVE-2020-1938 Ghostcat: 8.5.0–8.5.50, KEV, 57 edits over six years)*
 - [x] Capture:
   - initial disclosure
   - CNA record
@@ -426,11 +426,10 @@ What exactly had to be true for this scanner to produce this finding?
 
 ## Project health
 
-- [ ] Choose one well-known dependency to investigate throughout this section.
-- [ ] Open it in Cloudsmith Navigator.
-- [ ] Identify the signals Navigator provides.
-- [ ] Avoid presenting any aggregate score as objective truth.
-- [ ] Follow selected signals back to their underlying evidence.
+- [x] Choose one well-known dependency to investigate throughout this section. **Decided 2026-08-24: lodash** (already Part 2's bundling tracer; ~71M weekly downloads against a 2021 last release).
+- [x] ~~Open it in Cloudsmith Navigator. Identify the signals Navigator provides.~~ **Dropped 2026-08-24: Cloudsmith removed from the workshop entirely; Scorecard covers the health lens.**
+- [x] Avoid presenting any aggregate score as objective truth. *(Done: the aggregate-7.2-summarises-a-10-and-a-0 beat in the drafted module.)*
+- [x] Follow selected signals back to their underlying evidence.
 
 ## OpenSSF Scorecard
 
@@ -543,29 +542,25 @@ build
 
 ## Control 2 — Provenance / reverse trace
 
-- [ ] Create a small reverse-provenance exercise.
-- [ ] Start with an already-built container or JAR.
-- [ ] Ask:
+**Built 2026-08-25 as `scenarios/S07-provenance-s01`** (reuses S01's image and
+JAR, so no new app). Baseline reverse audit + four provenance layers, all run
+for real (docker + local registry + syft + cosign), evidence captured,
+proof-check 7/7.
 
-```text
-Which repository?
-Which commit?
-Which build?
-Which dependencies?
-Who/what produced this?
-```
-
-- [ ] Attempt to recover these from the artefact.
-- [ ] Demonstrate where ordinary metadata stops.
-- [ ] Add provenance incrementally:
-  - Git commit metadata
-  - OCI labels
-  - SBOM
-  - build identity
-  - attestation
-- [ ] Introduce SLSA/provenance conceptually.
-- [ ] Avoid turning this into a complete Sigstore/SLSA workshop.
-- [ ] Target participant time: 10–12 minutes.
+- [x] Create a small reverse-provenance exercise. *(S07, built on S01 per Steve's steer.)*
+- [x] Start with an already-built container or JAR. *(S01's Spring Boot image.)*
+- [x] Ask which repository / commit / build / dependencies / who produced this.
+- [x] Attempt to recover these from the artefact. *(Baseline: only the base image's inherited `22.04` label; nothing of ours.)*
+- [x] Demonstrate where ordinary metadata stops. *(Baseline audit section.)*
+- [x] Add provenance incrementally:
+  - [x] Git commit metadata *(git-commit-id plugin → git.properties in the JAR)*
+  - [x] OCI labels *(org.opencontainers.image.revision/source/created)*
+  - [x] SBOM *(syft CycloneDX, keyed to the image digest)*
+  - [x] build identity / attestation *(cosign sign + attest by digest, verified with the public key)*
+- [x] Introduce SLSA/provenance conceptually. *(Keyless Fulcio/Rekor named as the production form; not implemented.)*
+- [x] Avoid turning this into a complete Sigstore/SLSA workshop. *(Local key pair, one registry, four commands.)*
+- [x] Target participant time: 10–12 minutes.
+- [ ] **Rehearse the S07 run before the room:** needs Docker + a throwaway `registry:2`, and installs syft/cosign (pre-bake in the workshop container).
 
 ## Section conclusion
 
@@ -666,6 +661,30 @@ for all reference labs.
 - [ ] Make it return non-zero for anything that would block an attendee.
 - [ ] Print simple remediation instructions.
 
+## Containerised workshop (added 2026-08-25)
+
+- [x] Build a workshop container so attendees install only Docker.
+  **Split into two images (2026-08-25):**
+  - `shipping-workshop-base` (`container/Dockerfile.base`) — the tools:
+    Ubuntu 24.04, Temurin 21, Maven 3.9.9, Node 22, Python 3.12,
+    syft/grype/trivy/snyk/pip-audit/docker-scout CLI, **plus the Grype and
+    Trivy databases**. Big, rebuilt rarely — and rebuilt deliberately near
+    workshop day, because DB freshness lives here
+    (`./container/build.sh --base`).
+  - `shipping-workshop` (`container/Dockerfile`) — FROM the base, the
+    workshop code plus the scenario prewarm (Maven/npm/venv caches).
+    Rebuilt on every content change; attendees who have the base pull only
+    these layers.
+  Docker itself is NOT inside — the container drives the host daemon via a
+  mounted socket, so S01/S02 images land on the host and stay
+  browser-reachable.
+- [ ] Publish BOTH images to a registry (name/registry TBD) so attendees
+  pull instead of build; the code image's `BASE_IMAGE` build-arg already
+  supports a registry-qualified base. Decide multi-arch (arm64 + amd64)
+  via buildx.
+- [ ] Note in WORKSHOP.md per-step whether the step is container-friendly
+  (all of Parts 2–3 are; S03/S04/S05 browser hints don't apply inside).
+
 ## Network resilience
 
 - [ ] Identify every live internet dependency during the workshop.
@@ -691,10 +710,10 @@ for all reference labs.
 # P0 — Facilitator material
 
 - [x] Create `FACILITATOR.md`.
-- [x] Include exact timings. *(measured, not estimated — wall-clock offsets plus per-step machine floors)*
+- [x] Include exact timings. *(measured, not estimated: wall-clock offsets plus per-step machine floors)*
 - [x] Include "skip this if running late" points. *(per part, plus on-time checkpoints at 0:45/1:10/1:40)*
 - [x] Include expected output for each live command. *(one-line expectations; TRACEs hold the full form)*
-- [x] Include likely attendee failures and fixes. *(failure playbook — every entry actually hit during verification)*
+- [x] Include likely attendee failures and fixes. *(failure playbook: every entry actually hit during verification)*
 - [x] Include transitions between sections.
 - [x] Include questions to ask the room.
 - [x] Include the intended conclusion from every exercise.
@@ -772,8 +791,8 @@ scenarios/
   S03-python-pep517/
   S04-maven-plugin-hidden-content/
   S05-node-prepack/
-  S06-cache-integrity/
-  S07-reverse-provenance/
+  S06-cache-integrity/       (still to build)
+  S07-provenance-s01/        (built — reverse provenance on S01)
 
 investigations/
   CVE-tomcat-85/
@@ -820,7 +839,6 @@ The existing idea of covering many tools is useful, but it should be a reference
   - Dependency-Track
   - OSV
   - OpenSSF Scorecard
-  - Cloudsmith Navigator
   - EOL tooling
 - [x] Explicitly state that the catalogue is not a product ranking. *(first paragraph, bolded)*
 
@@ -888,13 +906,115 @@ where it came from,
 and whether I should still trust it?
 ```
 
+# Working abstract (revised draft, 2026-08-24)
+
+Kept in sync with the route. Changes from the published version: signature
+labs lead the middle; "SBOM" appears; the Tomcat teaser uses the captured
+numbers; ReversingLabs → Cloudsmith → dropped entirely (2026-08-24);
+bring-a-laptop + take-home added;
+tagline typo fixed. Python stays in the ecosystems line: S03 is now core.
+
+> **You Don't Know What You're Shipping**
+>
+> Every project has dependencies it knows about. Most have dependencies it
+> doesn't.
+>
+> This is a hands-on tour of the modern dependency problem, using free and
+> free-tier tools and public data. You'll work with applications built to
+> lie to you: an app whose dependency tree is empty but which serves an
+> endpoint nobody wrote; a JAR that drops out of your scanner's results
+> when we remove nothing but metadata; packages that write their own code
+> while being packaged or installed. Along the way you'll see why a
+> dependency tree, an SBOM and a scanner report can all disagree, and all
+> be right.
+>
+> Java, Node, Python, Docker: the techniques apply regardless of what
+> you're building.
+>
+> We'll take one famous Tomcat CVE apart using the public record: six years
+> of edits, three severity scores that disagree, a two-month window where
+> the same scan flips from clean to critical, and the end-of-life versions
+> the record silently ignores. You'll learn to read a CVE as an evolving
+> event rather than a fact, and to use in-support vulnerability data as a
+> searchlight on the versions your scanners aren't covering.
+>
+> We'll use Snyk's free tier and the HeroDevs EOL database to map what you
+> have and flag what's past safe support, and OSS Index and OpenSSF
+> Scorecard to judge whether the project behind a library will still be
+> fixing it next year. And we'll go beyond metadata to see what analysing
+> actual binary behaviour turns up.
+>
+> Then the sharp end: dependencies hidden by someone who means you harm, a
+> dissection of AI-generated malware, and how AI coding assistants are
+> quietly growing your dependency trees, picking poor libraries, and
+> hallucinating packages that don't exist, while attackers have learned to
+> publish the hallucinations for real.
+>
+> Bring a laptop. One command the night before sets everything up, and you
+> leave with the complete lab manual: every command, every capture, ready
+> to run against your own projects the moment you get home.
+
+---
+
+# Abstract alignment (added 2026-08-24)
+
+The published abstract ("You Don't Know What You're Shipping") was reviewed
+against the book/route. Decisions and remaining work:
+
+**Decided:**
+
+- [x] **All AI material becomes its own segment: Part 6 — AI and the Supply
+  Chain (20 min).** Wrap-up renumbered to Part 7. Part 5 drops to 25 min
+  (the malware dissection moved to Part 6). Route total now ~200–205 min
+  including the break.
+- [x] The binary-behaviour-analysis segment is **Cloudsmith** (abstract's
+  ReversingLabs mention was wrong): tools appendix rewritten, planned into
+  Part 5. **Superseded 2026-08-24: Cloudsmith dropped from the workshop
+  entirely; the segment stays, tool to be chosen.**
+- [x] "In-support data as a signal for uncovered versions" is now taught
+  explicitly: the **searchlight technique** section in the Tomcat
+  investigation (step 8).
+- [x] Book bridges to the public title: the About card opens with
+  "the manual for *You Don't Know What You're Shipping*" plus the
+  abstract's tagline.
+- [x] OSS Index added to the Part 4 plan and the tools appendix.
+- [x] "Snyk free tier is sufficient" stated in Accounts and Keys.
+- [x] "When you get home" checklist added to the wrap-up (Part 7): the
+  abstract's closing promise made literal.
+
+**Open (needs content decisions):**
+
+- [ ] **Part 6 asset: the AI-generated malware sample** — what gets
+  dissected, and the safe-handling story (instructor machine only,
+  isolated, never distributed).
+- [ ] **Part 6 evidence: hallucination/slopsquatting data** — verify and
+  source every claim (tree growth, poor picks, hallucination rates,
+  registered-hallucination incidents) before presenting.
+- [x] **Part 5 binary-behaviour demo** — tool chosen 2026-08-24: **GuardDog** (investigation `T08-guarddog`, built with evidence + passing proof-check). Static code heuristics, not dynamic execution; no Maven ecosystem (S04 JAR out of reach). Remaining: scope live-vs-screenshot for the room.
+- [x] Decide whether the book itself is retitled to the public workshop
+  title. **Decided 2026-08-24: yes.** Book title is now "You Don't Know
+  What You're Shipping", subtitle "The Software Supply Chain Trace Lab"
+  (the old title survives as the subtitle, so the lab identity is kept).
+  README retitled to match; running headers pick it up automatically.
+- [x] Reconsider S03 (Python) being optional. **Decided 2026-08-24: S03 is
+  core.** Part 2 Step 4 ("And not a JavaScript quirk either", ~8 min,
+  demo-if-late). Part 2 is now 60 min, route total ~205–210 incl. break.
+  Commands verified from clean: build 3s, two-file sdist, generated
+  site-packages, /trace endpoint on 8081. This reverses the earlier
+  "Make S03 optional/reference material" tick above.
+- [x] Cloudsmith free-tier concern resolved: **Navigator is free, no
+  sign-in** (confirmed by Steve, 2026-08-24). **Superseded later the same
+  day: Cloudsmith dropped from the workshop entirely.**
+
+---
+
 # Immediate next five tasks
 
 If we want to work through this efficiently, do these first:
 
 - [x] **Create `WORKSHOP.md` with the timed six-part route.**
-- [x] ~~**Build S00 — the boring baseline dependency trace.**~~ *(Dropped 2026-08-24 — machine check moved to Part 1 presentation; control folded into S01.)*
-- [x] **Cut S01 and S04 down to their canonical live exercises.** *(done 2026-08-24; demo timings — T01 baseline 9s, snyk probes 37s, compare instant. Also fixed: all T01/T02 scripts lacked the execute bit and failed with 'permission denied')*
+- [x] ~~**Build S00 — the boring baseline dependency trace.**~~ *(Dropped 2026-08-24: machine check moved to Part 1 presentation; control folded into S01.)*
+- [x] **Cut S01 and S04 down to their canonical live exercises.** *(done 2026-08-24; demo timings: T01 baseline 9s, snyk probes 37s, compare instant. Also fixed: all T01/T02 scripts lacked the execute bit and failed with 'permission denied')*
 - [x] **Build the Tomcat CVE/CPE investigation and timeline.** *(done 2026-08-24; proof-check 14/14 against captured evidence)*
 - [ ] **Run the first complete timed rehearsal before adding S06/S07 or slides.**
 

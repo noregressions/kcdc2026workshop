@@ -1,12 +1,12 @@
 ---
 id: s03-python-pep517-overview
 oneliner: "A transitive sdist that executes build code during installation: prerequisites and how to run it."
-track: optional
+track: core
 ---
 
 # S03 — Python PEP 517 Supply Chain Trace Lab: Overview
 
-> **Workshop track: OPTIONAL** — not part of the timed route. Visit this lab if you use Python: it shows the same build-time execution problem via PEP 517.
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
 
 A deliberately small, Python-native supply-chain scenario.
 

@@ -5,7 +5,7 @@ track: core
 status: placeholder
 ---
 
-# Part 1 — Supply-Chain Fundamentals
+# Introduction
 
 > **PLACEHOLDER** — presentation content to be written. Outline and timing
 > below are the working plan from the transformation TODO.

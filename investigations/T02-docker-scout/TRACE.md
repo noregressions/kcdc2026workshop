@@ -42,7 +42,7 @@ so Scout analyses the exact locally built scenario image.
 
 # S01 — Spring + Node
 
-## Look
+## Check
 
 Important tracer states:
 
@@ -150,7 +150,7 @@ The base-image recommendation view said the current:
 eclipse-temurin:21-jre-jammy
 ```
 
-was up to date, while also suggesting Java 25 and Java 26 tags as alternative major-runtime upgrades with one fewer vulnerability in the base-image comparison.
+was up to date. It also suggested Java 25 and Java 26 tags as alternative major-runtime upgrades, each with one fewer vulnerability in the base-image comparison.
 
 ## Establish
 
@@ -170,7 +170,7 @@ Moving the scanner later expands the deployed software universe, but does not gu
 
 # S02 — Payara + mvnpm
 
-## Look
+## Check
 
 Important tracer states:
 
@@ -406,9 +406,7 @@ S02
     Docker Scout 655
 ```
 
-The final image is the same.
-
-The inventory is not.
+The final image is the same, but the inventory is not.
 
 ## 5. Docker Scout adds evidence beyond package inventory
 

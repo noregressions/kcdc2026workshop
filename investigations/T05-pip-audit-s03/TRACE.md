@@ -41,7 +41,7 @@ pip 26.1.2
 
 # S03 ground truth
 
-## Look
+## Check
 
 The direct requirement is:
 
@@ -179,7 +179,7 @@ reportkit
 tracehook-demo
 ```
 
-Both were skipped with:
+`pip-audit` skipped both with:
 
 ```text
 Dependency not found on PyPI and could not be audited
@@ -208,7 +208,7 @@ package vulnerability-auditable through PyPI
 
 # B. Controlled PEP 517 execution probe
 
-## Look
+## Check
 
 The harness creates a temporary, controlled copy of the same
 `tracehook-demo` source distribution.
@@ -261,9 +261,7 @@ import tracehook_backend
 backend code executes
 ```
 
-The important point is not that `pip-audit` maliciously executes code.
-
-The important point is that a vulnerability audit of a requirements file can cross a Python packaging execution boundary because dependency collection uses pip and PEP 517 machinery.
+`pip-audit` is not executing code maliciously here: the important point is that a vulnerability audit of a requirements file can cross a Python packaging execution boundary, because dependency collection uses pip and PEP 517 machinery.
 
 So:
 
@@ -367,7 +365,7 @@ fixed in:
 26.2
 ```
 
-The scenario packages were again skipped because they were not found in PyPI's vulnerability service.
+The audit again skipped the scenario packages because they were not found in PyPI's vulnerability service.
 
 ## Establish
 
@@ -444,7 +442,7 @@ So transitive dependency identity can be reconstructed from package metadata.
 
 ## 2. Identified packages can still be unauditable
 
-Both scenario packages were identified but skipped:
+The audit identified both scenario packages but skipped them:
 
 ```text
 Dependency not found on PyPI and could not be audited
@@ -487,7 +485,7 @@ PEP 517 hooks ran
 runtime files were generated
 ```
 
-That evidence exists only because the build/install boundary was separately instrumented.
+That evidence exists only because the harness separately instrumented the build/install boundary.
 
 ---
 

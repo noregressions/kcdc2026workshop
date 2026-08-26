@@ -12,9 +12,9 @@ Use one vulnerability tool, Trivy, against several evidence boundaries in S01.
 
 The central question is:
 
-> Does the vulnerability answer change when the same software is observed as a dependency model, a transformed Java archive, a browser bundle, or a final container image?
+> Does the vulnerability answer change when you observe the same software as a dependency model, a transformed Java archive, a browser bundle, or a final container image?
 
-Trivy 0.74.0 was used for the observed run.
+The observed run used Trivy 0.74.0.
 
 For source dependency models and the frontend bundle, the investigation uses:
 
@@ -46,7 +46,7 @@ and did not invoke the Java archive detector. The corrected archive probes stage
 
 # Ground truth
 
-## Look
+## Check
 
 S01 contains these tracer states:
 
@@ -135,7 +135,7 @@ commons-codec 1.17.1
 normalizer    1.0.0
 ```
 
-After only codec Maven metadata was removed, Syft no longer identified codec 1.17.1.
+With only the codec Maven metadata removed, Syft no longer identified codec 1.17.1.
 
 The service JAR physically contained:
 
@@ -176,7 +176,7 @@ Those are not the same thing.
 ./scripts/compare-s01.sh
 ```
 
-The full clean harness can also be run with:
+You can also run the full clean harness with:
 
 ```bash
 ./scripts/run-trivy-s01.sh
@@ -195,7 +195,7 @@ commons-codec 1.17.1
 normalizer    1.0.0
 ```
 
-No tracer vulnerability finding was reported.
+Trivy reported no tracer vulnerability finding.
 
 ### Establish
 
@@ -267,7 +267,7 @@ commons-codec 1.17.1
 normalizer    1.0.0
 ```
 
-No tracer vulnerability finding was reported.
+Trivy reported no tracer vulnerability finding.
 
 ### Establish
 
@@ -311,9 +311,7 @@ Maven metadata removed
 commons-codec identity disappears
 ```
 
-The software bytes did not disappear.
-
-The package identity did.
+The package identity disappeared, but the software bytes did not.
 
 A CVE scanner cannot attach package-version vulnerability intelligence to an identity it has not established.
 
@@ -366,9 +364,7 @@ Trivy reported:
 Number of language-specific files num=0
 ```
 
-No tracer identities were recovered.
-
-No tracer vulnerability findings were reported.
+Trivy recovered no tracer identities and reported no tracer vulnerability findings.
 
 ### Establish
 
@@ -386,9 +382,7 @@ frontend/dist
     -> no lodash CVE findings
 ```
 
-This is not evidence that lodash code is absent.
-
-It is evidence that Trivy cannot reconstruct the npm package identity from the bundled output.
+This is evidence that Trivy cannot reconstruct the npm package identity from the bundled output, not that the lodash code is absent.
 
 ---
 
@@ -413,7 +407,7 @@ commons-codec    1.18.0
 normalizer       1.0.0
 ```
 
-Lodash was not recovered.
+Trivy did not recover lodash.
 
 For Jackson 2.19.4 Trivy again reported:
 
@@ -577,4 +571,4 @@ Break the chain at package identity and the CVE can disappear from the result ev
 
 The practical rule is:
 
-> A clean vulnerability scan proves only that the scanner found no matching vulnerabilities for the software identities it was able to establish at that evidence boundary. It does not prove that all shipped software was identified.
+> A clean vulnerability scan proves only that the scanner found no matching vulnerabilities for the software identities it was able to establish at that evidence boundary. It does not prove that the scanner identified all shipped software.

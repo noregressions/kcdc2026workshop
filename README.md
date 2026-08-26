@@ -1,14 +1,17 @@
-# Software Supply Chain Trace Lab
+# You Don't Know What You're Shipping
 
-A hands-on workshop about what you can and cannot know about the software you
-ship.
+*The Software Supply Chain Trace Lab* — a hands-on workshop about what you
+can and cannot know about the software you ship.
+
+> Every project has dependencies it knows about. Most have dependencies it
+> doesn't.
 
 Every scenario in this repository takes a component you declared, follows it
 through a real build, and asks the same question at each boundary: **is it still
 identifiable here?** Sometimes it is. Often the code survives while the evidence
 of what it was does not.
 
-The labs are deliberately small, but the builds are real — Maven, npm, Vite,
+The labs are deliberately small, but the builds are real: Maven, npm, Vite,
 esbuild, Maven Shade, Spring Boot, PEP 517, npm lifecycle hooks, Docker. Nothing
 is faked or stubbed.
 
@@ -39,7 +42,7 @@ perfectly while destroying every trace of where that behaviour came from.
 
 ## Attending the workshop?
 
-**Go straight to [`WORKSHOP.md`](./WORKSHOP.md)** — the timed, canonical route.
+**Go straight to [`WORKSHOP.md`](./WORKSHOP.md)**: the timed, canonical route.
 You are not expected to work through every scenario and investigation in this
 repository; the workshop route selects what matters and links to the rest.
 
@@ -47,6 +50,11 @@ repository; the workshop route selects what matters and links to the rest.
 
 You need a JDK 21+, Maven 3.9+, Node.js 20+, Python 3.11+ and Docker. Full
 details and install commands are in [`setup/`](./setup).
+
+**Zero-install option:** if you have Docker, you don't need anything else —
+`./container/build.sh && ./container/run.sh` drops you into a shell with
+every tool installed, every lab prebuilt, and the scanner databases
+prewarmed. Details in [`setup/01 getting-started.md`](./setup/01%20getting-started.md).
 
 **1. Check your machine.** Reports the version of every tool the workshop uses,
 flags anything too old, and prints an install link for anything missing. Changes
@@ -58,14 +66,14 @@ nothing.
 
 **2. Warm it up.** Pulls the container base images, builds all five scenarios,
 builds the scenario container images, and downloads the scanner databases. Do
-this *before* the workshop, on a good network — it is the difference between
+this *before* the workshop, on a good network: it is the difference between
 starting on time and watching Maven download.
 
 ```bash
 ./scripts/build-all.sh
 ```
 
-Add `--with-investigations` to also run the T01–T07 baselines. That is slower,
+Add `--with-investigations` to also run the T01–T08 baselines. That is slower,
 and the T06 step downloads a large NVD dataset the first time.
 
 **3. Pick a lab.** Each scenario and investigation has two documents:
@@ -85,7 +93,8 @@ cat TRACE.md
 
 ## Scenarios
 
-Five supply chains, each hiding software somewhere different.
+Five supply chains that each hide software somewhere different, plus a
+provenance lab (S07) built on the first.
 
 | | Lab | What it follows |
 |---|---|---|
@@ -94,10 +103,11 @@ Five supply chains, each hiding software somewhere different.
 | **S03** | [`Python PEP 517`](./scenarios/S03-python-pep517) | A direct dependency into a transitive sdist, through PEP 517 **build-backend execution**, into the installed environment and runtime |
 | **S04** | [`Maven plugin hidden content`](./scenarios/S04-maven-plugin-hidden-content) | Runtime capability entering an application through **Maven plugin execution** rather than its dependency graph — the application's dependency tree is empty |
 | **S05** | [`Node npm prepack`](./scenarios/S05-node-prepack) | A package through an npm **lifecycle hook** into a tarball, into `node_modules`, and into runtime behaviour |
+| **S07** | [`Reverse provenance`](./scenarios/S07-provenance-s01) | Reuses S01's image: trace a finished artefact home, then record provenance in four layers (**git → OCI labels → SBOM → attestation**) until you can |
 
 ## Investigations
 
-Seven tools pointed at those scenarios, asking what each one can actually see.
+Eight tools pointed at those scenarios, asking what each one can actually see.
 
 | | Investigation | Against |
 |---|---|---|
@@ -108,9 +118,10 @@ Seven tools pointed at those scenarios, asking what each one can actually see.
 | **T05** | [`pip-audit`](./investigations/T05-pip-audit-s03) | S03 |
 | **T06** | [`OWASP Dependency-Check`](./investigations/T06-owasp-dependency-check-s04) | S04 |
 | **T07** | [`npm audit`](./investigations/T07-npm-audit-s05) | S05 |
+| **T08** | [`GuardDog`](./investigations/T08-guarddog) | S05, S03 (a code-reading scanner, plus a positive control) |
 
-The point is not to rank the tools. It is to see which boundary each one
-observes, and what that choice makes visible or invisible.
+The point is to see which boundary each one observes, and what that choice
+makes visible or invisible, not to rank the tools.
 
 ## How a walkthrough is structured
 
@@ -118,15 +129,15 @@ Every step in every `TRACE.md` follows the same five beats, so you always know
 which part is argument and which part is evidence:
 
 ```text
-Why we need to do this      the question this step answers
-How we're going to do it    what the command does, and why this one
-Run                         the command
-Observed output             what it actually printed
-Establish                   what that does and does not prove
+Why                the question this step answers
+Approach           what the command does, and why this one
+Run                the command
+Observed output    what it actually printed
+Establish          what that does and does not prove
 ```
 
 The `Observed output` blocks are real captured output, not illustrations. If
-yours differs, that is worth investigating — versions and vulnerability
+yours differs, that is worth investigating: versions and vulnerability
 databases move.
 
 ## Conventions
@@ -158,7 +169,7 @@ is tracked in `.runtime.pid`. If you skip `stop.sh`, the next `run.sh` will tell
 you.
 
 **`proof-check.sh`** is how you find out whether a walkthrough has gone stale.
-It asserts the structural claims — which components appear, which are omitted.
+It asserts the structural claims: which components appear, which are omitted.
 Note that some also assert exact vulnerability counts, and those *will* drift as
 databases change; a failure there means the recorded numbers need refreshing,
 not that the lesson broke.
@@ -169,7 +180,7 @@ not that the lesson broke.
 FACILITATOR.md    instructor-side notes: timings, expected outputs, failure playbook
 setup/            prerequisites, accounts and keys, pre-pull and pre-warm
 scenarios/        S01-S05, each with an OVERVIEW.md and a TRACE.md
-investigations/   T01-T07, each with an OVERVIEW.md and a TRACE.md
+investigations/   T01-T08, each with an OVERVIEW.md and a TRACE.md
 scripts/          tools-check.sh, build-all.sh
 pom.xml           builds the whole workshop as a single PDF
 ```
@@ -188,7 +199,7 @@ mvn package
 # -> target/book.pdf   (US Letter, running headers, page numbers)
 ```
 
-The table of contents is generated — after adding, removing or materially
+The table of contents is generated. After adding, removing or materially
 resizing content, refresh its page numbers:
 
 ```bash
@@ -199,10 +210,12 @@ resizing content, refresh its page numbers:
 
 - [`setup/00 about.md`](./setup/00%20about.md) — what the workshop is for, the
   approach it takes, and how to read a trace
-- [`setup/01 intro.md`](./setup/01%20intro.md) — required versions, and the
-  versions the walkthroughs were recorded against
-- [`setup/02 tools.md`](./setup/02%20tools.md) — install commands for macOS and
-  Linux, plus notes on using Podman
+- [`setup/02 tools.md`](./setup/02%20tools.md) — required tools and versions,
+  plus notes on using Podman
+- [`setup/INSTALL.md`](./setup/INSTALL.md) — full install transcripts for
+  macOS and Debian/Ubuntu
+- [`setup/VERSIONS.md`](./setup/VERSIONS.md) — the versions the walkthroughs
+  were recorded against, and what legitimately drifts
 - [`setup/03 ACCOUNTS-AND-KEYS.md`](./setup/03%20ACCOUNTS-AND-KEYS.md) — Snyk
   authentication and the NVD API key
 - [`setup/04 PREPULL-PREWARM.md`](./setup/04%20PREPULL-PREWARM.md) — what
@@ -211,7 +224,7 @@ resizing content, refresh its page numbers:
 Two things are worth knowing before you start:
 
 - **Docker is the canonical engine.** Podman works for the S01/S02 container
-  build and run stages, but the scripts invoke `docker` directly, and T02 needs
+  build and run stages, but the scripts invoke `docker` directly. T02 needs
   Docker Scout, which Podman does not provide.
 - **An NVD API key changes T06.** With `NVD_API_KEY` set, T06 uses
   Dependency-Check 13.0.0; without it, 12.2.2. Both work, but they are not the
@@ -219,4 +232,4 @@ Two things are worth knowing before you start:
 
 ## License
 
-Apache License 2.0 — see [`LICENSE`](./LICENSE).
+Apache License 2.0. See [`LICENSE`](./LICENSE).

@@ -265,8 +265,8 @@ application audit
 package-lock-only audit
 ```
 
-This is consistent with the vulnerability decision being driven by npm
-dependency metadata rather than inspection of the generated installed files.
+This is consistent with npm dependency metadata driving the vulnerability
+decision, rather than inspection of the generated installed files.
 
 ---
 
@@ -501,7 +501,7 @@ and referenced three advisory causes in the returned `via` data.
 The npm registry audit path was functioning and capable of returning current
 vulnerability intelligence.
 
-Therefore the clean S05 results were not caused by a broken audit service.
+Therefore a broken audit service does not explain the clean S05 results.
 
 The control establishes:
 

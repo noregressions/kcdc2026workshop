@@ -10,7 +10,7 @@ This is the S03 case inside **T01 — Snyk Beyond the SBOM**.
 
 S03 is different from S01, S02 and S04.
 
-The interesting fact is not merely that a component was transformed. A **transitive dependency executes build code during installation**.
+The interesting fact is that a **transitive dependency executes build code during installation**, not merely that a component was transformed.
 
 Known S03 ground truth is:
 
@@ -59,7 +59,7 @@ package inventory
 build execution history
 ```
 
-Snyk's current Python CLI model uses supported Python manifests such as `requirements.txt` and the installed Python environment to construct the dependency graph. Snyk's experimental `--include-provenance` option is Maven-specific, so it is deliberately **not** used for this Python case.
+Snyk's current Python CLI model uses supported Python manifests such as `requirements.txt` and the installed Python environment to construct the dependency graph. Snyk's experimental `--include-provenance` option is Maven-specific, so we deliberately do **not** use it for this Python case.
 
 ---
 
@@ -210,9 +210,7 @@ Capture during walkthrough.
 
 ## Establish
 
-Absence here does not mean the build hook did not execute. S03 already proved that independently.
-
-It means that execution fact is not represented in the Snyk evidence we tested.
+Absence here means only that the execution fact is not represented in the Snyk evidence we tested. S03 already proved independently that the build hook did execute.
 
 ---
 

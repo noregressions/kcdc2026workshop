@@ -1,0 +1,77 @@
+# The TOOLS image: every tool and scanner database, no workshop code.
+# Rebuilt rarely (bump a tool, refresh the vulnerability databases —
+# rebuild close to workshop day so the DBs are fresh).
+#
+# The workshop code image (container/Dockerfile) builds FROM this, so
+# content changes cost attendees only the small code layers, never this.
+#
+# Build:  ./container/build.sh --base
+
+FROM ubuntu:24.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# --- base utilities ---------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl wget gnupg git \
+      jq zip unzip tar xz-utils lsof \
+      python3 python3-pip python3-venv pipx \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Temurin JDK 21 (Adoptium apt repo, arm64 + amd64) -----------------------
+RUN wget -qO- https://packages.adoptium.net/artifactory/api/gpg/key/public \
+      | gpg --dearmor -o /usr/share/keyrings/adoptium.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/adoptium.gpg] https://packages.adoptium.net/artifactory/deb noble main" \
+      > /etc/apt/sources.list.d/adoptium.list \
+    && apt-get update && apt-get install -y --no-install-recommends temurin-21-jdk \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Maven 3.9.x (Ubuntu 24.04's apt maven is 3.8 — too old) -----------------
+ARG MAVEN_VERSION=3.9.9
+RUN curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+      | tar -xz -C /opt \
+    && ln -s "/opt/apache-maven-${MAVEN_VERSION}/bin/mvn" /usr/local/bin/mvn
+
+# --- Node.js 22 + npm (NodeSource) -------------------------------------------
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- docker CLI + buildx (client only; daemon comes from the host socket) ----
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable" \
+      > /etc/apt/sources.list.d/docker.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
+      docker-ce-cli docker-buildx-plugin \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- SBOM + vulnerability tooling --------------------------------------------
+RUN curl -sSfL https://get.anchore.io/syft  | sh -s -- -b /usr/local/bin \
+    && curl -sSfL https://get.anchore.io/grype | sh -s -- -b /usr/local/bin \
+    && curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin \
+    && npm install -g snyk
+
+# --- pip-audit (pipx, on PATH) ------------------------------------------------
+ENV PIPX_BIN_DIR=/usr/local/bin
+RUN pipx install pip-audit
+
+# --- Docker Scout CLI plugin (T02) -------------------------------------------
+# Direct release download: Scout's install.sh refuses to run without a
+# reachable Docker daemon, and there is never a daemon at image-build time.
+ARG SCOUT_VERSION=1.24.0
+RUN arch=$(dpkg --print-architecture) \
+    && mkdir -p /usr/libexec/docker/cli-plugins \
+    && curl -fsSL "https://github.com/docker/scout-cli/releases/download/v${SCOUT_VERSION}/docker-scout_${SCOUT_VERSION}_linux_${arch}.tar.gz" \
+      | tar -xz -C /usr/libexec/docker/cli-plugins docker-scout \
+    && chmod +x /usr/libexec/docker/cli-plugins/docker-scout \
+    && docker scout version
+
+# --- scanner databases (the bulk of this image; refresh = rebuild base) ------
+RUN grype db update \
+    && trivy image --download-db-only \
+    && trivy image --download-java-db-only \
+    && grype db status
+
+CMD ["/bin/bash"]

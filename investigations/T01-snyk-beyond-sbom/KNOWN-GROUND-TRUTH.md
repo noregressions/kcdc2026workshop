@@ -1,6 +1,6 @@
 ---
 id: t01-known-ground-truth
-oneliner: "The S04 facts T01 begins with — plugin, payload and generated route — established before any tool is pointed at anything."
+oneliner: "The S04 facts T01 begins with (plugin, payload and generated route), established before any tool is pointed at anything."
 track: instructor-demo
 ---
 
@@ -80,7 +80,7 @@ S04 observed one identified package:
 maven-plugin-hidden-content  1.0.0  java-archive
 ```
 
-Neither the plugin nor payload was recovered as package identity.
+Syft recovered neither the plugin nor the payload as package identity.
 
 ### Runtime
 

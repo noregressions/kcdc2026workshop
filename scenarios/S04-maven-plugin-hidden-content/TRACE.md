@@ -28,13 +28,7 @@ Maven has more than one dependency domain.
 
 So these are different evidence views:
 
-```text
-application dependency graph
-        !=
-plugin dependency graph
-        !=
-plugin execution realm
-```
+**application dependency graph ≠ plugin dependency graph ≠ plugin execution realm**
 
 A plugin can then transform the application by generating source, resources, metadata or other content. Once that content has been compiled and packaged, the final JAR may contain the resulting behaviour without retaining an obvious package boundary for the build-time software that introduced it.
 
@@ -54,24 +48,46 @@ In this lab, the application POM declares `trace-injector-maven-plugin`, but doe
 
 ---
 
+## The scenario
+
+The application is two source files and — deliberately — zero declared
+dependencies:
+
+- `TraceServer.java` — A JDK-built-in (`jdk.httpserver`) web server on port
+  8082. Serves `/` and `/health` itself, then asks ServiceLoader for
+  `TraceRoute` implementations and mounts every one it finds.
+- `TraceRoute.java` — The extension interface: `path()` + `responseJson()`.
+  The checked-in source contains NO implementations.
+
+The supply chain lives in the build. The application POM attaches
+`trace-injector-maven-plugin` (built from `tooling/` into the
+scenario-local `.maven-repo/`). That plugin has its own transitive
+dependency, `trace-route-payload`, whose resource file defines a route.
+During `generate-sources` the plugin reads the payload and writes
+`GeneratedTraceRoute.java` plus the ServiceLoader registration — which
+Maven then compiles and packages as ordinary application code.
+
+The result: a runtime endpoint (`/hidden/build-info`) that no application
+source file defines and no application dependency supplies.
+
+---
+
 # 1. Start clean
 
-## Why we need to do this
+## Why
 
 Separate source-controlled content from previous generated build output.
 
 Most of the evidence in this lab is generated during the build. If output from an earlier run survives, we cannot tell which build produced the bytes we are inspecting.
 
-## How we're going to do it
+## Approach
 
 `clean.sh` removes the generated state of all three modules in this scenario:
 
-```text
-target/                  the application build output
-tooling/plugin/target/   the Maven plugin build output
-tooling/payload/target/  the plugin's transitive payload build output
-trace-output/            captured trace evidence
-```
+- `target/` — the application build output
+- `tooling/plugin/target/` — the Maven plugin build output
+- `tooling/payload/target/` — the plugin's transitive payload build output
+- `trace-output/` — captured trace evidence
 
 It also stops any runtime left over from a previous walkthrough and removes the `.runtime.pid` and `.runtime.log` files that track it.
 
@@ -89,9 +105,7 @@ rm -rf .maven-repo
 ./scripts/clean.sh
 ```
 
-## Observed output
-
-```text
+```output
 S04 clean.
 
 Kept the scenario-local Maven repository:
@@ -109,7 +123,7 @@ The application can be rebuilt from the checked-in scenario sources and local Ma
 
 # 2. Build the plugin, the payload, and the application
 
-## Why we need to do this
+## Why
 
 Everything after this step inspects build output, so we have to produce it first.
 
@@ -124,11 +138,11 @@ application       declares the plugin, declares no dependencies
 
 The plugin cannot be declared by the application until it exists in a repository Maven can resolve. That is why the tooling is built and installed first.
 
-## How we're going to do it
+## Approach
 
 `build.sh` runs both phases against the scenario-local repository rather than the developer's `~/.m2`:
 
-1. `mvn -Dmaven.repo.local="$PWD/.maven-repo" -f tooling/pom.xml install` builds `trace-route-payload` and `trace-injector-maven-plugin` and installs both into `.maven-repo/`. The payload is declared as an ordinary `compile` dependency of the plugin — that is what makes it *transitive plugin* software later.
+1. `mvn -Dmaven.repo.local="$PWD/.maven-repo" -f tooling/pom.xml install` builds `trace-route-payload` and `trace-injector-maven-plugin` and installs both into `.maven-repo/`. The plugin declares the payload as an ordinary `compile` dependency: that is what makes it *transitive plugin* software later.
 2. `mvn -Dmaven.repo.local="$PWD/.maven-repo" clean package` builds the application, which resolves the plugin from `.maven-repo/`, executes its `inject-route` goal during `generate-sources`, and packages the generated output.
 
 Using a scenario-local repository matters for the trace: it guarantees the plugin being executed is the fixture in `tooling/`, not a same-named artefact cached from somewhere else.
@@ -177,7 +191,7 @@ The application phase shows the plugin executing inside the normal lifecycle:
 [INFO] BUILD SUCCESS
 ```
 
-Note the compiler line: three source files were compiled, but only two exist in `src/`. The third was generated moments earlier by the plugin.
+Note the compiler line: javac compiled three source files, but only two exist in `src/`. The plugin generated the third moments earlier.
 
 ## Establish
 
@@ -199,7 +213,7 @@ compiled and packaged as ordinary application content
 
 # 3. Look at the application dependency graph
 
-## Why we need to do this
+## Why
 
 Start with the Maven view most developers use when asking "what does this application depend on?"
 
@@ -211,9 +225,7 @@ mvn \
   dependency:tree
 ```
 
-## Observed output
-
-```text
+```output
 [INFO] --------< dev.noregressions.trace:maven-plugin-hidden-content >---------
 [INFO] Building S04 Maven Plugin Hidden Content Trace Lab 1.0.0
 [INFO]   from pom.xml
@@ -239,7 +251,7 @@ Neither `trace-injector-maven-plugin` nor `trace-route-payload` appears as an ap
 
 # 4. Ask Maven about plugin dependencies instead
 
-## Why we need to do this
+## Why
 
 The project dependency graph is not Maven's only dependency domain.
 
@@ -252,9 +264,7 @@ mvn \
   -DincludeArtifactIds=trace-injector-maven-plugin
 ```
 
-## Observed output
-
-```text
+```output
 [INFO] The following plugins have been resolved:
 
 [INFO]    dev.noregressions.trace:trace-injector-maven-plugin:maven-plugin:1.0.0:runtime
@@ -280,7 +290,7 @@ Maven knows about the payload, but not as an application dependency.
 
 # 5. Inspect the actual plugin execution realm
 
-## Why we need to do this
+## Why
 
 Resolver output tells us what Maven can resolve. Debug output tells us what Maven actually loads to execute the plugin.
 
@@ -293,9 +303,7 @@ mvn \
   | grep -E 'trace-injector|trace-route-payload'
 ```
 
-## Observed output
-
-```text
+```output
 [DEBUG] Goal:          dev.noregressions.trace:trace-injector-maven-plugin:1.0.0:inject-route (inject-build-route)
 [INFO] --- trace-injector:1.0.0:inject-route (inject-build-route) @ maven-plugin-hidden-content ---
 [DEBUG] dev.noregressions.trace:trace-injector-maven-plugin:jar:1.0.0
@@ -309,21 +317,16 @@ mvn \
 
 ## Establish
 
-`trace-route-payload` is not merely resolvable. It is actually present in the Maven **plugin ClassRealm** used to execute `inject-route`.
+`trace-route-payload` is actually present in the Maven **plugin ClassRealm** used to execute `inject-route`, not merely resolvable.
 
-```text
-application dependency graph
-        no payload
-
-plugin execution realm
-        plugin + payload
-```
+- application dependency graph — no payload
+- plugin execution realm — plugin + payload
 
 ---
 
 # 6. Inspect the generated Java source
 
-## Why we need to do this
+## Why
 
 Now follow the build-time input across the transformation boundary into application source.
 
@@ -333,9 +336,7 @@ Now follow the build-time input across the transformation boundary into applicat
 find target/generated-sources -type f -print
 ```
 
-## Observed output
-
-```text
+```output
 target/generated-sources/trace-injector/dev/noregressions/trace/s04/generated/GeneratedTraceRoute.java
 ```
 
@@ -373,17 +374,15 @@ The runtime route now exists as Java application source even though it did not o
 
 Its provenance is explicit:
 
-```text
-origin       = trace-route-payload
-introducedBy = trace-injector-maven-plugin
-route        = /hidden/build-info
-```
+- `origin` = `trace-route-payload`
+- `introducedBy` = `trace-injector-maven-plugin`
+- `route` = `/hidden/build-info`
 
 ---
 
 # 7. Inspect the generated activation metadata
 
-## Why we need to do this
+## Why
 
 Generating a class does not make it execute. We need to see how the build connects it to the application.
 
@@ -393,9 +392,7 @@ Generating a class does not make it execute. We need to see how the build connec
 find target/generated-resources -type f -print
 ```
 
-## Observed output
-
-```text
+```output
 target/generated-resources/trace-injector/META-INF/trace-lab/plugin-injection.properties
 target/generated-resources/trace-injector/META-INF/services/dev.noregressions.trace.s04.TraceRoute
 ```
@@ -407,9 +404,7 @@ cat \
   target/generated-resources/trace-injector/META-INF/services/dev.noregressions.trace.s04.TraceRoute
 ```
 
-## Observed output
-
-```text
+```output
 dev.noregressions.trace.s04.generated.GeneratedTraceRoute
 ```
 
@@ -420,9 +415,7 @@ cat \
   target/generated-resources/trace-injector/META-INF/trace-lab/plugin-injection.properties
 ```
 
-## Observed output
-
-```text
+```output
 plugin=trace-injector-maven-plugin
 payload=trace-route-payload
 route=/hidden/build-info
@@ -432,11 +425,8 @@ route=/hidden/build-info
 
 The build generated both:
 
-```text
-GeneratedTraceRoute.class
-        +
-META-INF/services/...TraceRoute
-```
+- `GeneratedTraceRoute.class`
+- `META-INF/services/...TraceRoute`
 
 The ServiceLoader descriptor makes the generated implementation discoverable by the source-defined application at runtime.
 
@@ -444,7 +434,7 @@ The ServiceLoader descriptor makes the generated implementation discoverable by 
 
 # 8. Prove the generated content entered the final JAR
 
-## Why we need to do this
+## Why
 
 Generated build directories are intermediate evidence. The deployable JAR is the shipped artefact.
 
@@ -455,9 +445,7 @@ unzip -l target/maven-plugin-hidden-content-1.0.0.jar \
   | grep -E 'GeneratedTraceRoute|META-INF/services|plugin-injection'
 ```
 
-## Observed output
-
-```text
+```output
         0  08-22-2026 11:58   META-INF/services/
        88  08-22-2026 11:58   META-INF/trace-lab/plugin-injection.properties
        58  08-22-2026 11:58   META-INF/services/dev.noregressions.trace.s04.TraceRoute
@@ -472,7 +460,7 @@ The generated implementation, activation metadata and provenance marker are all 
 
 # 9. Inspect the shipped bytecode
 
-## Why we need to do this
+## Why
 
 Generated Java source may be deleted after the build. The final JAR still has to carry the behaviour.
 
@@ -485,9 +473,7 @@ javap \
   dev.noregressions.trace.s04.generated.GeneratedTraceRoute
 ```
 
-## Observed output
-
-```text
+```output
 Compiled from "GeneratedTraceRoute.java"
 
 public final class dev.noregressions.trace.s04.generated.GeneratedTraceRoute implements dev.noregressions.trace.s04.TraceRoute {
@@ -508,11 +494,9 @@ public final class dev.noregressions.trace.s04.generated.GeneratedTraceRoute imp
 
 The final application bytecode contains:
 
-```text
-/hidden/build-info
-trace-route-payload
-trace-injector-maven-plugin
-```
+- `/hidden/build-info`
+- `trace-route-payload`
+- `trace-injector-maven-plugin`
 
 The runtime behaviour survived the transformation even though the build-time package boundary did not.
 
@@ -520,7 +504,7 @@ The runtime behaviour survived the transformation even though the build-time pac
 
 # 10. Scan the final JAR with Syft
 
-## Why we need to do this
+## Why
 
 Now compare physical runtime capability with a package scanner's inventory.
 
@@ -530,9 +514,7 @@ Now compare physical runtime capability with a package scanner's inventory.
 syft target/maven-plugin-hidden-content-1.0.0.jar
 ```
 
-## Observed output
-
-```text
+```output
 ✔ Indexed file system   target/maven-plugin-hidden-content-1.0.0.jar
 ✔ Cataloged contents
 
@@ -548,18 +530,16 @@ maven-plugin-hidden-content  1.0.0    java-archive
 
 Syft sees the application archive, but does not identify either of the build-time components responsible for the generated behaviour:
 
-```text
-trace-injector-maven-plugin   not identified
-trace-route-payload           not identified
-```
+- `trace-injector-maven-plugin` — not identified
+- `trace-route-payload` — not identified
 
-The bytes are present. Their build provenance is not recovered as package identity.
+The bytes are present. Syft does not recover their build provenance as package identity.
 
 ---
 
 # 11. Generate a Maven-model CycloneDX SBOM
 
-## Why we need to do this
+## Why
 
 Compare the scanner view with an SBOM generated from Maven's project dependency model.
 
@@ -572,9 +552,7 @@ mvn \
   -DoutputFormat=json
 ```
 
-## Observed output
-
-```text
+```output
 [INFO] CycloneDX: Resolving Dependencies
 [INFO] CycloneDX: Creating BOM version 1.6 with 0 component(s)
 [INFO] CycloneDX: Writing and validating BOM (JSON): .../target/bom.json
@@ -588,9 +566,7 @@ jq -r '.components[]? | [.name, .version] | @tsv' target/bom.json \
   | grep -E 'trace-injector|trace-route-payload|maven-plugin-hidden-content' || true
 ```
 
-## Observed output
-
-```text
+```output
 ```
 
 No matching output.
@@ -601,26 +577,24 @@ The Maven-model CycloneDX SBOM contains **zero dependency components**. It does 
 
 At this point the evidence views are:
 
-```text
-Maven dependency tree     → no plugin or payload
-CycloneDX Maven SBOM      → no plugin or payload
-Maven plugin resolution   → plugin + payload
-Maven execution realm     → plugin + payload
-final JAR                 → generated runtime behaviour present
-Syft JAR scan             → application archive only
-```
+- Maven dependency tree — no plugin or payload
+- CycloneDX Maven SBOM — no plugin or payload
+- Maven plugin resolution — plugin + payload
+- Maven execution realm — plugin + payload
+- final JAR — generated runtime behaviour present
+- Syft JAR scan — application archive only
 
 ---
 
 # 12. Run the application
 
-## Why we need to do this
+## Why
 
 The final test is whether the generated, packaged bytes actually change runtime capability.
 
-## How we're going to do it
+## Approach
 
-`run.sh` starts the packaged JAR — not a recompiled classpath — so the runtime evidence comes from the same artefact Syft scanned in step 10.
+`run.sh` starts the packaged JAR (not a recompiled classpath), so the runtime evidence comes from the same artefact Syft scanned in step 10.
 
 Three details of the script matter when reading the output:
 
@@ -634,9 +608,7 @@ Three details of the script matter when reading the output:
 ./scripts/run.sh
 ```
 
-## Observed output
-
-```text
+```output
 Runtime started as PID 69945
 Open:   http://localhost:8082/
 Health: http://localhost:8082/health
@@ -652,7 +624,7 @@ The PID is an observation from this run, not an invariant.
 
 # 13. Verify the source-defined application endpoint
 
-## Why we need to do this
+## Why
 
 This is the control endpoint: behaviour deliberately present in the checked-in application source.
 
@@ -679,7 +651,7 @@ The source-defined application is running normally.
 
 # 14. Request the build-supplied endpoint
 
-## Why we need to do this
+## Why
 
 This closes the chain from plugin dependency to runtime behaviour.
 
@@ -720,13 +692,13 @@ application JAR
 
 # 15. Stop the runtime
 
-## Why we need to do this
+## Why
 
 The runtime started in step 12 is detached and will keep holding port `8082` after the walkthrough ends.
 
 Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to start when the port is already serving HTTP.
 
-## How we're going to do it
+## Approach
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 
@@ -738,9 +710,7 @@ Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to 
 ./scripts/stop.sh
 ```
 
-## Observed output
-
-```text
+```output
 Stopped runtime PID 69945
 ```
 

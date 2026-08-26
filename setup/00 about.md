@@ -6,8 +6,11 @@ track: core
 
 # About This Workshop
 
-This is a hands-on workshop about what you can and cannot know about the
-software you ship.
+> *Every project has dependencies it knows about. Most have dependencies it
+> doesn't.*
+
+This is the manual for the hands-on workshop of the same name: a session
+about what you can and cannot know about the software you ship.
 
 ## The question
 
@@ -67,8 +70,8 @@ Boot, PEP 517 backends, npm lifecycle hooks, Docker. Nothing is stubbed, because
 the whole point is what real tooling actually does to real artefacts.
 
 **Tracers, not haystacks.** Each scenario plants a small number of named
-components and follows only those. You are not hunting through thousands of
-dependencies; you are watching three or four specific things cross five or six
+components and follows only those. Instead of hunting through thousands of
+dependencies, you watch three or four specific things cross five or six
 specific boundaries.
 
 **Evidence over assertion.** Every claim in a walkthrough is backed by a command
@@ -77,7 +80,7 @@ proves. Where a step only shows correlation, it says that too.
 
 **Controlled experiments.** Where a result could be coincidence, the lab changes
 one thing and repeats the observation. S01, for example, strips only the
-identifying Maven metadata from a shaded JAR — leaving the bytecode untouched —
+identifying Maven metadata from a shaded JAR, leaving the bytecode untouched,
 and rescans. The difference is then attributable to the evidence removed, not to
 the code.
 
@@ -87,8 +90,8 @@ the code.
 somewhere different: bytecode relocation, a Maven plugin execution realm, a
 PEP 517 build backend, an npm lifecycle hook, a frontend bundler.
 
-**Seven investigations (T01–T07).** Each points a real tool — Snyk, Docker
-Scout, Trivy, Grype, pip-audit, OWASP Dependency-Check, npm audit — at those
+**Seven investigations (T01–T07).** Each points a real tool (Snyk, Docker
+Scout, Trivy, Grype, pip-audit, OWASP Dependency-Check, npm audit) at those
 scenarios and asks what that tool can actually see.
 
 The investigations are not a ranking. Each tool observes a particular boundary
@@ -109,15 +112,15 @@ Every step in every walkthrough follows the same five beats, so you always know
 which part is argument and which part is evidence:
 
 ```text
-Why we need to do this      the question this step answers
-How we're going to do it    what the command does, and why this one
-Run                         the command
-Observed output             what it actually printed
-Establish                   what that does and does not prove
+Why                the question this step answers
+Approach           what the command does, and why this one
+Run                the command
+Observed output    what it actually printed
+Establish          what that does and does not prove
 ```
 
 The `Observed output` blocks are real captured output, not illustrations. If
-yours differs, that is worth investigating rather than ignoring — but note that
+yours differs, that is worth investigating rather than ignoring. Note that
 tool versions and vulnerability databases move, so counts in particular will
 drift. The `Establish` sections are written to survive that drift; the exact
 numbers are not.
@@ -135,15 +138,15 @@ what additional evidence would answer the question I actually have
 
 That last point is the practical one. Several labs end with software that is
 provably present in the shipped artefact and provably invisible to the tool
-being used. Knowing *which* additional evidence recovers it — build logs, a
-plugin ClassRealm, a lockfile, the physical archive — is the transferable skill.
+being used. Knowing *which* additional evidence recovers it (build logs, a
+plugin ClassRealm, a lockfile, the physical archive) is the transferable skill.
 
 ## Scope
 
 The labs end at the container-image boundary.
 
-Reverse provenance — starting from a binary or container and determining the
-source repository and exact commit that produced it — is a different and harder
+Reverse provenance (starting from a binary or container and determining the
+source repository and exact commit that produced it) is a different and harder
 problem, and is deliberately left for a separate exercise.
 
 ## Before you start

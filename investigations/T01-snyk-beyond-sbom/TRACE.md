@@ -12,34 +12,26 @@ track: instructor-demo
 
 This investigation reuses five completed trace labs:
 
-```text
-S01  Spring + Node
-S02  Payara + mvnpm
-S03  Python + PEP 517
-S04  Maven plugin hidden-content
-S05  Node + npm prepack
-```
+- S01 — Spring + Node
+- S02 — Payara + mvnpm
+- S03 — Python + PEP 517
+- S04 — Maven plugin hidden-content
+- S05 — Node + npm prepack
 
 The investigation compares several evidence types:
 
-```text
-source declarations
-package-manager dependency models
-build-tool execution evidence
-generated artefacts
-SBOMs
-Snyk project scans
-Snyk artefact/unmanaged scans
-runtime evidence
-```
+- source declarations
+- package-manager dependency models
+- build-tool execution evidence
+- generated artefacts
+- SBOMs
+- Snyk project scans
+- Snyk artefact/unmanaged scans
+- runtime evidence
 
 The central result is:
 
-```text
-better package identity
-        !=
-complete supply-chain history
-```
+**better package identity ≠ complete supply-chain history**
 
 Snyk can often provide richer identity, vulnerability and dependency-path information than a basic SBOM. But it does not reconstruct every build realm, lifecycle action, code-generation step, bundling transformation, or publication-time mutation after those facts have disappeared from the dependency model.
 
@@ -51,25 +43,20 @@ Snyk can often provide richer identity, vulnerability and dependency-path inform
 
 The lab contains four useful tracer states:
 
-```text
-jackson-databind 2.19.4
-    ordinary Maven dependency
-    physically shipped as intact nested JAR
-
-commons-codec 1.17.1
-    dependency of normalizer
-    shaded and relocated into normalizer
-    Maven package metadata survives
-
-commons-codec 1.18.0
-    selected by service dependency management
-    physically shipped as intact nested JAR
-
-lodash 4.17.21
-    npm dependency
-    bundled by Vite into generated browser JavaScript
-    package boundary disappears
-```
+- `jackson-databind 2.19.4`
+  - ordinary Maven dependency
+  - physically shipped as intact nested JAR
+- `commons-codec 1.17.1`
+  - dependency of normalizer
+  - shaded and relocated into normalizer
+  - Maven package metadata survives
+- `commons-codec 1.18.0`
+  - selected by service dependency management
+  - physically shipped as intact nested JAR
+- `lodash 4.17.21`
+  - npm dependency
+  - bundled by Vite into generated browser JavaScript
+  - package boundary disappears
 
 Maven resolves:
 
@@ -159,15 +146,11 @@ No supported files found
 
 So the correct interpretation is not:
 
-```text
-Snyk inspected the bundle and failed to recognise lodash
-```
+*Snyk inspected the bundle and failed to recognise lodash*
 
 but:
 
-```text
-the deployable bundle no longer presents a supported npm project boundary
-```
+*the deployable bundle no longer presents a supported npm project boundary*
 
 No tested artefact-oriented Snyk view recovered `lodash 4.17.21` from the shipped browser bundle.
 
@@ -197,19 +180,15 @@ while the custom shaded normalizer remains unknown.
 
 ## S01 establishes
 
-```text
-known from model + shipped intact
-    → recoverable from Maven model
-    → recoverable again when intact nested package boundary survives
-
-known from model + transformed
-    → visible before transformation
-    → may become unrecoverable afterwards
-
-known from npm model + bundled
-    → visible before bundling
-    → package identity can disappear from deployable output
-```
+- known from model + shipped intact
+  - recoverable from Maven model
+  - recoverable again when intact nested package boundary survives
+- known from model + transformed
+  - visible before transformation
+  - may become unrecoverable afterwards
+- known from npm model + bundled
+  - visible before bundling
+  - package identity can disappear from deployable output
 
 ---
 
@@ -219,22 +198,18 @@ known from npm model + bundled
 
 The application has:
 
-```text
-commons-lang3 3.18.0
-    ordinary application dependency
-    physically shipped in WEB-INF/lib
-
-Jakarta EE Web API 11.0.0
-    Maven provided dependency
-    present in application dependency model
-    absent from WAR
-
-lodash-es 4.17.21
-    dependency of esbuild Maven plugin
-    present in actual Maven plugin ClassRealm
-    contributes source modules to generated browser bundle
-    absent from application dependency graph
-```
+- `commons-lang3 3.18.0`
+  - ordinary application dependency
+  - physically shipped in WEB-INF/lib
+- Jakarta EE Web API 11.0.0
+  - Maven provided dependency
+  - present in application dependency model
+  - absent from WAR
+- `lodash-es 4.17.21`
+  - dependency of esbuild Maven plugin
+  - present in actual Maven plugin ClassRealm
+  - contributes source modules to generated browser bundle
+  - absent from application dependency graph
 
 The generated source map proves `lodash-es` source modules contributed to the browser bundle.
 
@@ -242,10 +217,8 @@ The generated source map proves `lodash-es` source modules contributed to the br
 
 Snyk's Maven project scan identifies the application dependency graph, including:
 
-```text
-Jakarta provided dependencies
-commons-lang3 3.18.0
-```
+- Jakarta provided dependencies
+- `commons-lang3 3.18.0`
 
 It does not identify:
 
@@ -271,15 +244,11 @@ dependencies
 
 The CycloneDX comparison showed the same component set before and after provenance enrichment.
 
-Critically, Snyk checksum-qualified Jakarta `provided` dependencies even though they were not physically shipped in the WAR.
+Critically, Snyk checksum-qualified Jakarta `provided` dependencies even though they never physically ship in the WAR.
 
 Therefore:
 
-```text
-provenance identity
-        !=
-physical inclusion proof
-```
+**provenance identity ≠ physical inclusion proof**
 
 ## Artefact scanning
 
@@ -295,16 +264,9 @@ It does not reconstruct `lodash-es 4.17.21` from the generated browser bundle.
 
 ## S02 establishes
 
-```text
-modelled but not shipped
-    → Jakarta provided APIs
-
-modelled and shipped intact
-    → commons-lang3
-
-not modelled by the application but code ships
-    → lodash-es
-```
+- modelled but not shipped — Jakarta provided APIs
+- modelled and shipped intact — commons-lang3
+- not modelled by the application but code ships — lodash-es
 
 Snyk's project/provenance model handles the first two well, but the Maven plugin-domain contribution remains invisible.
 
@@ -399,21 +361,15 @@ Snyk can therefore reconstruct package dependency identity without reconstructin
 
 In the tested modes, Snyk Open Source did not treat any of these as a supported project on their own:
 
-```text
-unpacked tracehook sdist
-unpacked generated wheel
-installed site-packages directory
-```
+- unpacked tracehook sdist
+- unpacked generated wheel
+- installed site-packages directory
 
 The successful scan is anchored on the application `requirements.txt` plus the installed Python environment.
 
 ## S03 establishes
 
-```text
-dependency graph knowledge
-        !=
-build execution history
-```
+**dependency graph knowledge ≠ build execution history**
 
 ---
 
@@ -452,29 +408,21 @@ even though that route did not exist in checked-in application source.
 
 Maven application dependency tree:
 
-```text
-application only
-```
+**application only**
 
 Maven CycloneDX:
 
-```text
-0 dependency components
-```
+**0 dependency components**
 
 Syft final-JAR scan:
 
-```text
-application archive only
-```
+**application archive only**
 
 ## Snyk project result
 
 Normal Snyk Maven analysis identifies:
 
-```text
-application only
-```
+**application only**
 
 It does not identify:
 
@@ -493,7 +441,7 @@ In Snyk's CycloneDX output, provenance produced no substantive component-set cha
 
 ## Unmanaged JAR scan
 
-The final custom JAR is reported as:
+Snyk reports the final custom JAR as:
 
 ```text
 unknown
@@ -503,16 +451,14 @@ The scan exposes uncertainty but does not reconstruct the plugin/payload relatio
 
 ## S04 establishes
 
-```text
-Maven dependency tree     → application only
-Maven plugin resolver     → plugin + payload
-Maven plugin ClassRealm   → plugin + payload
-Maven CycloneDX           → no dependency components
-Snyk Maven                → application only
-Snyk + provenance         → same known application identity, enriched
-Snyk unmanaged JAR        → unknown custom JAR
-runtime                   → plugin-generated behaviour executes
-```
+- Maven dependency tree — application only
+- Maven plugin resolver — plugin + payload
+- Maven plugin ClassRealm — plugin + payload
+- Maven CycloneDX — no dependency components
+- Snyk Maven — application only
+- Snyk + provenance — same known application identity, enriched
+- Snyk unmanaged JAR — unknown custom JAR
+- runtime — plugin-generated behaviour executes
 
 The build-tool dependency realm is a distinct evidence source.
 
@@ -593,9 +539,7 @@ is absent from the published package.
 
 Therefore the published package contains a lifecycle declaration but not the executable source that previously satisfied it.
 
-That declaration alone is not proof that the lifecycle hook executed.
-
-The `npm pack` log provides that proof.
+That declaration alone does not prove the lifecycle hook executed; the `npm pack` log provides that proof.
 
 ## Snyk application result
 
@@ -612,11 +556,9 @@ The Snyk CycloneDX SBOM preserves the same relationship.
 
 Snyk can independently scan:
 
-```text
-source trace-route-package
-unpacked published tarball
-installed trace-route-package
-```
+- source trace-route-package
+- unpacked published tarball
+- installed trace-route-package
 
 because each retains `package.json`.
 
@@ -645,11 +587,7 @@ Even when scanning the source package, where the lifecycle declaration and gener
 
 ## S05 establishes
 
-```text
-npm package identity
-        !=
-npm publication history
-```
+**npm package identity ≠ npm publication history**
 
 Snyk knows what package is present, but the tested dependency views do not explain how npm manufactured the files that package published.
 
@@ -697,72 +635,51 @@ Snyk dependency analysis reconstructs dependency relationships rather than merel
 
 The investigation observed Snyk adding:
 
-```text
-dependency paths
-vulnerability intelligence
-fix guidance
-PURLs
-checksum-qualified Maven identities in provenance mode
-```
+- dependency paths
+- vulnerability intelligence
+- fix guidance
+- PURLs
+- checksum-qualified Maven identities in provenance mode
 
 That is useful information beyond a minimal component list.
 
 ## 3. Provenance enrichment is not provenance reconstruction
 
-For the Maven cases:
-
-```text
---include-provenance
-    → stronger identities for known Maven artefacts
-```
+For the Maven cases, `--include-provenance` → stronger identities for known Maven artefacts.
 
 It did not discover:
 
-```text
-Maven plugin-realm packages
-code-generation history
-bundling history
-lifecycle execution
-```
+- Maven plugin-realm packages
+- code-generation history
+- bundling history
+- lifecycle execution
 
 Therefore:
 
-```text
-provenance enrichment
-        !=
-supply-chain history reconstruction
-```
+**provenance enrichment ≠ supply-chain history reconstruction**
 
 ## 4. Package-manager models and shipped artefacts answer different questions
 
 A model may include something not shipped:
 
-```text
-Jakarta provided dependencies
-```
+*Jakarta provided dependencies*
 
 A shipped artefact may contain something absent from the application model:
 
-```text
-lodash-es code introduced through a Maven plugin
-```
+*lodash-es code introduced through a Maven plugin*
 
 A transformed artefact may contain code whose package identity has become difficult or impossible for the tested scanner to recover:
 
-```text
-bundled lodash
-shaded custom JAR contents
-```
+- bundled lodash
+- shaded custom JAR contents
 
 ## 5. Build systems have dependency and execution domains outside the application dependency graph
 
 Observed examples:
 
-```text
-Maven plugin ClassRealm
-PEP 517 build backend
-npm prepack lifecycle
-```
+- Maven plugin ClassRealm
+- PEP 517 build backend
+- npm prepack lifecycle
 
 These domains can execute code and materially change the resulting application without becoming ordinary runtime dependency edges.
 
@@ -770,38 +687,23 @@ These domains can execute code and materially change the resulting application w
 
 Observed examples:
 
-```text
-Vite browser bundle
-PEP 517 generated Python files
-Maven-plugin-generated Java/service metadata
-npm-prepack-generated dist files
-```
+- Vite browser bundle
+- PEP 517 generated Python files
+- Maven-plugin-generated Java/service metadata
+- npm-prepack-generated dist files
 
-A scanner observing only the final output may identify some surviving package boundaries, but it cannot be assumed to reconstruct the process that created those bytes.
+A scanner observing only the final output may identify some surviving package boundaries. You cannot assume it reconstructs the process that created those bytes.
 
 ## 7. Evidence must be collected at the boundary where the fact still exists
 
 For these labs:
 
-```text
-Maven application graph
-    → ordinary application dependency resolution
-
-Maven plugin ClassRealm
-    → build-plugin dependencies
-
-npm/package-lock
-    → Node package identity before bundling
-
-pip build log + sdist
-    → PEP 517 build execution
-
-npm pack log
-    → publication lifecycle execution
-
-final artefact scan
-    → software whose package boundaries survive strongly enough
-```
+- Maven application graph — ordinary application dependency resolution
+- Maven plugin ClassRealm — build-plugin dependencies
+- npm/package-lock — Node package identity before bundling
+- pip build log + sdist — PEP 517 build execution
+- npm pack log — publication lifecycle execution
+- final artefact scan — software whose package boundaries survive strongly enough
 
 No single one of these views is the complete supply-chain record.
 
@@ -809,24 +711,20 @@ No single one of these views is the complete supply-chain record.
 
 # Final conclusion
 
-The strongest T01 conclusion is not that Snyk is deficient.
-
-It is that software supply-chain evidence is **boundary-specific**.
+The strongest T01 conclusion is that software supply-chain evidence is **boundary-specific**, not that Snyk is deficient.
 
 Snyk is good at the dependency models and package identities it supports, and can enrich those identities with useful security and provenance information.
 
 But once a build or publication transformation crosses out of that model:
 
-```text
-plugin execution
-shading
-bundling
-PEP 517 build hooks
-npm lifecycle scripts
-generated code
-```
+- plugin execution
+- shading
+- bundling
+- PEP 517 build hooks
+- npm lifecycle scripts
+- generated code
 
-the missing history cannot be assumed to be recoverable later from the final artefact.
+you cannot assume the missing history remains recoverable later from the final artefact.
 
 The practical rule is:
 

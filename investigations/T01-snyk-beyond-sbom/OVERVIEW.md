@@ -135,7 +135,7 @@ S05 Node + npm prepack             next
 
 See `S02-TRACE.md` for the S02-specific evidence questions.
 
-The S02 investigation adds a useful positive control: Snyk scans the original `commons-lang3` JAR extracted from the WAR, then we compare that with `lodash-es`, whose code survived only after being transformed into browser JavaScript.
+The S02 investigation adds a useful positive control: Snyk scans the original `commons-lang3` JAR extracted from the WAR. We then compare that with `lodash-es`, whose code survived only after being transformed into browser JavaScript.
 
 ### Run the S03 investigation
 

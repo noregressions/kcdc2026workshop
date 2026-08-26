@@ -1,6 +1,6 @@
 ---
 id: setup-accounts-and-keys
-oneliner: "Snyk authentication and the NVD API key — the two credentials some investigations need."
+oneliner: "Snyk authentication and the NVD API key: the two credentials some investigations need."
 track: core
 ---
 
@@ -12,7 +12,8 @@ Set these up before the workshop.
 
 ## Snyk
 
-T01 requires an authenticated Snyk CLI.
+T01 requires an authenticated Snyk CLI. **A free Snyk account is
+sufficient**: nothing in this workshop needs a paid tier.
 
 ```bash
 snyk auth
@@ -135,7 +136,7 @@ T07 uses:
 https://registry.npmjs.org/
 ```
 
-No special npm account is required for the audit experiment, but your machine must be able to reach the public npm registry.
+You do not need a special npm account for the audit experiment, but your machine must be able to reach the public npm registry.
 
 Check:
 

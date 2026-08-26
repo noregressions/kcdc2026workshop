@@ -1,7 +1,7 @@
 ---
 id: s03-python-pep517
 oneliner: "Follows a direct dependency into a transitive sdist, through PEP 517 backend execution, into site-packages and into runtime behaviour."
-track: optional
+track: core
 ---
 
 # S03 — Python PEP 517 Supply Chain Trace Lab
@@ -49,15 +49,38 @@ The central question is simple:
 
 ---
 
+## The scenario
+
+The application is a small stdlib-only Python web service:
+
+```text
+src/app.py       ThreadingHTTPServer on port 8081. GET / prints a
+                 banner; GET /trace returns reportkit.runtime_trace()
+                 as JSON.
+
+reportkit        The application's ONLY declared dependency (a wheel,
+                 from the local python-repo/). Its entire body is one
+                 function that delegates to tracehook_demo.trace_data().
+
+tracehook-demo   reportkit's transitive dependency — and the point of
+                 the lab. It arrives as an sdist containing exactly two
+                 files: pyproject.toml and tracehook_backend.py. The
+                 pyproject declares tracehook_backend as its own PEP 517
+                 build backend, and that backend GENERATES the
+                 tracehook_demo package (plus a provenance marker) while
+                 pip builds the wheel during install.
+```
+
+So the package the application ultimately imports does not exist in any
+checked-in source or distributed archive — it is manufactured on your
+machine, by dependency-owned code, at `pip install` time. Both packages
+install from the local `python-repo/`; no PyPI access is involved.
+
+---
+
 # 1. Start clean
 
-## Why we need to do this
-
-We need to know that the virtual environment and pip evidence belong to this run.
-
-## How we're going to do it
-
-Remove generated state using the supplied cleanup script.
+A clean start ensures the virtual environment and pip evidence we inspect belong to this run:
 
 ## Run
 
@@ -65,9 +88,7 @@ Remove generated state using the supplied cleanup script.
 ./scripts/clean.sh
 ```
 
-## Observed output
-
-```text
+```output
 Cleaning S03 Python trace lab...
 S03 clean.
 
@@ -95,11 +116,11 @@ The package fixtures remain, but the installed environment and previous executio
 
 # 2. Inspect the direct dependency declaration
 
-## Why we need to do this
+## Why
 
 Start with the dependency information visible in the application itself.
 
-## How we're going to do it
+## Approach
 
 Read `requirements.txt`.
 
@@ -109,9 +130,7 @@ Read `requirements.txt`.
 cat requirements.txt
 ```
 
-## Observed output
-
-```text
+```output
 reportkit==1.0.0
 ```
 
@@ -119,9 +138,7 @@ reportkit==1.0.0
 
 The application explicitly declares one Python package:
 
-```text
-reportkit==1.0.0
-```
+- `reportkit==1.0.0`
 
 There is no local declaration of `tracehook-demo`.
 
@@ -129,11 +146,11 @@ There is no local declaration of `tracehook-demo`.
 
 # 3. Inspect the direct package metadata
 
-## Why we need to do this
+## Why
 
 Python transitive dependencies are carried by package metadata, not necessarily by the application's requirements file.
 
-## How we're going to do it
+## Approach
 
 Read the metadata inside the `reportkit` wheel.
 
@@ -144,9 +161,7 @@ unzip -p python-repo/reportkit-1.0.0-py3-none-any.whl \
   reportkit-1.0.0.dist-info/METADATA
 ```
 
-## Observed output
-
-```text
+```output
 Metadata-Version: 2.1
 Name: reportkit
 Version: 1.0.0
@@ -159,9 +174,7 @@ Requires-Dist: tracehook-demo==1.0.0
 
 The direct package introduces another package through:
 
-```text
-Requires-Dist: tracehook-demo==1.0.0
-```
+- `Requires-Dist: tracehook-demo==1.0.0`
 
 The dependency chain is therefore already larger than `requirements.txt` suggests.
 
@@ -169,11 +182,11 @@ The dependency chain is therefore already larger than `requirements.txt` suggest
 
 # 4. Inspect the transitive distribution
 
-## Why we need to do this
+## Why
 
 How a Python package is distributed affects what pip must do before it can install it.
 
-## How we're going to do it
+## Approach
 
 Inspect the transitive package archive.
 
@@ -183,9 +196,7 @@ Inspect the transitive package archive.
 tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz
 ```
 
-## Observed output
-
-```text
+```output
 tracehook_demo-1.0.0/pyproject.toml
 tracehook_demo-1.0.0/tracehook_backend.py
 ```
@@ -200,11 +211,11 @@ It is not supplied as an install-ready wheel.
 
 # 5. Prove the eventual runtime files are absent from the sdist
 
-## Why we need to do this
+## Why
 
 The lab's main transformation claim depends on showing that the files used later were not simply copied from the source archive.
 
-## How we're going to do it
+## Approach
 
 Search the sdist for the importable package and generated marker.
 
@@ -215,9 +226,7 @@ tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz \
   | grep -E 'tracehook_demo/__init__.py|build-hook.json' || true
 ```
 
-## Observed output
-
-```text
+```output
 ```
 
 There is no matching output.
@@ -226,10 +235,8 @@ There is no matching output.
 
 Neither of these files exists in the source distribution:
 
-```text
-tracehook_demo/__init__.py
-tracehook_demo/build-hook.json
-```
+- `tracehook_demo/__init__.py`
+- `tracehook_demo/build-hook.json`
 
 If they later appear in the installed environment, some build-time transformation created them.
 
@@ -237,11 +244,11 @@ If they later appear in the installed environment, some build-time transformatio
 
 # 6. Inspect the PEP 517 backend declaration
 
-## Why we need to do this
+## Why
 
 An sdist can nominate dependency-supplied Python code to act as its build backend.
 
-## How we're going to do it
+## Approach
 
 Read `pyproject.toml` from inside the sdist.
 
@@ -271,20 +278,18 @@ requires-python = ">=3.11"
 
 The package nominates code shipped inside its own sdist as the PEP 517 build backend:
 
-```text
-build-backend = "tracehook_backend"
-backend-path = ["."]
-```
+- `build-backend = "tracehook_backend"`
+- `backend-path = ["."]`
 
 ---
 
 # 7. Inspect what the build backend can generate
 
-## Why we need to do this
+## Why
 
 We need to connect later generated files to the code pip is allowed to execute during wheel construction.
 
-## How we're going to do it
+## Approach
 
 Inspect the relevant part of `tracehook_backend.py`.
 
@@ -300,10 +305,8 @@ tar -xOzf python-repo/tracehook_demo-1.0.0.tar.gz \
 
 Representative lines show `build_wheel()` constructing both:
 
-```text
-tracehook_demo/__init__.py
-tracehook_demo/build-hook.json
-```
+- `tracehook_demo/__init__.py`
+- `tracehook_demo/build-hook.json`
 
 ## Establish
 
@@ -313,11 +316,11 @@ The backend contains executable code that manufactures the package files before 
 
 # 8. Install the application dependencies
 
-## Why we need to do this
+## Why
 
 Now we move from source inspection to actual package-manager behaviour.
 
-## How we're going to do it
+## Approach
 
 Create a fresh virtual environment and let pip resolve and install from the local package repository.
 
@@ -346,7 +349,7 @@ Installing collected packages: tracehook-demo, reportkit
 Successfully installed reportkit-1.0.0 tracehook-demo-1.0.0
 ```
 
-The generated wheel size and digest are deliberately omitted here because they are run-specific details rather than the invariant being traced.
+We deliberately omit the generated wheel size and digest here because they are run-specific details rather than the invariant being traced.
 
 ## Establish
 
@@ -372,11 +375,11 @@ The transitive sdist caused Python build code to execute during dependency insta
 
 # 9. Compare declaration with installed package set
 
-## Why we need to do this
+## Why
 
 We want to make the difference between local declaration and resolved environment explicit.
 
-## How we're going to do it
+## Approach
 
 Ask pip for the installed package set.
 
@@ -386,9 +389,7 @@ Ask pip for the installed package set.
 .venv/bin/python -m pip freeze
 ```
 
-## Observed output
-
-```text
+```output
 reportkit==1.0.0
 tracehook-demo==1.0.0
 ```
@@ -397,14 +398,11 @@ tracehook-demo==1.0.0
 
 Compare the two views:
 
-```text
-requirements.txt
-    reportkit==1.0.0
-
-installed environment
-    reportkit==1.0.0
-    tracehook-demo==1.0.0
-```
+- `requirements.txt`:
+  - `reportkit==1.0.0`
+- installed environment:
+  - `reportkit==1.0.0`
+  - `tracehook-demo==1.0.0`
 
 A requirements file is not necessarily a complete inventory of the resulting environment.
 
@@ -412,11 +410,11 @@ A requirements file is not necessarily a complete inventory of the resulting env
 
 # 10. Find the generated package content
 
-## Why we need to do this
+## Why
 
 The importable package and marker were absent from the sdist. We now need to prove they exist after the PEP 517 build/install path.
 
-## How we're going to do it
+## Approach
 
 Search `site-packages` inside the virtual environment.
 
@@ -429,9 +427,7 @@ find .venv \
   -print
 ```
 
-## Observed output
-
-```text
+```output
 .venv/lib/python3.14/site-packages/tracehook_demo/__init__.py
 .venv/lib/python3.14/site-packages/tracehook_demo/build-hook.json
 ```
@@ -458,11 +454,11 @@ installed environment
 
 # 11. Inspect the generated marker
 
-## Why we need to do this
+## Why
 
 We want direct evidence tying the installed content back to the PEP 517 backend that generated it.
 
-## How we're going to do it
+## Approach
 
 Read `build-hook.json` from the installed environment.
 
@@ -494,11 +490,11 @@ The generated file identifies both the package and the build function responsibl
 
 # 12. Prove the generated package affects Python runtime behaviour
 
-## Why we need to do this
+## Why
 
 Presence on disk is not the same as runtime use.
 
-## How we're going to do it
+## Approach
 
 Import the direct package and call its trace function.
 
@@ -508,9 +504,7 @@ Import the direct package and call its trace function.
 .venv/bin/python -c 'import reportkit; print(reportkit.runtime_trace())'
 ```
 
-## Observed output
-
-```text
+```output
 {'event': 'pep517-build-backend-executed', 'package': 'tracehook-demo', 'version': '1.0.0', 'generatedBy': 'tracehook_backend.build_wheel', 'message': 'This content did not exist in the source distribution. The PEP 517 backend generated it while building the wheel.'}
 ```
 
@@ -532,11 +526,11 @@ Runtime behaviour now depends on package content that did not exist in the origi
 
 # 13. Run the application
 
-## Why we need to do this
+## Why
 
 The final boundary is the actual application, not a one-off Python import.
 
-## How we're going to do it
+## Approach
 
 Start the local HTTP application from the traced virtual environment.
 
@@ -548,9 +542,7 @@ S03 uses port `8081` by default so it can coexist with S02's Payara service on `
 ./scripts/run.sh
 ```
 
-## Observed output
-
-```text
+```output
 Runtime started as PID 68583
 Open:  http://localhost:8081/
 Trace: http://localhost:8081/trace
@@ -568,11 +560,11 @@ The run script also verifies that it is seeing the S03 trace response, rather th
 
 # 14. Request the generated trace at runtime
 
-## Why we need to do this
+## Why
 
 This closes the chain from dependency declaration to observable application behaviour.
 
-## How we're going to do it
+## Approach
 
 Call the local endpoint.
 
@@ -626,17 +618,17 @@ GET /trace
 
 # 15. Stop the runtime
 
-## Why we need to do this
+## Why
 
 The application started in step 13 is detached and keeps holding port `8081` after the walkthrough ends.
 
 Leaving it running also blocks a later re-run: `run.sh` verifies the port before starting and refuses when something is already serving there.
 
-## How we're going to do it
+## Approach
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 
-`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. Note that this only works while `.runtime.pid` exists — if the file is deleted before the process is stopped, neither script can find the runtime and it has to be stopped by hand:
+`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. Note that this only works while `.runtime.pid` exists. If you delete the file before stopping the process, neither script can find the runtime and you have to stop it by hand:
 
 ```bash
 lsof -nP -iTCP:8081 -sTCP:LISTEN
@@ -648,9 +640,7 @@ lsof -nP -iTCP:8081 -sTCP:LISTEN
 ./scripts/stop.sh
 ```
 
-## Observed output
-
-```text
+```output
 Stopped runtime PID 68583
 ```
 
@@ -666,15 +656,11 @@ Port `8081` is released and no scenario process remains from this walkthrough.
 
 The application declares only:
 
-```text
-reportkit==1.0.0
-```
+- `reportkit==1.0.0`
 
 but the resulting environment also contains:
 
-```text
-tracehook-demo==1.0.0
-```
+- `tracehook-demo==1.0.0`
 
 The transitive relationship lives in package metadata.
 
@@ -686,32 +672,20 @@ That means installing the latter requires a build step before installation.
 
 ## 3. Installing an sdist can execute dependency-supplied code
 
-The sdist's `pyproject.toml` nominates:
-
-```text
-tracehook_backend
-```
-
-as its PEP 517 build backend, and pip executes that backend while creating the wheel.
+The sdist's `pyproject.toml` nominates `tracehook_backend` as its PEP 517 build backend, and pip executes that backend while creating the wheel.
 
 ## 4. Build execution can manufacture software that was absent from source
 
 Neither of these files existed in the sdist:
 
-```text
-tracehook_demo/__init__.py
-tracehook_demo/build-hook.json
-```
+- `tracehook_demo/__init__.py`
+- `tracehook_demo/build-hook.json`
 
 Both existed after wheel construction and installation.
 
 So:
 
-```text
-source distribution contents
-    !=
-installed package contents
-```
+**Source distribution contents ≠ installed package contents.**
 
 ## 5. Generated build output can affect application runtime behaviour
 

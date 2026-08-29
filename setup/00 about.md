@@ -59,12 +59,12 @@ believe things about your software that are not true.
 
 ## The approach
 
-**Real builds, small applications.** The applications are deliberately tiny.
+**Real builds.** The applications are deliberately tiny.
 The builds are not simulated: Maven, npm, Vite, esbuild, Maven Shade, Spring
 Boot, PEP 517 backends, npm lifecycle hooks, Docker. Nothing is stubbed, because
 the whole point is what real tooling actually does to real artefacts.
 
-**Tracers, not haystacks.** Each scenario plants a small number of named
+**Named tracers.** Each scenario plants a small number of named
 components and follows only those. Instead of hunting through thousands of
 dependencies, you watch three or four specific things cross five or six
 specific boundaries.

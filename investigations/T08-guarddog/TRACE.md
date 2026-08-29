@@ -311,7 +311,7 @@ Assessment:  High risk  (8.2/10)
 the *consumer*, and because it survived into the artefact, a scan of the
 artefact finds it.
 
-One mechanism, two attacks, one discriminator:
+The two attacks share the mechanism; where the payload sits decides detection:
 
 ```text
 payload in generator   → runs at pack time, hits the PUBLISHER,  absent from tarball  → tarball scan MISSES

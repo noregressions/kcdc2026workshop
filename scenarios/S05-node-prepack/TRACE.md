@@ -79,7 +79,7 @@ src/server.js          node:http server on port 8083. Serves /health
                        exports: require('trace-route-package') gives it a
                        { path, response } pair.
 
-trace-route-package    The dependency — and the point of the lab. Its
+trace-route-package    The dependency this lab traces. Its
                        checked-in source (packages/trace-route-package/)
                        contains NO runtime code at all: just package.json,
                        a build-input/route.json data file, and
@@ -100,13 +100,9 @@ package-owned code.
 
 # 1. Start clean
 
-## Why
-
 We need to distinguish checked-in package inputs from files created by the npm lifecycle.
 
 The central claim of this lab is that `dist/` does not exist in the package source and is created during packing. That claim is only checkable from a known-clean starting state.
-
-## Approach
 
 `clean.sh` removes every piece of generated and installed state:
 
@@ -145,11 +141,7 @@ The automated proof-check verifies this directly before packing.
 
 # 2. Pack and install the package
 
-## Why
-
 The first execution boundary is `npm pack`: we want to see whether package-owned code executes before the tarball is assembled.
-
-## Approach
 
 `build.sh` performs the two steps separately so you can observe each execution boundary on its own. It also makes two deliberate choices that shape the evidence.
 
@@ -240,8 +232,6 @@ The exact tarball size, shasum and integrity digest are observations from this w
 
 # 3. Inspect the package source after packing
 
-## Why
-
 After the lifecycle has run, the source workspace contains both original inputs and generated output.
 
 ## Run
@@ -273,8 +263,6 @@ After `prepack`, three classes of evidence coexist in the package workspace:
 
 # 4. Inspect the packed npm artefact
 
-## Why
-
 The distributable tarball is a different evidence view from the package source workspace.
 
 ## Run
@@ -301,8 +289,6 @@ The publication boundary has therefore preserved the **result** of the lifecycle
 ---
 
 # 5. Inspect provenance retained in the tarball
-
-## Why
 
 Although the actual generator and input are absent, this lab deliberately writes a provenance marker into the generated output so we can trace the transformation.
 
@@ -342,8 +328,6 @@ Without that marker, the tarball would preserve the generated result but say lit
 ---
 
 # 6. Inspect the installed package
-
-## Why
 
 Installation creates another evidence boundary. We want to see what survives into `node_modules`.
 
@@ -508,11 +492,7 @@ Neither package inventory view, by itself, exposes the `prepack` transformation 
 
 # 12. Run the application
 
-## Why
-
 Static inspection has shown the generated files exist in the installed package. The remaining question is whether they change what the application can do.
-
-## Approach
 
 `run.sh` starts `src/server.js` against the `node_modules` tree produced in step 2, so the runtime loads exactly the package we packed and installed.
 
@@ -599,13 +579,9 @@ Both forms of behaviour coexist in the running process:
 
 # 15. Stop the runtime
 
-## Why
-
 The runtime started in step 12 is detached and keeps holding port `8083` after the walkthrough ends.
 
 Leaving it running also blocks a later re-run: `run.sh` refuses to start when the port is already serving HTTP.
-
-## Approach
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 

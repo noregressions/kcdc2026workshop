@@ -56,7 +56,7 @@ dependencies:
 - `TraceRoute.java` — The extension interface: `path()` + `responseJson()`.
   The checked-in source contains NO implementations.
 
-The supply chain lives in the build. The application POM attaches
+The application POM attaches
 `trace-injector-maven-plugin` (built from `tooling/` into the
 scenario-local `.maven-repo/`). That plugin has its own transitive
 dependency, `trace-route-payload`, whose resource file defines a route.
@@ -71,13 +71,9 @@ source file defines and no application dependency supplies.
 
 # 1. Start clean
 
-## Why
-
 Separate source-controlled content from previous generated build output.
 
 Most of the evidence in this lab is generated during the build. If output from an earlier run survives, we cannot tell which build produced the bytes we are inspecting.
-
-## Approach
 
 `clean.sh` removes the generated state of all three modules in this scenario:
 
@@ -120,8 +116,6 @@ The application can be rebuilt from the checked-in scenario sources and local Ma
 
 # 2. Build the plugin, the payload, and the application
 
-## Why
-
 Everything after this step inspects build output, so we have to produce it first.
 
 This scenario has two build domains, and they must be built in order:
@@ -134,8 +128,6 @@ application       declares the plugin, declares no dependencies
 ```
 
 The application build cannot resolve the plugin until it exists in a repository, which is why the tooling is built and installed first.
-
-## Approach
 
 `build.sh` runs both phases against the scenario-local repository rather than the developer's `~/.m2`:
 
@@ -210,8 +202,6 @@ compiled and packaged as ordinary application content
 
 # 3. Look at the application dependency graph
 
-## Why
-
 Start with the Maven view most developers use when asking "what does this application depend on?"
 
 ## Run
@@ -247,8 +237,6 @@ Neither `trace-injector-maven-plugin` nor `trace-route-payload` appears as an ap
 ---
 
 # 4. Ask Maven about plugin dependencies instead
-
-## Why
 
 The project dependency graph is not Maven's only dependency domain.
 
@@ -287,8 +275,6 @@ Maven knows about the payload, but not as an application dependency.
 
 # 5. Inspect the actual plugin execution realm
 
-## Why
-
 Resolver output tells us what Maven can resolve. Debug output tells us what Maven actually loads to execute the plugin.
 
 ## Run
@@ -322,8 +308,6 @@ mvn \
 ---
 
 # 6. Inspect the generated Java source
-
-## Why
 
 Now follow the build-time input across the transformation boundary into application source.
 
@@ -379,8 +363,6 @@ Its provenance is explicit:
 
 # 7. Inspect the generated activation metadata
 
-## Why
-
 Generating a class does not make it execute. We need to see how the build connects it to the application.
 
 ## Run
@@ -431,8 +413,6 @@ The ServiceLoader descriptor makes the generated implementation discoverable by 
 
 # 8. Prove the generated content entered the final JAR
 
-## Why
-
 Generated build directories are intermediate evidence. The deployable JAR is the shipped artefact.
 
 ## Run
@@ -456,8 +436,6 @@ The generated implementation, activation metadata and provenance marker are all 
 ---
 
 # 9. Inspect the shipped bytecode
-
-## Why
 
 Generated Java source may be deleted after the build. The final JAR still has to carry the behaviour.
 
@@ -501,8 +479,6 @@ The runtime behaviour survived the transformation even though the build-time pac
 
 # 10. Scan the final JAR with Syft
 
-## Why
-
 Now compare physical runtime capability with a package scanner's inventory.
 
 ## Run
@@ -535,8 +511,6 @@ The bytes are present. Syft does not recover their build provenance as package i
 ---
 
 # 11. Generate a Maven-model CycloneDX SBOM
-
-## Why
 
 Compare the scanner view with an SBOM generated from Maven's project dependency model.
 
@@ -585,11 +559,7 @@ At this point the evidence views are:
 
 # 12. Run the application
 
-## Why
-
 The final test is whether the generated, packaged bytes actually change runtime capability.
-
-## Approach
 
 `run.sh` starts the packaged JAR (not a recompiled classpath), so the runtime evidence comes from the same artefact Syft scanned in step 10.
 
@@ -621,8 +591,6 @@ The PID is an observation from this run, not an invariant.
 
 # 13. Verify the source-defined application endpoint
 
-## Why
-
 This is the control endpoint: behaviour deliberately present in the checked-in application source.
 
 ## Run
@@ -647,8 +615,6 @@ The source-defined application is running normally.
 ---
 
 # 14. Request the build-supplied endpoint
-
-## Why
 
 This closes the chain from plugin dependency to runtime behaviour.
 
@@ -689,13 +655,9 @@ application JAR
 
 # 15. Stop the runtime
 
-## Why
-
 The runtime started in step 12 is detached and will keep holding port `8082` after the walkthrough ends.
 
 Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to start when the port is already serving HTTP.
-
-## Approach
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 

@@ -81,8 +81,8 @@ payload in the generator   → runs at pack time, hits the PUBLISHER  → NOT in
 payload in the generated   → runs on load,      hits the CONSUMER   → IN tarball     → scan CATCHES (8.2)
 ```
 
-One mechanism, two victims, and a scan of the published tarball is exactly
-right for one and completely blind to the other. The payload is a harmless
+The same mechanism attacks two different victims, and a scan of the published
+tarball is exactly right for one and completely blind to the other. The payload is a harmless
 stand-in (an async `curl` to a reserved `.invalid` host); nothing is installed
 or published.
 

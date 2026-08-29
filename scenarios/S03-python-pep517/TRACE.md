@@ -8,7 +8,6 @@ track: core
 
 This lab follows a direct Python dependency into a transitive source distribution, through PEP 517 build execution, into the installed environment, and finally into runtime behaviour.
 
-
 ## What PEP 517 means in this lab
 
 PEP 517 defines the standard interface between a Python **build frontend**, such as `pip`, and a package's **build backend**.
@@ -27,7 +26,6 @@ flowchart TD
 ```
 
 In this lab, `tracehook-demo` is a **transitive** dependency and is available only as an sdist. Its own `pyproject.toml` nominates `tracehook_backend` as the build backend. When `pip` resolves the dependency, it executes that backend, which creates files that were not present in the original sdist. Those generated files then become part of the installed application and affect runtime behaviour.
-
 
 The tracers are:
 
@@ -59,8 +57,8 @@ reportkit        The application's ONLY declared dependency (a wheel,
                  from the local python-repo/). Its entire body is one
                  function that delegates to tracehook_demo.trace_data().
 
-tracehook-demo   reportkit's transitive dependency — and the point of
-                 the lab. It arrives as an sdist containing exactly two
+tracehook-demo   reportkit's transitive dependency — the package this
+                 lab traces. It arrives as an sdist containing exactly two
                  files: pyproject.toml and tracehook_backend.py. The
                  pyproject declares tracehook_backend as its own PEP 517
                  build backend, and that backend GENERATES the
@@ -113,11 +111,7 @@ The package fixtures remain, but the installed environment and previous executio
 
 # 2. Inspect the direct dependency declaration
 
-## Why
-
 Start with the dependency information visible in the application itself.
-
-## Approach
 
 Read `requirements.txt`.
 
@@ -143,11 +137,7 @@ There is no local declaration of `tracehook-demo`.
 
 # 3. Inspect the direct package metadata
 
-## Why
-
 Python transitive dependencies are carried by package metadata, not necessarily by the application's requirements file.
-
-## Approach
 
 Read the metadata inside the `reportkit` wheel.
 
@@ -179,11 +169,7 @@ The dependency chain is therefore already larger than `requirements.txt` suggest
 
 # 4. Inspect the transitive distribution
 
-## Why
-
 How a Python package is distributed affects what pip must do before it can install it.
-
-## Approach
 
 Inspect the transitive package archive.
 
@@ -208,11 +194,7 @@ It is not supplied as an install-ready wheel.
 
 # 5. Prove the eventual runtime files are absent from the sdist
 
-## Why
-
 The lab's main transformation claim depends on showing that the files used later were not simply copied from the source archive.
-
-## Approach
 
 Search the sdist for the importable package and generated marker.
 
@@ -241,11 +223,7 @@ If they later appear in the installed environment, some build-time transformatio
 
 # 6. Inspect the PEP 517 backend declaration
 
-## Why
-
 An sdist can nominate dependency-supplied Python code to act as its build backend.
-
-## Approach
 
 Read `pyproject.toml` from inside the sdist.
 
@@ -282,11 +260,7 @@ The package nominates code shipped inside its own sdist as the PEP 517 build bac
 
 # 7. Inspect what the build backend can generate
 
-## Why
-
 We need to connect later generated files to the code pip is allowed to execute during wheel construction.
-
-## Approach
 
 Inspect the relevant part of `tracehook_backend.py`.
 
@@ -313,11 +287,7 @@ The backend contains executable code that manufactures the package files before 
 
 # 8. Install the application dependencies
 
-## Why
-
 Now we move from source inspection to actual package-manager behaviour.
-
-## Approach
 
 Create a fresh virtual environment and let pip resolve and install from the local package repository.
 
@@ -372,11 +342,7 @@ The transitive sdist caused Python build code to execute during dependency insta
 
 # 9. Compare declaration with installed package set
 
-## Why
-
 We want to make the difference between local declaration and resolved environment explicit.
-
-## Approach
 
 Ask pip for the installed package set.
 
@@ -407,11 +373,7 @@ A requirements file is not necessarily a complete inventory of the resulting env
 
 # 10. Find the generated package content
 
-## Why
-
 The importable package and marker were absent from the sdist. We now need to prove they exist after the PEP 517 build/install path.
-
-## Approach
 
 Search `site-packages` inside the virtual environment.
 
@@ -451,11 +413,7 @@ installed environment
 
 # 11. Inspect the generated marker
 
-## Why
-
 We want direct evidence tying the installed content back to the PEP 517 backend that generated it.
-
-## Approach
 
 Read `build-hook.json` from the installed environment.
 
@@ -487,11 +445,7 @@ The generated file identifies both the package and the build function responsibl
 
 # 12. Prove the generated package affects Python runtime behaviour
 
-## Why
-
 Presence on disk is not the same as runtime use.
-
-## Approach
 
 Import the direct package and call its trace function.
 
@@ -523,11 +477,7 @@ Runtime behaviour now depends on package content that did not exist in the origi
 
 # 13. Run the application
 
-## Why
-
 The final boundary is the actual application, not a one-off Python import.
-
-## Approach
 
 Start the local HTTP application from the traced virtual environment.
 
@@ -557,11 +507,7 @@ The run script also verifies that it is seeing the S03 trace response, rather th
 
 # 14. Request the generated trace at runtime
 
-## Why
-
 This closes the chain from dependency declaration to observable application behaviour.
-
-## Approach
 
 Call the local endpoint.
 
@@ -615,13 +561,9 @@ GET /trace
 
 # 15. Stop the runtime
 
-## Why
-
 The application started in step 13 is detached and keeps holding port `8081` after the walkthrough ends.
 
 Leaving it running also blocks a later re-run: `run.sh` verifies the port before starting and refuses when something is already serving there.
-
-## Approach
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 

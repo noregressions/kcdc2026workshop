@@ -40,8 +40,7 @@ src/main/web/app.js  Browser code. Imports { escape, startCase } from
 index.html           Loads the bundle esbuild produced from app.js.
 ```
 
-The twist is in the build: `lodash-es` is **not** an application
-dependency. It is resolved from mvnpm (npm packages republished as Maven
+`lodash-es` is **not** an application dependency. It is resolved from mvnpm (npm packages republished as Maven
 artefacts) inside the esbuild-maven-plugin's execution realm, bundled into
 `target/generated-web/assets/app.js`, and packaged into the WAR as static
 content. The Jakarta APIs are `provided` — supplied at runtime by Payara.
@@ -70,8 +69,6 @@ This removes generated Maven, frontend, WAR, and SBOM output from earlier runs. 
 
 # 2. Inspect the source declarations
 
-## Why
-
 Before asking Maven, Syft, or an SBOM producer what exists, we need the literal declarations the developer gave the build.
 
 This scenario deliberately uses three different dependency paths:
@@ -88,8 +85,6 @@ build-plugin dependency
 ```
 
 Those declarations do not have the same resolution or packaging semantics.
-
-## Approach
 
 Inspect the relevant sections of `pom.xml` directly.
 
@@ -200,11 +195,7 @@ These are declarations. We have not yet proved how Maven resolves them or what r
 
 # 3. Build the WAR
 
-## Why
-
 The source configuration only describes intent. The interesting evidence appears after Maven resolves dependencies, constructs the plugin execution realm, runs esbuild, and packages the generated output into the WAR.
-
-## Approach
 
 Use the project's normal build wrapper and then verify the generated browser assets and WAR directly.
 
@@ -248,11 +239,7 @@ We still need to determine which dependency evidence belongs to the application 
 
 # 4. Resolve the ordinary application dependency
 
-## Why
-
 `commons-lang3` is our control case. It is declared as an ordinary project dependency, so it should appear in Maven's normal project dependency graph.
-
-## Approach
 
 Ask Maven's Dependency Plugin for the resolved project graph and filter it to `commons-lang3`.
 
@@ -289,13 +276,9 @@ Maven sees `commons-lang3:3.18.0` as normal application software.
 
 # 5. Show that lodash-es is absent from the project dependency graph
 
-## Why
-
 `lodash-es` is declared under `esbuild-maven-plugin`, not under the project's ordinary `<dependencies>` section.
 
 We want to prove that Maven's normal project dependency graph does not treat it like `commons-lang3`.
-
-## Approach
 
 Run the same project dependency-tree query, filtered to the mvnpm coordinate.
 
@@ -333,11 +316,7 @@ This does not mean the build did not use it. Maven maintains different dependenc
 
 # 6. Inspect what resolve-plugins reports
 
-## Why
-
 The project dependency graph does not contain `lodash-es`. The next question is whether Maven's plugin dependency reporting exposes it.
-
-## Approach
 
 Ask the Maven Dependency Plugin to resolve the esbuild Maven plugin and its published dependency set.
 
@@ -389,13 +368,9 @@ POM
 
 # 7. Inspect the actual plugin execution realm
 
-## Why
-
 A project can add dependencies to a Maven plugin. Maven resolves those dependencies for the plugin's isolated execution realm rather than for the application's normal dependency graph.
 
 That means build-time software can affect the bytes we ship while remaining absent from `dependency:tree`.
-
-## Approach
 
 Run the `generate-resources` phase with Maven debug logging enabled and filter the plugin-realm construction to `lodash-es`.
 
@@ -437,13 +412,9 @@ complete set of software that can influence the build
 
 # 8. Inspect the generated browser bundle
 
-## Why
-
 Finding `lodash-es` in the plugin execution realm only proves that the package was available to esbuild. It does not prove that lodash code contributed to the application output.
 
 We need evidence from the generated artefact.
-
-## Approach
 
 The build produced `app.js` and `app.js.map`. The source map records source modules represented in the generated JavaScript.
 
@@ -474,11 +445,7 @@ We still need to prove that lodash contributed to those bytes.
 
 # 9. Prove that lodash-es contributed to the generated bundle
 
-## Why
-
 The plugin execution realm tells us `lodash-es:4.17.21` was available. The source map lets us independently establish whether lodash modules contributed to the output.
-
-## Approach
 
 Read the source map's `sources` array and filter it to lodash modules.
 
@@ -543,13 +510,9 @@ We have now proved that lodash did more than merely exist in Maven's build envir
 
 # 10. Scan the generated frontend as an artefact
 
-## Why
-
 Now deliberately throw away the Maven build context.
 
 We know `lodash-es` contributed code. The question is whether an artefact scanner can recover the npm package identity from only the generated frontend output.
-
-## Approach
 
 Give Syft only `target/generated-web`. It receives no POM, plugin realm, mvnpm coordinate, or original package tree.
 
@@ -593,13 +556,9 @@ software contribution != package identifiability
 
 # 11. Follow both dependency paths into the WAR
 
-## Why
-
 The generated browser bundle exists, but that does not yet prove it reached the deployable application.
 
 At the same boundary we can compare the ordinary Java dependency with the transformed npm-origin dependency.
-
-## Approach
 
 Inspect the finished WAR directly for the versioned `commons-lang3` JAR and generated browser assets.
 
@@ -638,13 +597,9 @@ The WAR therefore contains third-party software from both ecosystems, but only o
 
 # 12. Scan the finished WAR
 
-## Why
-
 We have manually proved that the WAR contains both the conventional Java library and lodash-derived JavaScript.
 
 Now ask an independent artefact scanner what package identities it can recover from the finished WAR alone.
-
-## Approach
 
 Give Syft only the completed WAR.
 
@@ -687,13 +642,9 @@ without the originating package remaining identifiable
 
 # 13. Confirm what the WAR deliberately does not contain
 
-## Why
-
 The Jakarta EE Web API follows a third path.
 
 It is a project dependency, but Maven scope `provided` tells the build that the runtime environment is expected to supply it. We should therefore find it in Maven's dependency model but not packaged into `WEB-INF/lib`.
-
-## Approach
 
 First inspect the WAR library directory.
 
@@ -769,13 +720,9 @@ Jakarta EE API
 
 # 14. Generate the Maven-model CycloneDX SBOM
 
-## Why
-
 So far we have compared Maven resolution with physical artefact inspection.
 
 Now we want to see what a formal SBOM generated from Maven's project model says about those same three tracers.
-
-## Approach
 
 Invoke the CycloneDX Maven Plugin directly and emit JSON.
 
@@ -828,8 +775,6 @@ This is a model-derived inventory. It follows Maven's application dependency mod
 
 # 15. Understand Maven `provided` versus CycloneDX `required`
 
-## Why
-
 The previous result looks surprising:
 
 ```text
@@ -845,8 +790,6 @@ CycloneDX Maven SBOM
 ```
 
 It would be easy to read `required` as meaning "physically included in this WAR." That is not what this result means.
-
-## Approach
 
 Keep the scope models separate.
 
@@ -874,8 +817,6 @@ This becomes important when we compare it with an SBOM generated from the physic
 
 # 16. Generate an artefact-derived CycloneDX SBOM from the WAR
 
-## Why
-
 We now have one CycloneDX SBOM generated from Maven's dependency model.
 
 To isolate the effect of **evidence source**, generate a second CycloneDX SBOM from the completed WAR itself.
@@ -889,8 +830,6 @@ same CycloneDX format
 Maven model -> SBOM
 WAR bytes   -> SBOM
 ```
-
-## Approach
 
 Ask Syft to inspect the WAR and emit CycloneDX JSON.
 
@@ -947,8 +886,6 @@ lodash-es                         absent
 
 # 17. Compare the two CycloneDX SBOMs
 
-## Why
-
 This is the key SBOM comparison in the lab.
 
 Both documents use CycloneDX. Both describe the same application. The difference is where their inventory evidence came from.
@@ -998,13 +935,9 @@ A model-derived SBOM can include software that is required but not packaged in t
 
 # 18. Move the WAR into the Payara runtime
 
-## Why
-
 The WAR is not the complete runtime product.
 
 The application deliberately omitted Jakarta runtime APIs, and Payara itself brings a much larger body of server, JDK, and operating-system software.
-
-## Approach
 
 `run.sh` moves the WAR into a running Payara server in three steps:
 
@@ -1064,13 +997,9 @@ Starting the container does not by itself prove that Payara successfully deploye
 
 # 19. Verify the running application
 
-## Why
-
 We need runtime evidence, not merely image-construction evidence.
 
 A successful request proves that Payara deployed the WAR and that code relying on both the packaged Java dependency and server-provided Jakarta functionality can execute.
-
-## Approach
 
 Call the servlet endpoint.
 
@@ -1114,15 +1043,11 @@ The runtime supplies Jakarta capability that was deliberately absent from the WA
 
 # 20. Inspect the complete container image
 
-## Why
-
 The running product contains much more software than the WAR.
 
 The final image adds Payara itself, concrete Jakarta runtime libraries, a JDK, Ubuntu packages, utilities, and other transitive runtime software.
 
 This is the outermost software boundary in the exercise.
-
-## Approach
 
 Give Syft the completed local container image.
 
@@ -1219,11 +1144,7 @@ application SBOM != container/product SBOM
 
 # 21. Stop the container
 
-## Why
-
 The container started in step 18 runs detached and keeps holding port `8080` after the walkthrough ends.
-
-## Approach
 
 `stop.sh` force-removes the `payara-mvnpm-trace-lab` container. It is safe to run when nothing is running.
 

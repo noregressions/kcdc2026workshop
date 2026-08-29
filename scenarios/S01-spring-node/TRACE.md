@@ -43,7 +43,7 @@ service/      Spring Boot REST service. GET /api/trace?value=...
 At runtime it is one executable Spring Boot JAR on port 8080; the
 `Dockerfile` copies that JAR onto `eclipse-temurin:21-jre-jammy` as the
 `checkout-service` image. Each tracer is planted where a real project would
-put it — nothing here is artificial except the smallness.
+put it.
 
 ---
 

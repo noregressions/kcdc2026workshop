@@ -21,7 +21,7 @@ The point is to see which claims can still be proved after each transformation, 
 ## The workshop exercise (15 minutes)
 
 The canonical exercise lives in [`WORKSHOP.md`](../../WORKSHOP.md) Part 2,
-Step 1. Three legs, one conclusion:
+Step 1:
 
 ```text
 control          jackson-databind agrees in resolver and artefact scan

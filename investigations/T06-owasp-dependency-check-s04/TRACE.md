@@ -6,7 +6,7 @@ track: reference
 
 # T06 — OWASP Dependency-Check / S04
 
-## Objective
+## The question
 
 Use OWASP Dependency-Check against S04 to distinguish:
 
@@ -22,9 +22,7 @@ The central question is:
 
 > If a Maven plugin and its transitive dependency generate runtime capability that survives in the final application JAR, at which boundary can Dependency-Check still identify the build-time packages?
 
----
-
-# Tooling observed
+## The instrument
 
 ```text
 OWASP Dependency-Check Maven Plugin 13.0.0
@@ -46,12 +44,16 @@ Dependency-Check data directory:
 
 # NVD API key
 
+The key is instrument configuration, not a detail: it changes which tool
+version runs and whether the vulnerability database updates at all, and that
+is part of the evidence model.
+
 ## Why this matters
 
 OWASP Dependency-Check maintains a local vulnerability database populated from
 NVD data.
 
-An NVD API key is not conceptually required for Dependency-Check, but version
+An NVD API key is not strictly required by Dependency-Check, but version
 13.0.0 has a known no-key regression in its NVD update path. The T06
 walkthrough therefore used a valid NVD API key with 13.0.0.
 
@@ -90,7 +92,7 @@ Then:
 
 The activation link expires after seven days.
 
-The page used to display the key is single-use, so copy it to a secure secret
+The page that displays the key is single-use, so copy it to a secure secret
 store when it appears.
 
 Requesting and activating another key with the same email address invalidates
@@ -121,7 +123,34 @@ NVD API key: supplied via NVD_API_KEY environment variable
 
 ---
 
-# 1. Establish the application dependency model
+# Ground truth
+
+Every expectation below is derived from this section: what S04 actually
+contains and what its build actually did, established from Maven's own
+evidence, independently of the tool under investigation.
+
+## Fixture
+
+S04 plants its controlled tracers in the build tooling, not in the
+application:
+
+```text
+maven-plugin-hidden-content 1.0.0
+    the application itself
+    its ordinary dependency graph is otherwise empty
+
+trace-injector-maven-plugin 1.0.0
+    Maven build plugin
+    never an application dependency
+
+trace-route-payload 1.0.0
+    transitive dependency of that plugin
+    never an application dependency
+```
+
+Plugin execution generates runtime capability — a `/hidden/build-info` route —
+that survives into the final application JAR after the original build-time
+package boundaries are gone.
 
 ## Run
 
@@ -129,7 +158,7 @@ NVD API key: supplied via NVD_API_KEY environment variable
 ./scripts/baseline-s04.sh
 ```
 
-## Observe
+## Observed
 
 The application dependency tree contained only the application itself:
 
@@ -140,27 +169,6 @@ dev.noregressions.trace:maven-plugin-hidden-content:jar:1.0.0
 Neither controlled build-time tracer appeared as a normal application
 dependency.
 
-## Establish
-
-The ordinary Maven dependency universe is:
-
-```text
-maven-plugin-hidden-content 1.0.0
-```
-
-with no application dependency on:
-
-```text
-trace-injector-maven-plugin
-trace-route-payload
-```
-
----
-
-# 2. Establish the plugin dependency model
-
-## Observe
-
 Maven plugin resolution showed:
 
 ```text
@@ -168,24 +176,6 @@ dev.noregressions.trace:trace-injector-maven-plugin:maven-plugin:1.0.0:runtime
     dev.noregressions.trace:trace-injector-maven-plugin:jar:1.0.0
     dev.noregressions.trace:trace-route-payload:jar:1.0.0
 ```
-
-## Establish
-
-Maven has a separate build-tooling dependency domain:
-
-```text
-trace-injector-maven-plugin 1.0.0
-    ↓
-trace-route-payload 1.0.0
-```
-
-Neither package is an application dependency.
-
----
-
-# 3. Prove both packages entered the actual plugin execution realm
-
-## Observe
 
 Maven debug output showed:
 
@@ -204,16 +194,6 @@ trace-injector-maven-plugin:1.0.0:inject-route
 ```
 
 from that ClassRealm.
-
-## Establish
-
-The payload was not merely resolvable: it was present in the actual Maven ClassRealm used to execute the build plugin.
-
----
-
-# 4. Follow the build transformation
-
-## Observe
 
 Plugin execution generated:
 
@@ -241,35 +221,73 @@ trace-route-payload
 trace-injector-maven-plugin
 ```
 
-## Establish
+## What this pins down
 
-The build-time packages changed the final runtime capability.
-
-The transformation was:
+Maven has two separate dependency domains here. The ordinary Maven dependency
+universe is:
 
 ```text
-plugin + payload
-    ↓ Maven ClassRealm
-plugin execution
-    ↓
-generated Java + ServiceLoader metadata
-    ↓ compile/package
-final application JAR
+maven-plugin-hidden-content 1.0.0
 ```
 
-The behaviour survives into the final JAR.
+with no application dependency on:
+
+```text
+trace-injector-maven-plugin
+trace-route-payload
+```
+
+while Maven's build-tooling domain resolves:
+
+```text
+trace-injector-maven-plugin 1.0.0
+    ↓
+trace-route-payload 1.0.0
+```
+
+The payload was not merely resolvable: it was present in the actual Maven
+ClassRealm used to execute the build plugin, and that execution changed the
+final runtime capability. The transformation was:
+
+```mermaid
+flowchart TD
+  a["plugin + payload"] -->|"Maven ClassRealm"| b["plugin execution"]
+  b --> c["generated Java + ServiceLoader metadata"]
+  c -->|"compile/package"| d["final application JAR"]
+```
+
+The behaviour survives into the final JAR — the tracer *names* even survive as
+strings in the generated class — but the original build-time package
+boundaries do not travel with it. The probes below test which of these
+boundaries Dependency-Check can observe.
 
 ---
 
-# 5. Default Dependency-Check Maven scan
+# Running the probes
 
-## Run
+All four probes are driven by one harness run (with the NVD API key exported,
+as above):
 
 ```bash
 ./scripts/run-dependency-check-s04.sh
 ```
 
-## Observe
+---
+
+# Probe 1 — default application-model scan
+
+## Question
+
+What does the default Dependency-Check Maven scan of S04 see?
+
+## Expectation
+
+Ground truth: the application dependency graph contains only the application
+itself, and both controlled tracers live in Maven's build-tooling domain. If
+the default scan follows the ordinary application dependency model, neither
+tracer should appear in the inventory.
+
+## Observed
 
 The default scan produced:
 
@@ -280,10 +298,11 @@ S04 tracers:
 (none)
 ```
 
-## Establish
+## Verdict
 
-The default Maven Dependency-Check view followed the ordinary application
-dependency model.
+**trace-injector-maven-plugin: not identified. trace-route-payload: not
+identified** — as expected. The default Maven Dependency-Check view followed
+the ordinary application dependency model.
 
 It did not include:
 
@@ -302,9 +321,21 @@ complete Maven build-tooling inventory
 
 ---
 
-# 6. Enable plugin scanning
+# Probe 2 — plugin-aware scan
 
-## Observe
+## Question
+
+Does admitting Maven's build-tooling domain as evidence change the inventory —
+and the vulnerability answer?
+
+## Expectation
+
+Ground truth: Maven resolves the plugin and its payload in the plugin realm,
+alongside the rest of the build tooling. If plugin scanning admits that domain
+to Dependency-Check, both controlled tracers should be identified — and the
+build tooling should bring its own vulnerability surface with it.
+
+## Observed
 
 With Maven plugin scanning enabled, Dependency-Check reported:
 
@@ -340,10 +371,11 @@ plexus-archiver 4.2.7
 velocity 1.7
 ```
 
-## Establish
+## Verdict
 
-Changing only the evidence admitted to Dependency-Check changed the software
-universe from:
+**trace-injector-maven-plugin: identified. trace-route-payload: identified**,
+as expected — and this is the strongest T06 result. Changing only the evidence
+admitted to Dependency-Check changed the software universe from:
 
 ```text
 0 dependencies
@@ -357,15 +389,28 @@ to:
 78 vulnerability records
 ```
 
-This is the strongest T06 result.
-
 The difference is a different dependency boundary, not a different vulnerability database.
 
 ---
 
-# 7. Scan the final application JAR
+# Probe 3 — final application JAR
 
-## Observe
+## Question
+
+After the build, can a scan of the shipped artefact reconstruct the build-time
+packages that shaped it?
+
+## Expectation
+
+Ground truth: the final JAR carries the generated class, the ServiceLoader
+metadata, and even the tracer names as strings inside
+`GeneratedTraceRoute.class` — but not the original plugin or payload JARs,
+whose package boundaries never entered the artefact. If Dependency-Check
+identifies packages by package evidence rather than by generated content, both
+build-time identities should be gone here, however much of their behaviour
+shipped.
+
+## Observed
 
 The final JAR scan produced:
 
@@ -388,9 +433,11 @@ trace-injector-maven-plugin
 trace-route-payload
 ```
 
-## Establish
+## Verdict
 
-The final application JAR retains the generated behaviour:
+**maven-plugin-hidden-content: identified. trace-injector-maven-plugin:
+identity lost. trace-route-payload: identity lost.** The final application JAR
+retains the generated behaviour:
 
 ```text
 GeneratedTraceRoute.class
@@ -413,9 +460,21 @@ build-time package identity recoverable
 
 ---
 
-# 8. Direct plugin/payload controls
+# Probe 4 — direct plugin/payload controls
 
-## Observe
+## Question
+
+The control: is the identity loss in Probe 3 a transformation effect, or can
+Dependency-Check simply not recognise these packages at all?
+
+## Expectation
+
+Ground truth: the original plugin and payload JARs still have intact package
+boundaries. If the scanner is capable of recognising the controlled tracers,
+scanning those JARs directly should identify both — and a failure here would
+invalidate the interpretation of Probes 1–3.
+
+## Observed
 
 Scanning the original build-time JARs directly produced:
 
@@ -434,9 +493,9 @@ trace-route-payload-1.0.0.jar
 pkg:maven/dev.noregressions.trace/trace-route-payload@1.0.0
 ```
 
-## Establish
+## Verdict
 
-This rules out:
+**Both build-time packages: identified**, as expected. This rules out:
 
 ```text
 Dependency-Check cannot recognise the controlled tracer JARs
@@ -457,32 +516,10 @@ final application JAR
 
 ---
 
-# 9. Compare the tracer sets
+# Operational notes
 
-Observed:
-
-```text
-default Maven
-    no tracers
-
-plugin-aware Maven
-    trace-injector-maven-plugin
-    trace-route-payload
-
-final JAR
-    maven-plugin-hidden-content only
-
-direct plugin/payload
-    trace-injector-maven-plugin
-    trace-route-payload
-```
-
-The transformation boundary is therefore visible directly in the
-Dependency-Check results.
-
----
-
-# 10. Dependency-Check operational findings
+Instrument behaviour observed alongside the probes, recorded because it shapes
+how T06 runs in a workshop setting.
 
 The first full 13.0.0 run populated:
 
@@ -509,7 +546,44 @@ That failure was not an S04 dependency-analysis result.
 
 ---
 
-# What T06 establishes
+# Scorecard
+
+What Dependency-Check identified, tracer by tracer, at each boundary — `seen`
+means the package identity was established; `—` means it was not, although the
+software (or its effect) is part of that boundary; `n/a` means the tracer was
+outside what that probe scanned or recorded.
+
+| Boundary | trace-injector-maven-plugin 1.0.0 | trace-route-payload 1.0.0 | maven-plugin-hidden-content 1.0.0 |
+| --- | --- | --- | --- |
+| default Maven scan | — | — | — |
+| plugin-aware Maven scan | seen | seen | n/a |
+| final application JAR | — | — | seen |
+| direct plugin/payload JARs | seen | seen | n/a |
+
+Observed:
+
+```text
+default Maven
+    no tracers
+
+plugin-aware Maven
+    trace-injector-maven-plugin
+    trace-route-payload
+
+final JAR
+    maven-plugin-hidden-content only
+
+direct plugin/payload
+    trace-injector-maven-plugin
+    trace-route-payload
+```
+
+The transformation boundary is therefore visible directly in the
+Dependency-Check results.
+
+---
+
+# Findings
 
 ## 1. Maven has more than one dependency universe
 
@@ -622,7 +696,7 @@ The decisive variable was what software identities the scan admitted, not the CV
 
 ---
 
-# Final conclusion
+# Final verdict
 
 T06 demonstrates:
 

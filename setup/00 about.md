@@ -37,18 +37,13 @@ treated as interchangeable descriptions of "what is in this application". They
 are not. Each is an **observation, made at a particular point in the supply
 chain, from a particular evidence source**.
 
-```text
-source configuration
-        ↓
-resolver model
-        ↓
-build transformation
-        ↓
-application artefact
-        ↓
-SBOM producer
-        ↓
-container image
+```mermaid
+flowchart TD
+  a["source configuration"] --> b["resolver model"]
+  b --> c["build transformation"]
+  c --> d["application artefact"]
+  d --> e["SBOM producer"]
+  e --> f["container image"]
 ```
 
 They routinely disagree, and usually for entirely legitimate reasons. The
@@ -108,8 +103,12 @@ TRACE.md      the annotated step-by-step walkthrough
 
 ## How to read a trace
 
-Every step in every walkthrough follows the same five beats, so you always know
-which part is argument and which part is evidence:
+The two kinds of lab read differently, and the beats tell you which kind you
+are in.
+
+A **scenario walkthrough** follows software through a real build: its steps
+are narrative — five beats each, so you always know which part is argument and
+which part is evidence:
 
 ```text
 Why                the question this step answers
@@ -119,11 +118,28 @@ Observed output    what it actually printed
 Establish          what that does and does not prove
 ```
 
-The `Observed output` blocks are real captured output, not illustrations. If
-yours differs, that is worth investigating rather than ignoring. Note that
-tool versions and vulnerability databases move, so counts in particular will
-drift. The `Establish` sections are written to survive that drift; the exact
-numbers are not.
+An **investigation** points one tool at those scenarios, so it reads as an
+experiment report instead. It opens with ground truth — what the scenario
+actually contains, established independently of the tool — and then runs a
+series of probes, each falsifiable because its prediction is stated before its
+result:
+
+```text
+Question       what this probe asks of the tool
+Expectation    what ground truth predicts, stated before the output
+Observed       what the tool actually reported
+Verdict        seen or missed, and what that does and does not prove
+```
+
+Every investigation ends with a scorecard — tracer by tracer, boundary by
+boundary, what the tool identified — and the scorecards share a vocabulary so
+the tools can be laid side by side.
+
+In both kinds, the observed-output blocks are real captured output, not
+illustrations. If yours differs, that is worth investigating rather than
+ignoring. Note that tool versions and vulnerability databases move, so counts
+in particular will drift. The `Establish` and `Verdict` sections are written to
+survive that drift; the exact numbers are not.
 
 ## What you should take away
 

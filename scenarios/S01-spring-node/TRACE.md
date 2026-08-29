@@ -13,9 +13,9 @@ This lab follows three specific components through a small but realistic softwar
 
 The objective is to see **what evidence exists at each stage, what survives the next transformation, and what different tools can legitimately know**.
 
-The pattern throughout is:
+Each step follows the same beats:
 
-**Look → Run → Observe → Establish**
+**Why → Approach → Run → Observed output → Establish**
 
 ---
 
@@ -98,8 +98,6 @@ Look at:
 
 `service/pom.xml` declares `jackson-databind` without a local version. The root `pom.xml` imports the Spring Boot dependency-management BOM.
 
-- `jackson-databind` — declared by `service`; version not specified locally
-
 At this point we know Jackson is requested, but not which version Maven will select.
 
 ## commons-codec
@@ -140,11 +138,11 @@ Until those transformations happen, we only have configuration.
 
 ## Approach
 
-`build.sh` runs the project's normal build path in the correct order rather than reproducing it manually in the lab. The important thing is that we inspect the outputs produced by the same build path the application actually uses.
+`build.sh` runs the project's normal build path in the correct order, so we inspect outputs produced by the same path the application actually uses.
 
 The order matters: the frontend is installed and bundled first, because Maven packages the resulting `frontend/dist/` output into the service JAR.
 
-For the frontend install, the script prefers `npm ci`, which installs exactly what `package-lock.json` specifies. If no lockfile is present it falls back to `npm install` once, to create one. That fallback is worth knowing about, because step 1 preserved the lockfile precisely so that resolution is reproducible. On a fresh checkout without a lockfile, the versions observed later in this lab are whatever npm resolved at that moment rather than a pinned set.
+For the frontend install, the script prefers `npm ci`, which installs exactly what `package-lock.json` specifies; if no lockfile is present it falls back to `npm install` once, to create one. On a fresh checkout without a lockfile, the versions observed later in this lab are therefore whatever npm resolved at that moment rather than a pinned set — which is why step 1 preserved the lockfile.
 
 ## Run
 
@@ -216,7 +214,7 @@ This proves Maven selected `jackson-databind:2.19.4`. It does not yet prove it w
 
 ## Why
 
-`commons-codec` is going to be transformed by Shade. Before looking at that transformation, we need a baseline: which version did the `normalizer` module actually resolve before shading?
+Shade will transform `commons-codec`. Before looking at that transformation, we need a baseline: which version did the `normalizer` module actually resolve before shading?
 
 Without that baseline we could not later tell whether the shaded code and metadata still correspond to the resolved component.
 
@@ -312,7 +310,7 @@ Jackson is our uncomplicated control case: if Spring Boot packages it normally, 
 
 Spring Boot executable JARs store dependency JARs under `BOOT-INF/lib`. We list the archive and filter for `jackson-databind`.
 
-`unzip -l` lists archive entries without extracting them. The `grep` is only narrowing a generated artefact listing; it is not being used to inspect source.
+`unzip -l` lists archive entries without extracting them; the `grep` only narrows the listing.
 
 ## Run
 
@@ -455,7 +453,7 @@ This step asks whether an independent artefact scanner can recover `commons-code
 
 ## Approach
 
-Syft is a software package cataloguer from Anchore. Given a filesystem, archive, or container image, it looks for package-identifying evidence such as package-manager metadata and archive metadata and emits a software inventory.
+Syft is a software package cataloguer from Anchore. Given a filesystem, archive, or container image, it looks for package-identifying evidence (package-manager metadata, archive metadata) and emits a software inventory.
 
 We give Syft only `normalizer-1.0.0.jar` here; it does not see the Maven dependency tree or the project source.
 
@@ -473,12 +471,10 @@ normalizer     1.0.0    java-archive
 
 ## Establish
 
-```text
-relocated code
-    +
-surviving Maven metadata
-    ↓
-commons-codec 1.17.1 identified
+```mermaid
+flowchart TD
+  b["relocated code"] --> r["commons-codec 1.17.1 identified"]
+  m["surviving Maven metadata"] --> r
 ```
 
 The transformed class names did not prevent component identification because identifying package evidence survived in the artefact.
@@ -497,7 +493,7 @@ We will remove only the identifying Maven metadata while leaving the relocated c
 
 `strip-codec-metadata.sh` creates a copy of the shaded normalizer JAR, removes only `META-INF/maven/commons-codec/...`, and runs the same Syft check before and after.
 
-The script is intentionally part of the project because the experiment should be repeatable rather than dependent on a one-off sequence of archive-editing commands.
+The script is part of the project so the experiment is repeatable rather than a one-off sequence of archive edits.
 
 ## Run
 
@@ -525,18 +521,12 @@ normalizer-no-codec-metadata  UNKNOWN  java-archive
 
 `commons-codec:1.17.1` disappeared from Syft's inventory although the relocated bytecode remained.
 
-```text
-Same relocated bytecode
-        +
-Maven package metadata
-        ↓
-commons-codec 1.17.1 identified
-
-Same relocated bytecode
-        -
-Maven package metadata
-        ↓
-commons-codec not identified
+```mermaid
+flowchart TD
+  b1["Same relocated bytecode"] --> r1["commons-codec 1.17.1 identified"]
+  m1["Maven package metadata present"] --> r1
+  b2["Same relocated bytecode"] --> r2["commons-codec not identified"]
+  m2["Maven package metadata removed"] --> r2
 ```
 
 The important distinction is:
@@ -572,9 +562,7 @@ frontend/dist/.vite/manifest.json
 
 ## Establish
 
-The discrete npm package structure is no longer present in the deployable frontend output.
-
-Where there was a deployable `node_modules/lodash/` directory, there are now generated JavaScript and CSS assets.
+Where the build input had a `node_modules/lodash/` directory, the deployable output has only generated JavaScript and CSS assets. The npm package structure is gone.
 
 ---
 
@@ -750,7 +738,7 @@ But the scan also reveals `commons-codec:1.18.0`, which we have not yet accounte
 
 A scanner finding is evidence, but we should independently verify surprising results where possible.
 
-Syft reported a second commons-codec version. Before explaining why, we first need to establish that `1.18.0` really exists as a physical nested JAR rather than being a duplicate identification or metadata artefact.
+Syft reported a second commons-codec version. Before explaining why, we need to establish that `1.18.0` really exists as a physical nested JAR rather than being a duplicate identification or metadata artefact.
 
 ## Approach
 
@@ -805,14 +793,14 @@ mvn -pl service -am dependency:tree \
 
 Normalizer:
 
-```text
+```output
 [INFO] dev.noregressions.trace:normalizer:jar:1.0.0
 [INFO] \- commons-codec:commons-codec:jar:1.17.1:compile
 ```
 
 Service:
 
-```text
+```output
 [INFO] dev.noregressions.trace:service:jar:1.0.0
 [INFO] \- dev.noregressions.trace:normalizer:jar:1.0.0:compile
 [INFO]    \- commons-codec:commons-codec:jar:1.18.0:compile (version managed from 1.17.1)
@@ -1009,9 +997,7 @@ If the inventories differ now, the difference cannot be blamed on SBOM format: b
 
 ## Approach
 
-`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracer fields from both.
-
-Again, the script uses `jq` internally so the comparison is deterministic and easy to rerun.
+`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracer fields from both, wrapping the `jq` queries as in step 20.
 
 ## Run
 
@@ -1191,18 +1177,13 @@ The important findings are:
 
 The most important conceptual point is that every inventory is an observation made from a particular evidence source at a particular point in the supply chain.
 
-```text
-source configuration
-        ↓
-resolver model
-        ↓
-build transformation
-        ↓
-application artefact
-        ↓
-SBOM producer
-        ↓
-container image
+```mermaid
+flowchart TD
+  a["source configuration"] --> b["resolver model"]
+  b --> c["build transformation"]
+  c --> d["application artefact"]
+  d --> e["SBOM producer"]
+  e --> f["container image"]
 ```
 
 Compare those views rather than assuming they are interchangeable.

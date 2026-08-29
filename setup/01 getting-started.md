@@ -100,9 +100,7 @@ tools-check.sh   exits 0 (optional tools may still be absent)
 build-all.sh     reports 0 failed
 ```
 
-That is everything. The workshop itself starts at Part 1, and its opening
-presentation deliberately leaves room to re-run these two commands and flag an
-instructor if either misbehaves.
+That is everything. The workshop itself starts at Part 1.
 
 The remaining chapters in this section are the reference detail behind these
 four steps: exact version requirements, the two credentials some optional

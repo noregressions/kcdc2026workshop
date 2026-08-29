@@ -6,7 +6,7 @@ track: reference
 
 # T05 — pip-audit / S03
 
-## Objective
+## The question
 
 Use `pip-audit` against S03 to separate four different facts:
 
@@ -27,9 +27,9 @@ T05 also asks a more surprising question:
 
 The observed answer to the second question is **yes**.
 
----
+## The instrument
 
-# Tool versions observed
+The observed run used:
 
 ```text
 pip-audit 2.10.1
@@ -37,11 +37,19 @@ Python 3.14
 pip 26.1.2
 ```
 
+The probes below are variants of one audit operation — requirements audit,
+resolution disabled, pip disabled, installed-environment audit, SBOM output —
+so the differences between them are evidence about *how* pip-audit collects
+what it audits, not about different tools.
+
 ---
 
-# S03 ground truth
+# Ground truth
 
-## Check
+Every expectation below is derived from this section: what S03 actually
+contains, established independently of the tool.
+
+## Fixture
 
 The direct requirement is:
 
@@ -86,7 +94,7 @@ tracehook_demo/build-hook.json
 ./scripts/baseline-s03.sh
 ```
 
-## Observe
+## Observed
 
 Ordinary pip installation showed:
 
@@ -132,7 +140,7 @@ The generated marker contained:
 }
 ```
 
-## Establish
+## What this pins down
 
 The package installation crosses a transformation boundary:
 
@@ -152,9 +160,25 @@ source distribution contents
 installed runtime contents
 ```
 
+The probes test which of those facts each pip-audit mode can observe — and
+whether the audit itself crosses that transformation boundary.
+
 ---
 
-# A. Normal requirements audit
+# Probe 1 — normal requirements audit
+
+## Question
+
+From the requirements file alone, what package identities does a normal
+pip-audit run recover, and can it attach vulnerability intelligence to them?
+
+## Expectation
+
+Ground truth: the requirements file pins only `reportkit==1.0.0`;
+`tracehook-demo` is reachable only through reportkit's wheel metadata. A
+resolution-based audit should therefore recover both identities. Both are
+private scenario packages, so PyPI's vulnerability service has never heard of
+them — what happens then is exactly what this probe observes.
 
 ## Run
 
@@ -164,7 +188,7 @@ installed runtime contents
 
 The normal requirements audit uses dependency resolution.
 
-## Observe
+## Observed
 
 `pip-audit` reported:
 
@@ -185,18 +209,18 @@ tracehook-demo
 Dependency not found on PyPI and could not be audited
 ```
 
-## Establish
+## Verdict
 
-`pip-audit` successfully recovered the transitive dependency identity:
+**reportkit: identified. tracehook-demo: identified — but both skipped.**
+`pip-audit` recovered the transitive dependency identity:
 
 ```text
 reportkit
     → tracehook-demo
 ```
 
-But package identity did not imply vulnerability coverage.
-
-For these private scenario packages:
+But package identity did not imply vulnerability coverage. For these private
+scenario packages:
 
 ```text
 package identified
@@ -206,21 +230,29 @@ package vulnerability-auditable through PyPI
 
 ---
 
-# B. Controlled PEP 517 execution probe
+# Probe 2 — controlled PEP 517 execution probe
 
-## Check
+## Question
 
-The harness creates a temporary, controlled copy of the same
-`tracehook-demo` source distribution.
+The controlled experiment: does the audit itself execute the dependency's
+PEP 517 backend code during dependency collection?
 
-The dependency metadata is unchanged.
+## Expectation
 
-The backend receives one benign observable side effect:
+Ground truth: `tracehook-demo` is an sdist whose own `tracehook_backend.py` is
+its build backend. If pip-audit's dependency collection uses pip's PEP 517
+machinery, collecting metadata for the sdist should import — and therefore
+execute — that backend. To make the execution observable, the harness creates
+a temporary, controlled copy of the same source distribution: the dependency
+metadata is unchanged, and the backend receives one benign observable side
+effect:
 
 ```text
 when tracehook_backend is imported
     write a marker file
 ```
+
+If the audit is a purely static inspection, no marker should appear.
 
 ## Run
 
@@ -228,7 +260,7 @@ when tracehook_backend is imported
 ./scripts/run-pep517-exec-probe.sh
 ```
 
-## Observe
+## Observed
 
 The audit reported:
 
@@ -245,23 +277,19 @@ PEP 517 execution marker:
 tracehook_backend imported during pip-audit dependency resolution
 ```
 
-## Establish
+## Verdict
 
-This is direct evidence that:
+**Backend execution: confirmed.** This is direct evidence that:
 
-```text
-pip-audit -r requirements.txt
-    ↓
-pip-assisted dependency collection
-    ↓
-PEP 517 hook processing
-    ↓
-import tracehook_backend
-    ↓
-backend code executes
+```mermaid
+flowchart TD
+  a["pip-audit -r requirements.txt"] --> b["pip-assisted dependency collection"]
+  b --> c["PEP 517 hook processing"]
+  c --> d["import tracehook_backend"]
+  d --> e["backend code executes"]
 ```
 
-`pip-audit` is not executing code maliciously here: the important point is that a vulnerability audit of a requirements file can cross a Python packaging execution boundary, because dependency collection uses pip and PEP 517 machinery.
+`pip-audit` is not executing code maliciously here. The point is that a vulnerability audit of a requirements file can cross a Python packaging execution boundary: dependency collection uses pip's PEP 517 machinery.
 
 So:
 
@@ -271,17 +299,28 @@ This is not visible in the final vulnerability report.
 
 ---
 
-# C. `--no-deps`
+# Probe 3 — `--no-deps`
 
-## Observe
+## Question
 
-With:
+Does disabling dependency resolution shrink the audit set to only the pinned
+requirement?
+
+## Expectation
+
+Ground truth: only `reportkit==1.0.0` is pinned; `tracehook-demo` enters the
+picture only through resolution. If `--no-deps` fully disabled pip-assisted
+collection, only `reportkit` should remain in the audit set.
+
+## Run
 
 ```bash
 pip-audit --no-deps ...
 ```
 
-the observed audit set still contained:
+## Observed
+
+The observed audit set still contained:
 
 ```text
 reportkit
@@ -294,25 +333,38 @@ The tool emitted:
 --no-deps is supported, but users are encouraged to fully hash their pinned dependencies
 ```
 
-## Establish
+## Verdict
 
-For the observed `pip-audit 2.10.1` run, `--no-deps` alone did not reduce the resulting audit set to only the directly pinned requirement.
+**tracehook-demo: still present** — the expectation was not met. For the
+observed `pip-audit 2.10.1` run, `--no-deps` alone did not reduce the resulting
+audit set to only the directly pinned requirement.
 
-That is recorded as observed behaviour rather than inferred behaviour.
+That is recorded as observed rather than inferred behaviour.
 
 ---
 
-# D. `--no-deps --disable-pip`
+# Probe 4 — `--no-deps --disable-pip`
 
-## Observe
+## Question
 
-With:
+Does additionally disabling pip isolate static handling of the requirements
+file from pip-assisted collection?
+
+## Expectation
+
+If pip-assisted collection is what pulls `tracehook-demo` into the audit set
+(Probe 3), then removing pip from the operation should leave only the pinned
+`reportkit`.
+
+## Run
 
 ```bash
 pip-audit --no-deps --disable-pip ...
 ```
 
-the audit set contained only:
+## Observed
+
+The audit set contained only:
 
 ```text
 reportkit
@@ -320,9 +372,9 @@ reportkit
 
 `tracehook-demo` was absent.
 
-## Establish
+## Verdict
 
-The difference is:
+**tracehook-demo: absent**, as expected. The difference is:
 
 ```text
 --no-deps
@@ -337,13 +389,25 @@ This isolates pip-assisted dependency collection from static handling of the exp
 
 ---
 
-# E. Installed-environment audit
+# Probe 5 — installed-environment audit
+
+## Question
+
+What changes when the audit target is the installed environment rather than
+the requirements file?
+
+## Expectation
+
+Ground truth: the installed environment contains `reportkit 1.0.0`,
+`tracehook-demo 1.0.0` — and `pip 26.1.2` itself. Auditing `site-packages`
+should therefore widen the software universe beyond the application's declared
+packages to include the packaging tooling present in the environment.
 
 ## Run
 
 The harness audits the already-installed `site-packages` directory.
 
-## Observe
+## Observed
 
 The audit saw:
 
@@ -367,23 +431,35 @@ fixed in:
 
 The audit again skipped the scenario packages because they were not found in PyPI's vulnerability service.
 
-## Establish
+## Verdict
 
-Auditing the installed environment changes the software universe.
-
-The vulnerability scan now includes packaging/runtime tooling present in that environment:
+**pip 26.1.2: identified, with a real CVE. Scenario packages: identified,
+still skipped.** Auditing the installed environment changes the software
+universe. The vulnerability scan now includes packaging/runtime tooling
+present in that environment:
 
 ```text
 pip
 ```
 
-That produced a real vulnerability finding that was unrelated to the application dependency graph itself.
+That produced a real vulnerability finding unrelated to the application dependency graph.
 
 ---
 
-# F. CycloneDX output
+# Probe 6 — CycloneDX output
 
-## Observe
+## Question
+
+Does the SBOM output format preserve the same evidence as the JSON
+vulnerability result of the same audit?
+
+## Expectation
+
+The JSON result explicitly records the private packages as identified but
+skipped. If every output format preserved the same evidence, the CycloneDX
+component list should carry `reportkit` and `tracehook-demo` too.
+
+## Observed
 
 The observed pip-audit CycloneDX output surfaced:
 
@@ -398,11 +474,11 @@ reportkit
 tracehook-demo
 ```
 
-## Establish
+## Verdict
 
-The JSON vulnerability result and the CycloneDX output preserve different evidence.
-
-The JSON result explicitly records private packages as:
+**reportkit and tracehook-demo: identity lost in the CycloneDX view.** The
+JSON vulnerability result and the CycloneDX output preserve different
+evidence. The JSON result explicitly records private packages as:
 
 ```text
 identified but skipped
@@ -420,7 +496,35 @@ same evidence preserved in every output format
 
 ---
 
-# What T05 establishes
+# Scorecard
+
+What each pip-audit mode observed — `seen` means the identity (or fact)
+appeared in that mode's output; `—` means it did not. The last column is the
+fact no audit output preserved: the harness's own marker is the only evidence
+the backend ran.
+
+| Audit boundary | reportkit 1.0.0 | tracehook-demo 1.0.0 | pip 26.1.2 | PEP 517 execution |
+| --- | --- | --- | --- | --- |
+| requirements audit | seen | seen | — | — |
+| `--no-deps` | seen | seen | — | — |
+| `--no-deps --disable-pip` | seen | — | — | — |
+| installed environment | seen | seen | seen | — |
+| CycloneDX output | — | — | seen | — |
+
+For the vulnerability findings observed:
+
+```text
+reportkit / tracehook-demo
+    every mode        -> identified where seen, but skipped:
+                         not found on PyPI's vulnerability service
+
+pip 26.1.2
+    installed environment -> PYSEC-2026-3721 / CVE-2026-13346
+```
+
+---
+
+# Findings
 
 ## 1. Dependency resolution can recover a transitive package
 
@@ -546,7 +650,7 @@ So the vulnerability surface of the environment includes more than the applicati
 
 ---
 
-# Final conclusion
+# Final verdict
 
 T05 demonstrates two different supply-chain blind spots.
 

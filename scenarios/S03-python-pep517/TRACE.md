@@ -19,14 +19,11 @@ Those hooks are executable Python code. They run as part of dependency installat
 
 That makes PEP 517 an important supply-chain execution boundary:
 
-```text
-downloaded sdist
-        ↓
-dependency-supplied build backend executes
-        ↓
-new wheel is produced
-        ↓
-generated wheel contents are installed
+```mermaid
+flowchart TD
+  a["downloaded sdist"] --> b["dependency-supplied build backend executes"]
+  b --> c["new wheel is produced"]
+  c --> d["generated wheel contents are installed"]
 ```
 
 In this lab, `tracehook-demo` is a **transitive** dependency and is available only as an sdist. Its own `pyproject.toml` nominates `tracehook_backend` as the build backend. When `pip` resolves the dependency, it executes that backend, which creates files that were not present in the original sdist. Those generated files then become part of the installed application and affect runtime behaviour.
@@ -41,7 +38,7 @@ The tracers are:
 
 The pattern is:
 
-**Look → Run → Observe → Establish**
+**Why → Approach → Run → Observed output → Establish**
 
 The central question is simple:
 
@@ -349,7 +346,7 @@ Installing collected packages: tracehook-demo, reportkit
 Successfully installed reportkit-1.0.0 tracehook-demo-1.0.0
 ```
 
-We deliberately omit the generated wheel size and digest here because they are run-specific details rather than the invariant being traced.
+We omit the generated wheel size and digest: they are run-specific, not the invariant being traced.
 
 ## Establish
 
@@ -628,7 +625,7 @@ Leaving it running also blocks a later re-run: `run.sh` verifies the port before
 
 `stop.sh` reads `.runtime.pid`, terminates that process, and removes the file. It is safe to run when nothing is running.
 
-`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. Note that this only works while `.runtime.pid` exists. If you delete the file before stopping the process, neither script can find the runtime and you have to stop it by hand:
+`clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. This only works while `.runtime.pid` exists. If you delete the file before stopping the process, neither script can find the runtime and you have to stop it by hand:
 
 ```bash
 lsof -nP -iTCP:8081 -sTCP:LISTEN

@@ -14,12 +14,12 @@ A deliberately small mixed-stack application for tracing software through a diff
 - Payara Server Web Profile as the runtime, supplied by the container image;
 - `commons-lang3` as an ordinary Java application dependency packaged in `WEB-INF/lib`;
 - `lodash-es` as npm-origin JavaScript obtained through mvnpm as a Maven **plugin dependency**;
-- `esbuild-maven-plugin` transforms that mvnpm package into browser code in `assets/app.js`;
-- a final Payara container contains both the application WAR and the much larger server/JDK/OS software universe.
+- `esbuild-maven-plugin`, which transforms that mvnpm package into browser code in `assets/app.js`;
+- a final Payara container holding both the application WAR and the much larger server/JDK/OS software universe.
 
 ## Why mvnpm is interesting here
 
-mvnpm makes npm packages available as Maven artifacts. In this project `org.mvnpm:lodash-es:4.17.21` is attached to the esbuild Maven plugin, so it is build-time software rather than a conventional application dependency. Maven resolves the package, esbuild uses it to build the browser bundle, and then its original package boundary is absent from the WAR.
+mvnpm makes npm packages available as Maven artefacts. In this project `org.mvnpm:lodash-es:4.17.21` is attached to the esbuild Maven plugin, so it is build-time software rather than a conventional application dependency. Maven resolves the package, esbuild uses it to build the browser bundle, and then its original package boundary is absent from the WAR.
 
 That gives the trace a useful distinction:
 

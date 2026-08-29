@@ -104,9 +104,9 @@ data keyed by package coordinates (purl format: `pkg:npm/lodash@4.17.21`).
 **Question:** what does a clean vulnerability lookup actually mean?
 
 **Do this:** look up `pkg:npm/lodash@4.17.21`. (The service has had
-availability wobbles; a captured response will live in `evidence/` for the
-days it is having a bad day — *capture pending, see FACILITATOR.md*. The
-capture is also the polite option on conference wifi.)
+availability wobbles; a captured response will live in `evidence/` —
+*capture pending, see FACILITATOR.md*. The capture is also the polite
+option on conference wifi.)
 
 **Expected observation:** no known vulnerabilities for 4.17.21. Earlier 4.17
 releases carry known CVEs, prototype pollution among them, which 4.17.21
@@ -241,8 +241,8 @@ verdicts; what a clean vulnerability lookup does and does not claim; and why
 lifecycle status is a separate question from vulnerability status, with its
 own evidence sources.
 
-**Transition:** everything demonstrated so far, in the whole workshop, has
-been legitimate behaviour honestly observed. Part 5 asks what happens when
+**Transition:** everything demonstrated so far in this workshop has been
+legitimate behaviour, honestly observed. Part 5 asks what happens when
 someone uses the same machinery on purpose.
 
 ---

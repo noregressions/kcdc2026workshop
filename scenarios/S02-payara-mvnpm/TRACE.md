@@ -17,7 +17,7 @@ Rather than teaching Maven, mvnpm, Payara, Docker, or SBOM basics, the point is 
 
 The pattern throughout is:
 
-**Look → Run → Observe → Establish**
+**Why → Approach → Run → Observed output → Establish**
 
 The exercise ends at the container-image boundary.
 
@@ -242,7 +242,7 @@ deployable application
     target/payara-mvnpm-trace-lab-1.0.0.war
 ```
 
-The build succeeded. We still need to determine which dependency evidence belongs to the application graph and which belongs to the build itself.
+We still need to determine which dependency evidence belongs to the application graph and which belongs to the build itself.
 
 ---
 
@@ -293,7 +293,7 @@ Maven sees `commons-lang3:3.18.0` as normal application software.
 
 `lodash-es` is declared under `esbuild-maven-plugin`, not under the project's ordinary `<dependencies>` section.
 
-We want to prove that Maven's normal project dependency graph therefore does not treat it like `commons-lang3`.
+We want to prove that Maven's normal project dependency graph does not treat it like `commons-lang3`.
 
 ## Approach
 
@@ -335,7 +335,7 @@ This does not mean the build did not use it. Maven maintains different dependenc
 
 ## Why
 
-The project dependency graph does not contain `lodash-es`. The next obvious question is whether Maven's plugin dependency reporting exposes it.
+The project dependency graph does not contain `lodash-es`. The next question is whether Maven's plugin dependency reporting exposes it.
 
 ## Approach
 
@@ -352,7 +352,7 @@ mvn dependency:resolve-plugins \
 
 Representative excerpt:
 
-```text
+```output
 [INFO] The following plugins have been resolved:
 [INFO]    io.mvnpm:esbuild-maven-plugin:maven-plugin:2.0.0:runtime
 [INFO]       io.mvnpm:esbuild-maven-plugin:jar:2.0.0
@@ -1056,7 +1056,7 @@ payara-mvnpm-trace-lab:local
 
 The WAR has crossed into a concrete Payara runtime image.
 
-The base-image digest is build-time evidence for this walkthrough, not a value that should be assumed stable for future runs of the mutable tag.
+The base-image digest is build-time evidence for this walkthrough, not a value to assume stable for future runs of the mutable tag.
 
 Starting the container does not by itself prove that Payara successfully deployed the application. We verify that next.
 
@@ -1283,20 +1283,14 @@ The important findings are:
 
 The complete evidence chain is:
 
-```text
-source configuration
-        ↓
-Maven project graph / plugin execution realm
-        ↓
-build transformation
-        ↓
-WAR
-        ↓
-SBOM producer and evidence source
-        ↓
-Payara runtime
-        ↓
-container image
+```mermaid
+flowchart TD
+  a["source configuration"] --> b["Maven project graph / plugin execution realm"]
+  b --> c["build transformation"]
+  c --> d["WAR"]
+  d --> e["SBOM producer and evidence source"]
+  e --> f["Payara runtime"]
+  f --> g["container image"]
 ```
 
 The central lesson is the same as the first trace lab:

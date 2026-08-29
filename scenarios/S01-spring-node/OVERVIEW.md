@@ -64,7 +64,7 @@ For the full trace:
 ./scripts/build.sh
 ```
 
-The first build uses `npm install` because this generated lab does not ship a pre-fabricated npm lockfile. That creates `frontend/package-lock.json`; from that point use it as normal evidence and, for a real repository, commit it.
+The first build uses `npm install` because the lab does not ship an npm lockfile. That creates `frontend/package-lock.json`; later runs use it as normal evidence (a real repository would commit it).
 
 The build sequence intentionally matches the scenario:
 
@@ -85,7 +85,7 @@ java -jar service/target/service-1.0.0.jar
 curl 'http://localhost:8080/api/trace?value=Hello%20Supply%20Chain'
 ```
 
-Then open <http://localhost:8080/>.
+Then open <http://localhost:8080/>. Ctrl-C stops the service when you are done.
 
 ## Follow the trace
 
@@ -105,13 +105,13 @@ The controlled metadata experiment is:
 ./scripts/strip-codec-metadata.sh
 ```
 
+The script copies the shaded `normalizer` JAR and removes only the original commons-codec Maven metadata — not the relocated codec bytecode. Scanning the before/after pair exposes how downstream identification depends on evidence that survives packaging.
+
 After generating the Maven/CycloneDX BOMs, compare the tracer components in the normalizer and service models with:
 
 ```bash
 ./scripts/compare-sboms.sh
 ```
-
-The script copies the shaded `normalizer` JAR and removes only the original commons-codec Maven metadata. It does not remove the relocated codec bytecode. Scanning the before/after pair exposes how downstream identification depends on evidence that survives packaging.
 
 ## Container image
 

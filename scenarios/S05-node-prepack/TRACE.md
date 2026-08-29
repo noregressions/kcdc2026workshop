@@ -10,7 +10,7 @@ This lab follows a Node package from source, through an npm lifecycle hook, into
 
 The pattern is:
 
-**Look → Run → Observe → Establish**
+**Why → Approach → Run → Observed output → Establish**
 
 ## What `prepack` means in this lab
 
@@ -56,23 +56,15 @@ The packed package is therefore not simply a copy of the source tree.
 
 In this lab the complete chain is:
 
-```text
-build-input/route.json
-        ↓
-npm prepack
-        ↓
-scripts/generate-dist.js
-        ↓
-dist/index.js
-dist/prepack-evidence.json
-        ↓
-npm pack
-        ↓
-trace-route-package-1.0.0.tgz
-        ↓
-node_modules/trace-route-package
-        ↓
-GET /hidden/prepack-info
+```mermaid
+flowchart TD
+  a["build-input/route.json"] --> b["npm prepack"]
+  b --> c["scripts/generate-dist.js"]
+  c --> d["dist/index.js<br/>dist/prepack-evidence.json"]
+  d --> e["npm pack"]
+  e --> f["trace-route-package-1.0.0.tgz"]
+  f --> g["node_modules/trace-route-package"]
+  g --> h["GET /hidden/prepack-info"]
 ```
 
 ---
@@ -179,7 +171,7 @@ npm install --ignore-scripts
 
 The build keeps both logs under `trace-output/` (`npm-pack.log` and `npm-install.log`) so the evidence survives the walkthrough.
 
-Note that `build.sh` starts by removing `node_modules/`, `package-lock.json`, `npm-repo/`, `trace-output/` and the package's `dist/` directory. It re-establishes step 1's clean state itself, so the build is safe to re-run at any point.
+`build.sh` starts by removing `node_modules/`, `package-lock.json`, `npm-repo/`, `trace-output/` and the package's `dist/` directory — re-establishing step 1's clean state, so it is safe to re-run at any point.
 
 ## Run
 
@@ -345,7 +337,7 @@ npm lifecycle prepack
 scripts/generate-dist.js
 ```
 
-Without such retained metadata, the tarball itself would preserve the generated result but provide much less evidence about how it was produced.
+Without that marker, the tarball would preserve the generated result but say little about how it was produced.
 
 ---
 

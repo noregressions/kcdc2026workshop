@@ -6,9 +6,8 @@ track: core
 
 # Accounts and Keys
 
-A small number of investigations need authentication or API access.
-
-Set these up before the workshop.
+A small number of investigations need authentication or API access; set
+these up before the workshop.
 
 ## Snyk
 
@@ -34,7 +33,7 @@ Do not commit Snyk credentials to the repository.
 
 T06 uses the OWASP Dependency-Check Maven Plugin.
 
-The current harness behaves as follows:
+The harness behaves as follows:
 
 ```text
 NVD_API_KEY present
@@ -110,7 +109,7 @@ then the variable is either unset or not exported into the shell running the scr
 
 # Docker account
 
-Docker Scout may require Docker authentication depending on the environment and operation.
+Docker Scout may require Docker authentication in some environments.
 
 Before the workshop:
 
@@ -124,7 +123,7 @@ Verify:
 docker scout version
 ```
 
-T02 specifically requires Docker Scout. Podman does not replace this requirement.
+T02 requires Docker Scout, which Podman does not provide.
 
 ---
 

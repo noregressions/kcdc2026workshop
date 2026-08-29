@@ -47,6 +47,17 @@
                     -->
                     <theme>noregressions</theme>
                     <!--
+                        The kind layer: scenario walkthroughs and tool
+                        investigations get distinct identity furniture (badge,
+                        title rule, section markers, command fences) on top of
+                        the theme. The axis that drives it is declared inside
+                        each <book> below.
+                    -->
+                    <stylesheets>
+                        <stylesheet>src/main/paperband/styles/kind.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/diagrams.css</stylesheet>
+                    </stylesheets>
+                    <!--
                         US Letter, with real margins: Chromium draws the
                         header/footer templates inside the page margin, so a
                         full-bleed margin of 0 would make them invisible.
@@ -81,7 +92,37 @@
                                 expanded rather than click-to-open.
                             -->
                             <sidebar>true</sidebar>
+                            <!-- Mermaid diagrams in the greyscale that matches
+                                 the noregressions ink/grey system; colour in
+                                 this book is semantic, and diagrams aren't. -->
+                            <mermaidTheme>neutral</mermaidTheme>
                         </vars>
+                        <!--
+                            The kind axis: is this card a scenario walkthrough
+                            (build and trace) or a tool investigation (point an
+                            instrument at a boundary)? Valued per folder by
+                            scenarios/paperband.yaml and
+                            investigations/paperband.yaml, so cards need no
+                            frontmatter of their own; workshop/ and setup/
+                            cards have no kind and keep the plain theme voice.
+                            Styling lives in the kind.css stylesheet above.
+                        -->
+                        <axes>
+                            <axis>
+                                <name>kind</name>
+                                <title>Kind</title>
+                                <values>
+                                    <value>
+                                        <id>scenario</id>
+                                        <label>Scenario</label>
+                                    </value>
+                                    <value>
+                                        <id>investigation</id>
+                                        <label>Investigation</label>
+                                    </value>
+                                </values>
+                            </axis>
+                        </axes>
                         <sections>
                             <section >
                                 <landingPage>false</landingPage>
@@ -138,8 +179,6 @@
                                 <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
                                 <includes>
                                     <include>workshop/03-vulnerabilities.md</include>
-                                    <include>investigations/CVE-tomcat-85/OVERVIEW.md</include>
-                                    <include>investigations/CVE-tomcat-85/TRACE.md</include>
                                 </includes>
                             </section>
                             <section>
@@ -219,6 +258,10 @@
                         </goals>
                         <configuration>
                             <output>${project.build.directory}/book.pdf</output>
+                            <!-- The pre-renderer HTML, for checking what the
+                                 layout actually produced (card classes,
+                                 badges, dividers) without opening the PDF. -->
+                            <emitHtml>${project.build.directory}/book.html</emitHtml>
                             <!--
                                 The printed book is the workshop handout: the timed
                                 route plus the tools appendix, and nothing else.
@@ -247,7 +290,25 @@
                                 <vars>
                                     <subtitle>KCDC 2026 Workshop</subtitle>
                                     <sidebar>true</sidebar>
+                                    <mermaidTheme>neutral</mermaidTheme>
                                 </vars>
+                                <!-- Kept in step with the shared book's kind axis above. -->
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
                                 <sections>
                                     <section>
                                         <landingPage>false</landingPage>
@@ -295,8 +356,6 @@
                                         <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
                                         <includes>
                                             <include>workshop/03-vulnerabilities.md</include>
-                                            <include>investigations/CVE-tomcat-85/OVERVIEW.md</include>
-                                            <include>investigations/CVE-tomcat-85/TRACE.md</include>
                                         </includes>
                                     </section>
                                     <section>

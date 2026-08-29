@@ -125,8 +125,11 @@ makes visible or invisible, not to rank the tools.
 
 ## How a walkthrough is structured
 
-Every step in every `TRACE.md` follows the same five beats, so you always know
-which part is argument and which part is evidence:
+The two kinds of lab read differently, and the beats tell you which kind you
+are in.
+
+A **scenario** `TRACE.md` is a walkthrough — five beats per step, so you always
+know which part is argument and which part is evidence:
 
 ```text
 Why                the question this step answers
@@ -136,9 +139,23 @@ Observed output    what it actually printed
 Establish          what that does and does not prove
 ```
 
-The `Observed output` blocks are real captured output, not illustrations. If
-yours differs, that is worth investigating: versions and vulnerability
-databases move.
+An **investigation** `TRACE.md` is an experiment report: ground truth first,
+then a series of probes, each falsifiable because its prediction comes before
+its result:
+
+```text
+Question       what this probe asks of the tool
+Expectation    what ground truth predicts, stated before the output
+Observed       what the tool actually reported
+Verdict        seen or missed, and what that does and does not prove
+```
+
+Every investigation ends with a scorecard of what the tool identified at each
+boundary, in a shared vocabulary, so the tools can be laid side by side.
+
+In both kinds, the observed-output blocks are real captured output, not
+illustrations. If yours differs, that is worth investigating: versions and
+vulnerability databases move.
 
 ## Conventions
 
@@ -197,13 +214,6 @@ PDF:
 ```bash
 mvn package
 # -> target/book.pdf   (US Letter, running headers, page numbers)
-```
-
-The table of contents is generated. After adding, removing or materially
-resizing content, refresh its page numbers:
-
-```bash
-./scripts/generate-toc.sh
 ```
 
 ## Prerequisites in full

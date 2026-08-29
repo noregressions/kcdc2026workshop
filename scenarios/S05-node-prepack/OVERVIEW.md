@@ -10,22 +10,15 @@ track: core
 
 This scenario traces runtime code that is **generated during package creation**, rather than simply being copied from the package source tree.
 
-```text
-package source
-    ↓
-package.json prepack lifecycle hook
-    ↓
-scripts/generate-dist.js executes
-    ↓
-generates dist/index.js + provenance metadata
-    ↓
-npm pack creates trace-route-package-1.0.0.tgz
-    ↓
-application installs tarball
-    ↓
-node_modules contains generated runtime code
-    ↓
-GET /hidden/prepack-info
+```mermaid
+flowchart TD
+  a["package source"] --> b["package.json prepack lifecycle hook"]
+  b --> c["scripts/generate-dist.js executes"]
+  c --> d["generates dist/index.js + provenance metadata"]
+  d --> e["npm pack creates trace-route-package-1.0.0.tgz"]
+  e --> f["application installs tarball"]
+  f --> g["node_modules contains generated runtime code"]
+  g --> h["GET /hidden/prepack-info"]
 ```
 
 The package's `files` field deliberately publishes only `dist/`. The generator and its build input stay out of the tarball. This makes the source tree, lifecycle execution, packed package, installed package, inventory/SBOM views and runtime distinct evidence boundaries.

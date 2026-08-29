@@ -6,11 +6,11 @@ track: reference
 
 # T02 — Docker Scout: What Does the Final Container Know?
 
-## Objective
+## The question
 
 Use Docker Scout as a final-container evidence source for the workshop scenarios that produce container images.
 
-Current coverage:
+Coverage:
 
 ```text
 S01  Spring + Node
@@ -20,6 +20,8 @@ S02  Payara + mvnpm
 The investigation asks:
 
 > Once dependency resolution, plugin execution, shading, bundling, packaging and container assembly are complete, what software identity can Docker Scout recover from the final image, and what history has already been lost?
+
+## The instrument
 
 The tested Scout views are:
 
@@ -38,11 +40,14 @@ local://IMAGE
 
 so Scout analyses the exact locally built scenario image.
 
+Syft scans the same images as a second witness, so scanner-to-scanner
+disagreement at the same boundary is part of the evidence.
+
 ---
 
-# S01 — Spring + Node
+# Probe 1 — S01 final image (Spring + Node)
 
-## Check
+## Ground truth
 
 Important tracer states:
 
@@ -69,6 +74,23 @@ lodash 4.17.21
     npm package boundary disappears
 ```
 
+## Question
+
+Which of these tracer identities can Docker Scout recover from the finished
+`checkout-service` image, and what evidence does it add beyond the package
+inventory?
+
+## Expectation
+
+Ground truth: the four Java tracers ship inside the image with their Maven
+identity evidence intact — including the shaded codec 1.17.1, whose package
+metadata survives relocation. A final-image scan should therefore recover all
+four. lodash's npm package boundary was destroyed by Vite before the image was
+assembled, and nothing at the container boundary re-creates that evidence, so
+lodash should stay invisible. The image should also expose a deployed software
+universe — base image, JRE, OS packages — that no application-level dependency
+model describes.
+
 ## Run
 
 ```bash
@@ -77,7 +99,7 @@ lodash 4.17.21
 ./scripts/compare-s01.sh
 ```
 
-## Observe
+## Observed
 
 The rebuilt image was:
 
@@ -152,7 +174,10 @@ eclipse-temurin:21-jre-jammy
 
 was up to date. It also suggested Java 25 and Java 26 tags as alternative major-runtime upgrades, each with one fewer vulnerability in the base-image comparison.
 
-## Establish
+## Verdict
+
+**Four Java tracers: identified. lodash 4.17.21: identity lost** — both as
+expected.
 
 ```text
 Maven/npm model             → application dependency identity before transformation
@@ -168,9 +193,9 @@ Moving the scanner later expands the deployed software universe, but does not gu
 
 ---
 
-# S02 — Payara + mvnpm
+# Probe 2 — S02 final image (Payara + mvnpm)
 
-## Check
+## Ground truth
 
 Important tracer states:
 
@@ -194,6 +219,22 @@ Payara server
     supplies its own Jakarta/API/runtime package universe
 ```
 
+## Question
+
+Which of these tracer identities can Docker Scout recover from the finished
+Payara image — and when a package family reappears at this boundary, whose
+software is it?
+
+## Expectation
+
+Ground truth: commons-lang3 ships intact in the WAR, so it should be
+identified. The Jakarta EE Web API is a `provided` dependency — absent from
+the WAR — but Payara supplies its own Jakarta universe, so Jakarta-named
+packages should *reappear* at this boundary for a reason unrelated to the
+application's build. lodash-es lost its npm package identity at bundling, so
+it should stay invisible. The Payara server should also inflate the package
+inventory well beyond S01's.
+
 ## Run
 
 ```bash
@@ -202,7 +243,7 @@ Payara server
 ./scripts/compare-s02.sh
 ```
 
-## Observe
+## Observed
 
 The rebuilt image was:
 
@@ -291,9 +332,13 @@ No recommendations
 
 for the `payara/server-web:7.2026.7` base image.
 
-## Establish
+## Verdict
 
-The Jakarta APIs demonstrate a particularly important boundary change:
+**commons-lang3 3.18.0: identified. Jakarta APIs: present again — but as
+Payara's packages, not the WAR's. lodash-es 4.17.21: identity lost** — all as
+expected.
+
+The Jakarta APIs demonstrate an important boundary change:
 
 ```text
 Maven application model
@@ -325,7 +370,25 @@ Once esbuild bundled the code, neither final-image scanner reconstructed the npm
 
 ---
 
-# Cross-scenario comparison
+# Scorecard
+
+What the final-image scans established, tracer by tracer — `seen` means the
+package identity was recovered from the image; `—` means it was not. Every `—`
+in this table is code that shipped in the image anyway.
+
+| Tracer | Scenario | Docker Scout (final image) |
+| --- | --- | --- |
+| jackson-databind 2.19.4 | S01 | seen |
+| commons-codec 1.18.0 | S01 | seen |
+| commons-codec 1.17.1 (shaded) | S01 | seen |
+| normalizer 1.0.0 | S01 | seen |
+| lodash 4.17.21 | S01 | — |
+| commons-lang3 3.18.0 | S02 | seen |
+| Jakarta EE Web API 11.0.0 | S02 | seen — as Payara-supplied Jakarta packages, not the WAR's |
+| payara-mvnpm-trace-lab 1.0.0 | S02 | seen |
+| lodash-es 4.17.21 | S02 | — |
+
+The two scanners' views of the same images also differ:
 
 | Observation | S01 | S02 |
 | --- | ---: | ---: |
@@ -339,7 +402,7 @@ Once esbuild bundled the code, neither final-image scanner reconstructed the npm
 | Runtime/base-image universe exposed | yes | yes |
 | Scout recommendations | Java 25/26 alternatives | none |
 
-The absolute package counts differ between Syft and Scout even when both observe the same image.
+The package counts differ between Syft and Scout even when both observe the same image.
 
 Therefore:
 
@@ -353,7 +416,7 @@ Scanner implementation, cataloguers and package-identification rules still matte
 
 ---
 
-# What T02 establishes
+# Findings
 
 ## 1. A container image is a different evidence boundary from the application package
 
@@ -434,7 +497,7 @@ A provenance claim about where an image was built does not itself imply complete
 
 ---
 
-# Final conclusion
+# Final verdict
 
 Docker Scout is valuable precisely because it observes a boundary the source dependency tools do not:
 

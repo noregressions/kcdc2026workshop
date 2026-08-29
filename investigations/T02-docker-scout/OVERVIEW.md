@@ -10,7 +10,7 @@ track: reference
 
 Docker Scout investigation for the container-producing workshop scenarios.
 
-Completed coverage:
+Coverage:
 
 ```text
 S01  Spring + Node

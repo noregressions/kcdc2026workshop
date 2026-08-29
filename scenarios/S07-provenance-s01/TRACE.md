@@ -13,8 +13,12 @@ image to the source that produced it. The baseline cannot make the walk. Then
 record provenance one layer at a time until it can, and be honest at each step
 about whether you have produced a *claim* or a *proof*.
 
-```text
-running image → published bytes → build → commit → repository
+```mermaid
+flowchart LR
+  a["running image"] --> b["published bytes"]
+  b --> c["build"]
+  c --> d["commit"]
+  d --> e["repository"]
 ```
 
 ---

@@ -13,10 +13,9 @@ you where you stand:
 ./scripts/tools-check.sh
 ```
 
-It reports the version of every tool it finds, flags anything below the
-workshop minimum, and prints installation instructions with a link for
-anything missing. It installs nothing and changes nothing. Exit status is
-non-zero if a required tool is missing or too old.
+It reports every tool it finds against the workshop minimum and prints
+install instructions for anything missing; it installs nothing and changes
+nothing. Exit status is non-zero if a required tool is missing or too old.
 
 To see the install instructions for every tool (useful when preparing a
 machine you do not have in front of you):
@@ -77,8 +76,8 @@ output differs from what a walkthrough records, compare there first.
 
 ## A note on Podman
 
-Docker is the canonical container engine for the workshop as the repository
-is currently written; the scripts invoke `docker` directly. Podman works for
+Docker is the workshop's canonical container engine; the scripts invoke
+`docker` directly. Podman works for
 the basic S01 and S02 container build/run stages if you run the equivalent
 `podman` commands manually or use a Docker-compatible shim, but it is not a
 transparent replacement:
@@ -87,5 +86,4 @@ transparent replacement:
 - T03 tells Trivy to use Docker as the image source.
 - T04 feeds Grype a Docker image source.
 
-Install commands for Podman are in [`setup/INSTALL.md`](./INSTALL.md). Do
-not assume Podman makes T02 Docker Scout available.
+Install commands for Podman are in [`setup/INSTALL.md`](./INSTALL.md).

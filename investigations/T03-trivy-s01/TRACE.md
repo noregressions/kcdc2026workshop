@@ -6,13 +6,15 @@ track: reference
 
 # T03 — Trivy Across S01 Boundaries
 
-## Objective
+## The question
 
 Use one vulnerability tool, Trivy, against several evidence boundaries in S01.
 
 The central question is:
 
 > Does the vulnerability answer change when you observe the same software as a dependency model, a transformed Java archive, a browser bundle, or a final container image?
+
+## The instrument
 
 The observed run used Trivy 0.74.0.
 
@@ -46,7 +48,10 @@ and did not invoke the Java archive detector. The corrected archive probes stage
 
 # Ground truth
 
-## Check
+Every expectation below is derived from this section: what S01 actually
+contains, established independently of the tool under investigation.
+
+## Fixture
 
 S01 contains these tracer states:
 
@@ -87,7 +92,7 @@ The relocated codec bytecode is unchanged.
 ./scripts/baseline-s01.sh
 ```
 
-## Observe
+## Observed
 
 Maven showed:
 
@@ -151,7 +156,7 @@ and the bundled frontend under:
 BOOT-INF/classes/static/
 ```
 
-## Establish
+## What this pins down
 
 The baseline separates:
 
@@ -162,13 +167,14 @@ physical shipped bytes
 recoverable package identity
 ```
 
-Those are not the same thing.
+Those are not the same thing. The probes below test which of them Trivy can
+observe at each boundary.
 
 ---
 
-# Trivy across boundaries
+# Running the probes
 
-## Run
+All eight probes are driven by three scripts:
 
 ```bash
 ./scripts/run-trivy-nonarchives-s01.sh
@@ -184,9 +190,19 @@ You can also run the full clean harness with:
 
 ---
 
-## Boundary 1 — normalizer POM
+# Probe 1 — normalizer POM
 
-### Observe
+## Question
+
+What does Trivy identify from the normalizer's source dependency model?
+
+## Expectation
+
+Ground truth: the normalizer POM declares `commons-codec 1.17.1` directly. At
+this boundary the shading transformation has not happened yet — the declaration
+is plain Maven model evidence — so the codec identity should be recoverable.
+
+## Observed
 
 Trivy identified:
 
@@ -197,15 +213,27 @@ normalizer    1.0.0
 
 Trivy reported no tracer vulnerability finding.
 
-### Establish
+## Verdict
 
-At the source dependency boundary, Trivy can identify codec 1.17.1 directly from Maven model evidence.
+**codec 1.17.1: identified**, as expected. At the source dependency boundary,
+Trivy can identify codec 1.17.1 directly from Maven model evidence.
 
 ---
 
-## Boundary 2 — service POM
+# Probe 2 — service POM
 
-### Observe
+## Question
+
+Does a scan of the service's own POM report the service's *resolved*
+dependency set?
+
+## Expectation
+
+Ground truth: the resolved service tree contains `jackson-databind 2.19.4` and
+`commons-codec 1.18.0` (managed up from normalizer's 1.17.1). If a single-POM
+scan answers the resolved-graph question, both should appear.
+
+## Observed
 
 Trivy identified:
 
@@ -226,15 +254,27 @@ MEDIUM  CVE-2026-54515
 MEDIUM  CVE-2026-59888
 ```
 
-### Establish
+## Verdict
 
-A source-model vulnerability scan answers a dependency-model question, not necessarily a complete resolved-graph or built-artefact question.
+**Jackson 2.19.4: identified. codec 1.18.0: not identified** from this single
+POM. A source-model vulnerability scan answers a dependency-model question, not
+necessarily a complete resolved-graph or built-artefact question.
 
 ---
 
-## Boundary 3 — frontend package-lock
+# Probe 3 — frontend package-lock
 
-### Observe
+## Question
+
+What does Trivy identify from the npm dependency model?
+
+## Expectation
+
+Ground truth: `package-lock.json` records `lodash@4.17.21` explicitly. At this
+boundary the package identity is literal text in the lockfile, so it should be
+identified — and any lodash CVEs should attach to it.
+
+## Observed
 
 Trivy identified:
 
@@ -250,15 +290,30 @@ MEDIUM  CVE-2025-13465
 MEDIUM  CVE-2026-2950
 ```
 
-### Establish
+## Verdict
 
-At the npm package-model boundary, lodash has explicit package identity and Trivy can attach vulnerability intelligence to it.
+**lodash 4.17.21: identified**, with three CVEs attached, as expected. At the
+npm package-model boundary, lodash has explicit package identity and Trivy can
+attach vulnerability intelligence to it.
 
 ---
 
-## Boundary 4 — shaded normalizer JAR
+# Probe 4 — shaded normalizer JAR
 
-### Observe
+## Question
+
+Can Trivy recover the codec identity from the built artefact, after Shade has
+relocated the bytecode?
+
+## Expectation
+
+Ground truth: the shaded JAR carries the relocated bytecode under
+`com/acme/internal/codec/`, but the original Maven identity metadata
+(`META-INF/maven/commons-codec/...`) survives inside it, and Syft identified
+the codec from that metadata. If Trivy reads the same evidence, codec 1.17.1
+should still be identified here.
+
+## Observed
 
 Using `trivy rootfs` against an isolated directory containing the shaded JAR, Trivy identified:
 
@@ -269,15 +324,29 @@ normalizer    1.0.0
 
 Trivy reported no tracer vulnerability finding.
 
-### Establish
+## Verdict
 
-Trivy can recover the shaded codec identity from the built artefact while the embedded Maven metadata survives.
+**codec 1.17.1: identified**, as expected. Trivy can recover the shaded codec
+identity from the built artefact *while the embedded Maven metadata survives* —
+which is precisely the condition the next probe removes.
 
 ---
 
-## Boundary 5 — metadata-stripped shaded normalizer JAR
+# Probe 5 — metadata-stripped shaded normalizer JAR
 
-### Observe
+## Question
+
+The controlled experiment: with the same relocated bytecode but the Maven
+metadata removed, does the codec identity survive?
+
+## Expectation
+
+Ground truth: the stripped copy differs from Probe 4's JAR *only* in the
+removal of `META-INF/maven/commons-codec/commons-codec/*`; the executable
+bytecode is unchanged. If Probe 4's identification relied on that metadata
+rather than on the bytecode, the codec identity should now disappear.
+
+## Observed
 
 The archive still contains the same relocated codec bytecode.
 
@@ -293,33 +362,41 @@ It no longer identified:
 commons-codec 1.17.1
 ```
 
-### Establish
+## Verdict
 
-This is the key controlled experiment:
+**codec 1.17.1: identity lost** — the expectation confirmed, and the key result
+of T03:
 
-```text
-same relocated codec bytecode
-        +
-Maven metadata present
-        ↓
-commons-codec 1.17.1 identified
-
-same relocated codec bytecode
-        +
-Maven metadata removed
-        ↓
-commons-codec identity disappears
+```mermaid
+flowchart TD
+  b1["same relocated codec bytecode"] --> r1["commons-codec 1.17.1 identified"]
+  m1["Maven metadata present"] --> r1
+  b2["same relocated codec bytecode"] --> r2["commons-codec identity disappears"]
+  m2["Maven metadata removed"] --> r2
 ```
 
-The package identity disappeared, but the software bytes did not.
-
-A CVE scanner cannot attach package-version vulnerability intelligence to an identity it has not established.
+The package identity disappeared, but the software bytes did not. A CVE scanner
+cannot attach package-version vulnerability intelligence to an identity it has
+not established.
 
 ---
 
-## Boundary 6 — Spring Boot service JAR
+# Probe 6 — Spring Boot service JAR
 
-### Observe
+## Question
+
+What does the built service artefact expose that the service's Maven model did
+not?
+
+## Expectation
+
+Ground truth: the service JAR physically contains jackson-databind 2.19.4,
+codec 1.18.0 and the normalizer JAR — and nested inside the normalizer, the
+shaded codec 1.17.1 with its metadata intact. A scan of the physical artefact
+should therefore surface *both* codec versions, where the service POM scan
+(Probe 2) surfaced neither.
+
+## Observed
 
 Trivy identified:
 
@@ -337,9 +414,10 @@ For Jackson 2.19.4 it reported the same five CVEs:
 3 MEDIUM
 ```
 
-### Establish
+## Verdict
 
-The built service JAR contains a software reality that differs from the service Maven model:
+**Both codec versions: identified**, as expected. The built service JAR
+contains a software reality that differs from the service Maven model:
 
 ```text
 service Maven model
@@ -350,13 +428,26 @@ built service JAR
     -> codec 1.17.1 embedded inside shaded normalizer
 ```
 
-The shaded codec becomes visible because its identifying Maven metadata survives inside the nested normalizer archive.
+The shaded codec becomes visible because its identifying Maven metadata
+survives inside the nested normalizer archive.
 
 ---
 
-## Boundary 7 — frontend/dist
+# Probe 7 — frontend/dist
 
-### Observe
+## Question
+
+After Vite bundles the frontend, can Trivy still see lodash in the shipped
+JavaScript?
+
+## Expectation
+
+Ground truth: the lodash code is in the bundle — Vite inlined it — but the npm
+package boundary (its `package.json`, its `node_modules` directory) is gone.
+If Trivy identifies npm packages by package evidence rather than by code
+content, lodash should disappear here even though its code ships.
+
+## Observed
 
 Trivy reported:
 
@@ -366,11 +457,10 @@ Number of language-specific files num=0
 
 Trivy recovered no tracer identities and reported no tracer vulnerability findings.
 
-### Establish
+## Verdict
 
-The Vite output ships browser JavaScript, but the npm package boundary has disappeared.
-
-For lodash:
+**lodash 4.17.21: identity lost.** The Vite output ships browser JavaScript,
+but the npm package boundary has disappeared:
 
 ```text
 package-lock.json
@@ -382,13 +472,27 @@ frontend/dist
     -> no lodash CVE findings
 ```
 
-This is evidence that Trivy cannot reconstruct the npm package identity from the bundled output, not that the lodash code is absent.
+This is evidence that Trivy cannot reconstruct the npm package identity from
+the bundled output, not that the lodash code is absent.
 
 ---
 
-## Boundary 8 — final container image
+# Probe 8 — final container image
 
-### Observe
+## Question
+
+Does scanning the final deployed boundary — the container image — restore any
+identity that earlier transformations destroyed?
+
+## Expectation
+
+Ground truth: the image contains the service JAR (so the four Java identities
+of Probe 6 should reappear) plus an Ubuntu base image (so OS packages enter the
+inventory). The bundled frontend is inside the JAR as static content; nothing
+at this boundary re-creates the npm evidence Vite destroyed, so lodash should
+stay invisible.
+
+## Observed
 
 Trivy detected:
 
@@ -419,26 +523,32 @@ MEDIUM  CVE-2026-54515
 MEDIUM  CVE-2026-59888
 ```
 
-### Establish
+## Verdict
 
-The final container exposes a broader deployed software boundary because Trivy also analyses operating-system packages.
-
-But moving later in the supply chain does not restore npm identity that Vite already destroyed.
+**Java identities: identified. lodash: still lost**, as expected. The final
+container exposes a broader deployed software boundary because Trivy also
+analyses operating-system packages — but moving later in the supply chain does
+not restore npm identity that Vite already destroyed.
 
 ---
 
-# Boundary comparison
+# Scorecard
+
+What Trivy identified, tracer by tracer, at each boundary — `seen` means the
+package identity was established; `—` means it was not. Every `—` in this
+table is code that shipped anyway, except where the tracer genuinely isn't part
+of that boundary's evidence.
 
 | Boundary | codec 1.17.1 | codec 1.18.0 | Jackson 2.19.4 | lodash 4.17.21 |
 | --- | --- | --- | --- | --- |
-| normalizer POM | yes | no | no | no |
-| service POM | no | no | yes | no |
-| package-lock | no | no | no | yes |
-| shaded normalizer JAR | yes | no | no | no |
-| stripped normalizer JAR | no | no | no | no |
-| service JAR | yes | yes | yes | no |
-| frontend/dist | no | no | no | no |
-| final container | yes | yes | yes | no |
+| normalizer POM | seen | — | — | — |
+| service POM | — | — | seen | — |
+| package-lock | — | — | — | seen |
+| shaded normalizer JAR | seen | — | — | — |
+| stripped normalizer JAR | — | — | — | — |
+| service JAR | seen | seen | seen | — |
+| frontend/dist | — | — | — | — |
+| final container | seen | seen | seen | — |
 
 For the tracer CVEs observed:
 
@@ -456,7 +566,7 @@ lodash 4.17.21
 
 ---
 
-# What T03 establishes
+# Findings
 
 ## 1. Vulnerability visibility depends on package identity
 
@@ -545,26 +655,22 @@ trivy image
     -> final container analysis
 ```
 
-Using the wrong scan mode can produce a false negative experiment before vulnerability matching even begins.
+Using the wrong scan mode can produce a false negative before vulnerability matching even begins.
 
 ---
 
-# Final conclusion
+# Final verdict
 
 T03 demonstrates that a CVE scanner is downstream of software identification.
 
 The practical chain is:
 
-```text
-bytes exist
-    ↓
-scanner recognises package identity
-    ↓
-scanner determines package version
-    ↓
-vulnerability database matches affected range
-    ↓
-CVE appears
+```mermaid
+flowchart TD
+  a["bytes exist"] --> b["scanner recognises package identity"]
+  b --> c["scanner determines package version"]
+  c --> d["vulnerability database matches affected range"]
+  d --> e["CVE appears"]
 ```
 
 Break the chain at package identity and the CVE can disappear from the result even though the underlying code remains.

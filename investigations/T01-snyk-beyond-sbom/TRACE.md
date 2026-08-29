@@ -6,7 +6,7 @@ track: instructor-demo
 
 # T01 — Snyk Beyond the SBOM
 
-## Question
+## The question
 
 > What does a commercial SCA tool know that an ordinary SBOM does not, and which supply-chain transformations remain invisible even to it?
 
@@ -18,7 +18,7 @@ This investigation reuses five completed trace labs:
 - S04 — Maven plugin hidden-content
 - S05 — Node + npm prepack
 
-The investigation compares several evidence types:
+and compares several evidence types:
 
 - source declarations
 - package-manager dependency models
@@ -29,11 +29,22 @@ The investigation compares several evidence types:
 - Snyk artefact/unmanaged scans
 - runtime evidence
 
-The central result is:
+## The instrument
+
+The tool under investigation is Snyk Open Source, exercised in every mode the
+labs support:
+
+- project scans against Maven, npm and pip dependency models
+- `--include-provenance` enrichment of those scans
+- CycloneDX SBOM output
+- unmanaged scans of built artefacts (JARs, WARs, tarballs), packed and
+  unpacked
+
+The headline result, stated up front:
 
 **better package identity ≠ complete supply-chain history**
 
-Snyk can often provide richer identity, vulnerability and dependency-path information than a basic SBOM. But it does not reconstruct every build realm, lifecycle action, code-generation step, bundling transformation, or publication-time mutation after those facts have disappeared from the dependency model.
+Snyk often provides richer identity, vulnerability and dependency-path information than a basic SBOM. But it does not reconstruct every build realm, lifecycle action, code-generation step, bundling transformation, or publication-time mutation after those facts have disappeared from the dependency model. The probes below establish both halves of that sentence, scenario by scenario.
 
 ---
 
@@ -41,7 +52,7 @@ Snyk can often provide richer identity, vulnerability and dependency-path inform
 
 ## Ground truth
 
-The lab contains four useful tracer states:
+The lab contains four tracer states:
 
 - `jackson-databind 2.19.4`
   - ordinary Maven dependency
@@ -88,7 +99,21 @@ META-INF/maven/commons-codec/commons-codec/
 
 makes that identity disappear from Syft while leaving the relocated bytecode unchanged.
 
-## Snyk Maven project result
+## Probe — Maven project scan
+
+### Question
+
+Does Snyk's Maven project view know both codec versions, in their module
+contexts?
+
+### Expectation
+
+Ground truth: the reactor resolves codec 1.17.1 for normalizer and codec
+1.18.0 for the service. A scan that reads the Maven reactor model should
+reproduce both — but reading the model proves nothing about what physically
+ships.
+
+### Observed
 
 Snyk's Maven aggregate view identifies both codec versions in their respective module contexts:
 
@@ -102,11 +127,27 @@ service
     → jackson-databind 2.19.4
 ```
 
-This proves Snyk knows both versions from the Maven reactor model.
+### Verdict
 
-It does **not** prove that Snyk independently reconstructed the physical fact that both versions' code ship in the final application.
+**Both codec versions: identified**, as expected, from the Maven reactor
+model. This does **not** prove that Snyk independently reconstructed the
+physical fact that both versions' code ship in the final application — the
+model was the evidence, not the artefact.
 
-## Snyk provenance result
+## Probe — provenance enrichment
+
+### Question
+
+Does `--include-provenance` broaden what Snyk knows, or only strengthen it?
+
+### Expectation
+
+Ground truth still holds two facts outside the dependency model — the shaded
+codec bytecode and the bundled lodash. If provenance mode reconstructs
+history, new components should appear; if it only enriches, the component set
+should be unchanged with stronger identities.
+
+### Observed
 
 `--include-provenance` preserves the same component set.
 
@@ -124,11 +165,26 @@ The root reactor POM gains:
 ?type=pom
 ```
 
-The result is:
+### Verdict
+
+**Component set: unchanged. Identities: strengthened.**
 
 > Snyk provenance strengthens the identity of software already present in its dependency model. It does not broaden the dependency model.
 
-## Snyk npm result
+## Probe — npm project, then the bundled output
+
+### Question
+
+Snyk sees lodash in the npm project. Does any Snyk view still see it after
+Vite bundles the frontend?
+
+### Expectation
+
+Ground truth: Vite inlines the lodash code into generated browser JavaScript
+and the npm package boundary disappears. The npm project scan should identify
+lodash; the bundle should offer Snyk no package boundary to anchor on.
+
+### Observed
 
 From the npm project Snyk identifies:
 
@@ -144,17 +200,30 @@ After Vite bundling, scanning `frontend/dist` produces:
 No supported files found
 ```
 
-So the correct interpretation is not:
+### Verdict
 
-*Snyk inspected the bundle and failed to recognise lodash*
+**lodash 4.17.21: identified in the npm project; lost in the bundle.** The
+correct interpretation is not *Snyk inspected the bundle and failed to
+recognise lodash* but *the deployable bundle no longer presents a supported
+npm project boundary*. No tested artefact-oriented Snyk view recovered
+`lodash 4.17.21` from the shipped browser bundle.
 
-but:
+## Probe — unmanaged JAR scans
 
-*the deployable bundle no longer presents a supported npm project boundary*
+### Question
 
-No tested artefact-oriented Snyk view recovered `lodash 4.17.21` from the shipped browser bundle.
+Without a project model, can Snyk recover package identities from the built
+artefacts alone?
 
-## Snyk unmanaged JAR result
+### Expectation
+
+Ground truth: the shaded normalizer still carries the codec's Maven metadata
+— Syft identifies codec 1.17.1 from it — and the Spring Boot JAR nests three
+intact library JARs. If Snyk's unmanaged scanning reads the same evidence as
+Syft, the shaded codec should be identified while the metadata survives, and
+the intact nested JARs should be identified once they are reachable.
+
+### Observed
 
 Direct unmanaged scans of both:
 
@@ -178,7 +247,15 @@ jackson-databind 2.19.4
 
 while the custom shaded normalizer remains unknown.
 
-## S01 establishes
+### Verdict
+
+**Shaded codec 1.17.1: not identified — even with its Maven metadata intact,
+where Syft succeeds. Intact nested libraries: identified after unpacking.
+Custom JARs: unknown.** Identity recovery from artefacts depends on the
+package boundary surviving intact, and different tools read different
+evidence from the same bytes.
+
+## What S01 pins down
 
 - known from model + shipped intact
   - recoverable from Maven model
@@ -213,7 +290,21 @@ The application has:
 
 The generated source map proves `lodash-es` source modules contributed to the browser bundle.
 
-## Snyk project result
+## Probe — Maven project scan
+
+### Question
+
+Does the application-graph scan see software that entered through the Maven
+plugin realm?
+
+### Expectation
+
+Ground truth: `lodash-es` lives in the esbuild plugin's ClassRealm, not in
+the application dependency graph. A scan that reads the application graph
+should report commons-lang3 and the Jakarta provided dependencies — and
+should have no path to lodash-es.
+
+### Observed
 
 Snyk's Maven project scan identifies the application dependency graph, including:
 
@@ -226,9 +317,27 @@ It does not identify:
 lodash-es 4.17.21
 ```
 
-because that package exists in the Maven plugin realm rather than the application dependency graph.
+### Verdict
 
-## Provenance
+**commons-lang3: identified. Jakarta provided dependencies: identified.
+lodash-es: not identified** — as expected, because that package exists in the
+Maven plugin realm rather than the application dependency graph. The plugin
+realm is simply not part of the evidence this scan reads.
+
+## Probe — provenance enrichment
+
+### Question
+
+Does provenance mode turn model identity into physical-inclusion evidence?
+
+### Expectation
+
+Ground truth: the Jakarta provided dependencies are in the model but never
+ship in the WAR. If provenance enrichment were inclusion proof, they should
+be treated differently from the shipped dependencies. If it is identity
+enrichment only, everything in the model gets enriched alike.
+
+### Observed
 
 Normal `snyk test` JSON emitted no PURLs.
 
@@ -246,11 +355,27 @@ The CycloneDX comparison showed the same component set before and after provenan
 
 Critically, Snyk checksum-qualified Jakarta `provided` dependencies even though they never physically ship in the WAR.
 
-Therefore:
+### Verdict
+
+**Provenance: identity enrichment of the existing model, applied even to
+dependencies that never ship.** Therefore:
 
 **provenance identity ≠ physical inclusion proof**
 
-## Artefact scanning
+## Probe — artefact scans
+
+### Question
+
+Can the WAR itself tell Snyk what the model could not?
+
+### Expectation
+
+Ground truth: commons-lang3 ships intact in WEB-INF/lib; the lodash-es
+contribution survives only as generated bundle content with no npm boundary.
+Expect the intact library to be recoverable once reachable, and the bundled
+contribution not to be.
+
+### Observed
 
 Direct unmanaged scan of the whole WAR:
 
@@ -262,7 +387,13 @@ After unpacking the WAR, Snyk identifies preserved `commons-lang3 3.18.0`.
 
 It does not reconstruct `lodash-es 4.17.21` from the generated browser bundle.
 
-## S02 establishes
+### Verdict
+
+**commons-lang3: identified after unpacking. lodash-es: not identified at any
+boundary.** The artefact restores nothing that the transformation already
+removed.
+
+## What S02 pins down
 
 - modelled but not shipped — Jakarta provided APIs
 - modelled and shipped intact — commons-lang3
@@ -326,7 +457,21 @@ generatedBy = tracehook_backend.build_wheel
 
 and the generated content affects runtime behaviour.
 
-## Snyk Pip result
+## Probe — pip dependency graph
+
+### Question
+
+Can Snyk reconstruct the installed dependency graph, including the transitive
+package that arrived as an sdist?
+
+### Expectation
+
+Ground truth: the application declares only `reportkit`, but the installed
+environment contains `tracehook-demo` because reportkit's wheel metadata
+requires it. A scan anchored on the installed environment should recover the
+full edge, going beyond the literal `requirements.txt`.
+
+### Observed
 
 Snyk reconstructs the full installed dependency graph:
 
@@ -344,7 +489,27 @@ application
         → tracehook-demo
 ```
 
-## Missing execution history
+### Verdict
+
+**reportkit and tracehook-demo: identified**, including the transitive edge
+the source declaration never states. Snyk's graph is genuinely richer than
+the literal declaration here.
+
+## Probe — build execution history
+
+### Question
+
+Does anything in the Snyk output represent the PEP 517 backend execution that
+manufactured the installed files?
+
+### Expectation
+
+Ground truth: `tracehook_backend.build_wheel()` executed during install and
+generated runtime content, and the installed marker records that event. If
+Snyk models package identity rather than build execution, none of that should
+surface.
+
+### Observed
 
 The actual Snyk outputs contain no evidence for:
 
@@ -355,9 +520,26 @@ build-hook.json
 pep517-build-backend-executed
 ```
 
-Snyk can therefore reconstruct package dependency identity without reconstructing the executable PEP 517 build history that produced the installed files.
+### Verdict
 
-## Package artefact boundaries
+**PEP 517 execution history: not represented.** Snyk can reconstruct package
+dependency identity without reconstructing the executable build history that
+produced the installed files.
+
+## Probe — package artefact boundaries
+
+### Question
+
+Which of the physical Python artefacts can Snyk scan as a project on its own?
+
+### Expectation
+
+Ground truth offers three physical artefacts — the unpacked sdist, the
+unpacked generated wheel, and the installed site-packages directory. Whether
+any of them forms a supported project boundary on its own is exactly what
+this probe asks.
+
+### Observed
 
 In the tested modes, Snyk Open Source did not treat any of these as a supported project on their own:
 
@@ -367,7 +549,13 @@ In the tested modes, Snyk Open Source did not treat any of these as a supported 
 
 The successful scan is anchored on the application `requirements.txt` plus the installed Python environment.
 
-## S03 establishes
+### Verdict
+
+**Standalone Python artefacts: not scannable in the tested modes.** The
+working evidence boundary is the application manifest plus the installed
+environment, not the intermediate artefacts.
+
+## What S03 pins down
 
 **dependency graph knowledge ≠ build execution history**
 
@@ -404,7 +592,9 @@ The resulting application exposes:
 
 even though that route did not exist in checked-in application source.
 
-## Application dependency views
+## Baseline views
+
+What the non-Snyk instruments already said, framing the expectations below:
 
 Maven application dependency tree:
 
@@ -418,7 +608,20 @@ Syft final-JAR scan:
 
 **application archive only**
 
-## Snyk project result
+## Probe — Maven project scan
+
+### Question
+
+Does Snyk see further into the plugin realm than the baseline views did?
+
+### Expectation
+
+Ground truth: the plugin and its payload exist only in the plugin resolution
+domain and ClassRealm. Every baseline view that read the application graph
+reported the application only. If Snyk reads the same application graph, it
+should report the same.
+
+### Observed
 
 Normal Snyk Maven analysis identifies:
 
@@ -431,7 +634,24 @@ trace-injector-maven-plugin
 trace-route-payload
 ```
 
-## Snyk provenance
+### Verdict
+
+**Plugin and payload: not identified** — the application dependency graph is
+the evidence read, and they are not in it.
+
+## Probe — provenance enrichment
+
+### Question
+
+Does provenance mode discover what the plain scan could not?
+
+### Expectation
+
+From the S01 and S02 probes: provenance strengthens known identities and does
+not broaden the model. Expect the root application identity enriched and
+nothing discovered.
+
+### Observed
 
 `--include-provenance` adds a Maven PURL to the known root application artefact.
 
@@ -439,7 +659,25 @@ It does not discover the plugin or payload.
 
 In Snyk's CycloneDX output, provenance produced no substantive component-set change beyond run-specific metadata.
 
-## Unmanaged JAR scan
+### Verdict
+
+**Root identity: enriched. Plugin and payload: still not identified** —
+consistent with provenance being enrichment, not reconstruction.
+
+## Probe — unmanaged JAR scan
+
+### Question
+
+Does the final artefact expose the plugin-generated content to Snyk?
+
+### Expectation
+
+Ground truth: the generated class, service registration and properties file
+are in the JAR, but they carry no package identity — they are custom
+application bytes. Expect the artefact to be scannable only as an unknown
+custom JAR.
+
+### Observed
 
 Snyk reports the final custom JAR as:
 
@@ -447,9 +685,12 @@ Snyk reports the final custom JAR as:
 unknown
 ```
 
-The scan exposes uncertainty but does not reconstruct the plugin/payload relationship or build history.
+### Verdict
 
-## S04 establishes
+**Final JAR: unknown custom artefact.** The scan exposes uncertainty but does
+not reconstruct the plugin/payload relationship or build history.
+
+## What S04 pins down
 
 - Maven dependency tree — application only
 - Maven plugin resolver — plugin + payload
@@ -521,7 +762,7 @@ The installed package preserves the same publication boundary.
 
 Runtime imports the generated `dist/index.js`.
 
-## A particularly awkward publication state
+## An awkward publication state
 
 The published `package.json` still declares:
 
@@ -541,7 +782,19 @@ Therefore the published package contains a lifecycle declaration but not the exe
 
 That declaration alone does not prove the lifecycle hook executed; the `npm pack` log provides that proof.
 
-## Snyk application result
+## Probe — npm application scan
+
+### Question
+
+Does Snyk identify the traced package from the application's npm model?
+
+### Expectation
+
+Ground truth: the application depends on `trace-route-package 1.0.0` and the
+package boundary (its `package.json`) survives publication and install.
+Expect the identity recovered.
+
+### Observed
 
 Snyk identifies:
 
@@ -552,7 +805,24 @@ node-prepack-trace-lab 1.0.0
 
 The Snyk CycloneDX SBOM preserves the same relationship.
 
-## Snyk package scans
+### Verdict
+
+**trace-route-package 1.0.0: identified**, as expected — the npm package
+boundary is intact at every stage of this scenario.
+
+## Probe — package-boundary scans
+
+### Question
+
+Which physical states of the package can Snyk scan on their own?
+
+### Expectation
+
+Ground truth: source, published tarball and installed copy all retain a
+`package.json`. If that file is what anchors an npm project scan, all three
+should be independently scannable — in contrast to S03's Python artefacts.
+
+### Observed
 
 Snyk can independently scan:
 
@@ -564,7 +834,28 @@ because each retains `package.json`.
 
 All scans succeed.
 
-## Missing publication history
+### Verdict
+
+**All three package states: scannable**, as expected. The npm package
+boundary is unusually durable evidence — which makes the next probe's absence
+all the more instructive.
+
+## Probe — publication history
+
+### Question
+
+Does any Snyk output represent the `prepack` execution that manufactured the
+published files?
+
+### Expectation
+
+Ground truth: `prepack` ran during `npm pack`, generated `dist/`, and the
+published package even retains the (now-unsatisfiable) lifecycle declaration.
+If Snyk's views model package identity rather than publication history, none
+of that should surface — even when scanning the source package where the
+generator physically exists.
+
+### Observed
 
 The real Snyk outputs contain no evidence for:
 
@@ -585,7 +876,12 @@ They are not lifecycle-script evidence.
 
 Even when scanning the source package, where the lifecycle declaration and generator physically exist, the Snyk Open Source result does not expose the `prepack` action as supply-chain execution evidence.
 
-## S05 establishes
+### Verdict
+
+**prepack publication history: not represented** at any tested boundary,
+including the one where the generator source is physically present.
+
+## What S05 pins down
 
 **npm package identity ≠ npm publication history**
 
@@ -593,7 +889,30 @@ Snyk knows what package is present, but the tested dependency views do not expla
 
 ---
 
-# Cross-scenario matrix
+# Scorecard
+
+Tracer by tracer, what a tested Snyk view established at each boundary.
+`seen` means a tested Snyk view established the identity or fact at that
+boundary; `—` means none did; `n/a` marks boundaries where ground truth says
+there was nothing to find (not shipped, or no standalone artefact tested).
+Every `—` is code that shipped, or an execution that really happened, anyway.
+
+| Scenario | Tracer / fact | Dependency-model boundary | Artefact boundary |
+| --- | --- | --- | --- |
+| S01 | jackson-databind 2.19.4 | seen | seen (after unpack) |
+| S01 | commons-codec 1.17.1 (shaded) | seen | — |
+| S01 | commons-codec 1.18.0 | seen | seen (after unpack) |
+| S01 | lodash 4.17.21 (bundled) | seen | — |
+| S02 | commons-lang3 3.18.0 | seen | seen (after unpack) |
+| S02 | Jakarta provided APIs | seen | n/a — never shipped |
+| S02 | lodash-es 4.17.21 (plugin realm) | — | — |
+| S03 | reportkit → tracehook-demo | seen | n/a — no standalone artefact scan supported |
+| S03 | PEP 517 backend execution | — | — |
+| S04 | trace-injector plugin + payload | — | — |
+| S05 | trace-route-package 1.0.0 | seen | seen (package.json survives) |
+| S05 | prepack publication history | — | — |
+
+The full capability matrix behind those verdicts:
 
 | Evidence / capability | S01 | S02 | S03 | S04 | S05 |
 | --- | --- | --- | --- | --- | --- |
@@ -608,7 +927,7 @@ Snyk knows what package is present, but the tested dependency views do not expla
 
 ---
 
-# What T01 establishes
+# Findings
 
 ## 1. Snyk can know more than a literal source declaration
 
@@ -640,8 +959,6 @@ The investigation observed Snyk adding:
 - fix guidance
 - PURLs
 - checksum-qualified Maven identities in provenance mode
-
-That is useful information beyond a minimal component list.
 
 ## 3. Provenance enrichment is not provenance reconstruction
 
@@ -709,7 +1026,7 @@ No single one of these views is the complete supply-chain record.
 
 ---
 
-# Final conclusion
+# Final verdict
 
 The strongest T01 conclusion is that software supply-chain evidence is **boundary-specific**, not that Snyk is deficient.
 

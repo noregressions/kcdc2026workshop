@@ -18,7 +18,7 @@ The tracers are:
 
 The pattern is:
 
-**Look → Run → Observe → Establish**
+**Why → Approach → Run → Observed output → Establish**
 
 ## What Maven plugins mean in this lab
 
@@ -34,17 +34,14 @@ A plugin can then transform the application by generating source, resources, met
 
 The important trace boundary is therefore:
 
-```text
-plugin execution realm
-        ↓
-build transformation
-        ↓
-application bytes
-        ↓
-runtime behaviour
+```mermaid
+flowchart TD
+  a["plugin execution realm"] --> b["build transformation"]
+  b --> c["application bytes"]
+  c --> d["runtime behaviour"]
 ```
 
-In this lab, the application POM declares `trace-injector-maven-plugin`, but does **not** declare `trace-route-payload` as an application dependency. The payload is a transitive dependency of the plugin. During `generate-sources`, the plugin reads that payload and creates Java code plus ServiceLoader metadata. Maven then compiles and packages those generated files as ordinary application content.
+In this lab, the application POM declares `trace-injector-maven-plugin`, but does **not** declare `trace-route-payload` as an application dependency: the payload is a transitive dependency of the plugin. During `generate-sources` the plugin reads it and generates Java code plus ServiceLoader metadata, which Maven compiles and packages as ordinary application content.
 
 ---
 
@@ -136,7 +133,7 @@ tooling/plugin    the plugin that reads it and generates application code
 application       declares the plugin, declares no dependencies
 ```
 
-The plugin cannot be declared by the application until it exists in a repository Maven can resolve. That is why the tooling is built and installed first.
+The application build cannot resolve the plugin until it exists in a repository, which is why the tooling is built and installed first.
 
 ## Approach
 
@@ -157,7 +154,7 @@ Using a scenario-local repository matters for the trace: it guarantees the plugi
 
 The tooling phase installs both fixtures:
 
-```text
+```output
 == Build the Maven plugin and its transitive payload ==
 
 [INFO] Reactor Summary for s04-build-tooling 1.0.0:
@@ -738,22 +735,15 @@ Port `8082` is released and no scenario process remains from this walkthrough.
 
 The complete evidence chain is:
 
-```text
-application POM
-        ↓
-trace-injector-maven-plugin
-        ↓
-trace-route-payload
-        ↓
-Maven plugin ClassRealm
-        ↓
-GeneratedTraceRoute.java
-        +
-META-INF/services registration
-        ↓
-compiled/package application JAR
-        ↓
-ServiceLoader
-        ↓
-GET /hidden/build-info
+```mermaid
+flowchart TD
+  a["application POM"] --> b["trace-injector-maven-plugin"]
+  b --> c["trace-route-payload"]
+  c --> d["Maven plugin ClassRealm"]
+  d --> e1["GeneratedTraceRoute.java"]
+  d --> e2["META-INF/services registration"]
+  e1 --> f["compiled/package application JAR"]
+  e2 --> f
+  f --> g["ServiceLoader"]
+  g --> h["GET /hidden/build-info"]
 ```

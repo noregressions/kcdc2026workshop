@@ -6,7 +6,7 @@ track: reference
 
 # T04 — Grype / S02
 
-## Objective
+## The question
 
 Use Grype against S02 to separate:
 
@@ -24,6 +24,8 @@ The central question is:
 
 > Does Grype produce a different vulnerability answer when it discovers the Payara image itself versus when it consumes an SBOM generated from that same image?
 
+## The instrument
+
 The observed run used:
 
 ```text
@@ -36,11 +38,34 @@ DB status: valid
 
 Every run used the same final image and the same Grype vulnerability database.
 
+The database state is itself part of the instrument. The first attempted run
+failed because the local Grype database was too old:
+
+```text
+Status: invalid
+the vulnerability database was built 2 weeks ago
+(max allowed age is 5 days)
+```
+
+After refreshing the database, the successful run reported:
+
+```text
+Schema: v6.1.9
+Built: 2026-08-22T06:14:16Z
+Status: valid
+```
+
+Vulnerability database state is part of the evidence: a stale or invalid
+database can prevent the vulnerability experiment from running at all.
+
 ---
 
-# S02 ground truth
+# Ground truth
 
-## Check
+Every expectation below is derived from this section: what S02 actually
+contains, established independently of the tool under investigation.
+
+## Fixture
 
 S02 has three deliberately different kinds of software evidence.
 
@@ -93,7 +118,7 @@ It does not contain a `lodash-es` package boundary.
 ./scripts/baseline-s02.sh
 ```
 
-## Observe
+## Observed
 
 The final image is:
 
@@ -137,7 +162,7 @@ The generated CycloneDX document contained:
 
 This number is not treated as equivalent to the Syft package count. The CycloneDX document represents more than the 589-package catalogue.
 
-## Establish
+## What this pins down
 
 S02 separates four boundaries:
 
@@ -148,13 +173,15 @@ WAR contents
 final deployed container
 ```
 
-They contain different software universes.
+They contain different software universes. The probes below test what Grype's
+vulnerability answer looks like over the last of them — and whether the *way*
+that boundary is represented to Grype changes the answer.
 
 ---
 
-# Grype experiment
+# Running the probes
 
-## Run
+The probes are driven by one harness script:
 
 ```bash
 ./scripts/run-grype-s02.sh
@@ -179,37 +206,22 @@ pkg:maven/org.mvnpm/lodash-es@4.17.21
 
 ---
 
-# Database state
+# Probe 1 — direct image scan
 
-## Observe
+## Question
 
-The first attempted run failed because the local Grype database was too old:
+What does Grype report when it discovers the final image itself?
 
-```text
-Status: invalid
-the vulnerability database was built 2 weeks ago
-(max allowed age is 5 days)
-```
+## Expectation
 
-After refreshing the database, the successful run reported:
+Ground truth: the image is the application WAR deployed onto a Payara runtime
+over an Ubuntu base — Syft catalogued 589 packages, most of them runtime and
+OS software the application never declared. The vulnerability answer should
+therefore be dominated by runtime and OS packages, not by the tracers; and
+`lodash-es` cannot be matched at all, because its identity is absent from the
+image inventory.
 
-```text
-Schema: v6.1.9
-Built: 2026-08-22T06:14:16Z
-Status: valid
-```
-
-## Establish
-
-Vulnerability database state is part of the evidence.
-
-A stale or invalid database can prevent the vulnerability experiment from running at all.
-
----
-
-# Direct image scan
-
-## Observe
+## Observed
 
 Grype reported:
 
@@ -259,17 +271,31 @@ Payara-named tracer pattern
 Jakarta-named tracer pattern
 ```
 
-## Establish
+## Verdict
 
-The deployed runtime/base-image software universe, not merely the application WAR, dominates the final-image vulnerability answer.
+**Runtime and OS packages dominate; no tracer match**, as expected. The
+deployed runtime/base-image software universe, not merely the application WAR,
+dominates the final-image vulnerability answer.
 
 The harness did not expose a direct Grype package-catalogue count, so this investigation does not claim one.
 
 ---
 
-# Syft JSON input
+# Probe 2 — Syft JSON input
 
-## Observe
+## Question
+
+Does Grype produce the same answer when it consumes a Syft JSON SBOM instead
+of discovering the image itself?
+
+## Expectation
+
+Ground truth: the Syft JSON was generated from the same image, by the same
+Syft, describing the same 589-package catalogue. If Grype's own discovery and
+Syft's catalogue see the same package universe, the match set should be
+identical to Probe 1's.
+
+## Observed
 
 Grype emitted:
 
@@ -284,15 +310,31 @@ Despite that compatibility warning, Grype again produced:
 169 unique vulnerability matches
 ```
 
-## Establish
+## Verdict
 
-For this image and these tool versions, the Syft schema-version warning did not change the resulting vulnerability match set.
+**Same match count**, as expected — despite a schema-version warning the
+expectation had no way to predict. For this image and these tool versions, the
+Syft schema-version warning did not change the resulting vulnerability match
+set.
 
 ---
 
-# CycloneDX input
+# Probe 3 — CycloneDX input
 
-## Observe
+## Question
+
+Does a different SBOM *format* — with a very different raw component count —
+change the vulnerability answer?
+
+## Expectation
+
+Ground truth: the CycloneDX document was generated from the same image but
+contains 6014 components against the Syft JSON's 589 package artifacts. If
+those extra components are representation detail rather than additional
+matchable package identities, the match set should again be unchanged; if
+Grype matches against them, the answer should grow.
+
+## Observed
 
 Grype consumed the CycloneDX SBOM generated from the same image and again produced:
 
@@ -300,15 +342,27 @@ Grype consumed the CycloneDX SBOM generated from the same image and again produc
 169 unique vulnerability matches
 ```
 
-## Establish
+## Verdict
 
-The CycloneDX document contains 6014 components rather than the Syft JSON's 589 package artifacts. In this run, that difference did not produce a different vulnerability answer.
-
-Those raw document counts therefore should not be interpreted as equivalent package counts.
+**Same match count**, as expected. The CycloneDX document contains 6014
+components rather than the Syft JSON's 589 package artifacts; in this run,
+that difference did not produce a different vulnerability answer. Those raw
+document counts should therefore not be interpreted as equivalent package
+counts.
 
 ---
 
-# Exact match-set comparison
+# Probe 4 — exact match-set comparison
+
+## Question
+
+The counts agree — but are the three match *sets* actually identical?
+
+## Expectation
+
+Probes 1–3 each produced 169 matches. Equal counts can still hide differing
+contents; if the three representations genuinely describe the same matchable
+inventory, a set comparison should show no differences in any direction.
 
 ## Run
 
@@ -316,7 +370,7 @@ Those raw document counts therefore should not be interpreted as equivalent pack
 ./scripts/compare-s02.sh
 ```
 
-## Observe
+## Observed
 
 The final comparison showed:
 
@@ -339,9 +393,9 @@ Syft JSON vs CycloneDX
     no differences
 ```
 
-## Establish
+## Verdict
 
-For this S02 image:
+**Identical match sets**, as expected. For this S02 image:
 
 ```text
 Grype direct discovery
@@ -357,9 +411,23 @@ The inventory representation did not change Grype's vulnerability answer.
 
 ---
 
-# commons-lang3 control
+# Probe 5 — commons-lang3 control
 
-## Observe
+## Question
+
+commons-lang3 produced no vulnerability match anywhere — is that because the
+scanner lost its identity, or because there is genuinely no match to find?
+
+## Expectation
+
+Ground truth: `commons-lang3 3.18.0` is in the final image inventory, so its
+identity survived. A direct PURL control removes discovery from the experiment
+entirely: it asks the vulnerability database about the exact package identity.
+If the database has no entry for that version, the control should also come
+back empty — proving the silent scans were a database fact, not an identity
+loss.
+
+## Observed
 
 The final image inventory contains:
 
@@ -375,15 +443,33 @@ no vulnerability matches
 
 The image/SBOM scans likewise produced no tracer-related vulnerability match for commons-lang3.
 
-## Establish
+## Verdict
 
-Grype identifies the package in the final image inventory, so the inventory is doing its job: the observed Grype vulnerability database simply produced no match for that package/version.
+**commons-lang3 3.18.0: identified; no match exists.** Grype identifies the
+package in the final image inventory, so the inventory is doing its job: the
+observed Grype vulnerability database simply produced no match for that
+package/version.
 
 ---
 
-# lodash-es control
+# Probe 6 — lodash-es control
 
-## Observe
+## Question
+
+lodash-es demonstrably participated in the build — can any final-image scan,
+or even a direct database query, say anything about it?
+
+## Expectation
+
+Ground truth: `org.mvnpm:lodash-es:4.17.21` is proven in the
+`esbuild-maven-plugin` ClassRealm, but the WAR carries only the generated
+bundle — no package boundary — and the image inventory does not identify it.
+The scans therefore cannot match it. The PURL control then asks the remaining
+question: does the database even hold a match for this identity, i.e. could a
+"scanner knows the vulnerability but discovery lost the package" story be told
+here at all?
+
+## Observed
 
 Maven plugin evidence proves:
 
@@ -403,9 +489,10 @@ The direct PURL control also produced:
 no vulnerability matches
 ```
 
-## Establish
+## Verdict
 
-For this run, lodash-es cannot demonstrate:
+**lodash-es 4.17.21: identity lost before the image — and no database match
+either.** For this run, lodash-es cannot demonstrate:
 
 ```text
 Grype knows the vulnerability
@@ -426,9 +513,21 @@ Grype cannot vulnerability-match a final-image package identity that is not pres
 
 ---
 
-# Provided dependencies and runtime supply
+# Probe 7 — provided dependencies and runtime supply
 
-## Observe
+## Question
+
+Where does the Jakarta software in the final image actually come from?
+
+## Expectation
+
+Ground truth: the application declares `jakarta.jakartaee-web-api 11.0.0` at
+`provided` scope, and the WAR does not package it. Yet the image is a Payara
+runtime, which ships its own Jakarta implementation. The scan should therefore
+show Jakarta components that never passed through the application's dependency
+graph at all.
+
+## Observed
 
 The application Maven model declares:
 
@@ -451,9 +550,10 @@ jakarta.validation-api 3.1.1
 
 Those components are supplied by the Payara runtime image.
 
-## Establish
+## Verdict
 
-The container vulnerability scan answers:
+**Jakarta components: present, but supplied by the runtime**, as expected. The
+container vulnerability scan answers:
 
 ```text
 what software is deployed together?
@@ -463,7 +563,35 @@ It does not tell us that all software found in the image came from the applicati
 
 ---
 
-# What T04 establishes
+# Scorecard
+
+What survived into the final-image inventory, tracer by tracer — `seen` means
+the package identity was established there; `—` means it was not. No tracer
+produced a vulnerability match in any of the three Grype runs: for
+commons-lang3 because the database holds no match for that version (Probe 5),
+for lodash-es because its identity never reached the image (Probe 6), and for
+the Jakarta tracer because the WAR never packaged it — the image's Jakarta
+software is the runtime's own (Probe 7).
+
+| Tracer | final-image inventory | vulnerability match |
+| --- | --- | --- |
+| commons-lang3 3.18.0 | seen | — |
+| lodash-es 4.17.21 | — | — |
+| jakarta.jakartaee-web-api 11.0.0 (provided) | — | — |
+| payara-mvnpm-trace-lab 1.0.0 | seen | — |
+
+And across the three inventory representations of that same boundary, the
+answer did not move:
+
+```text
+direct image     169 unique vulnerability matches
+Syft JSON        169 unique vulnerability matches
+CycloneDX        169 unique vulnerability matches
+```
+
+---
+
+# Findings
 
 ## 1. Grype can consume different inventory representations without changing the answer
 
@@ -548,7 +676,7 @@ matching rules
 
 ---
 
-# Final conclusion
+# Final verdict
 
 T04 demonstrates that changing the *representation* of a good final-image inventory does not necessarily change the vulnerability answer.
 

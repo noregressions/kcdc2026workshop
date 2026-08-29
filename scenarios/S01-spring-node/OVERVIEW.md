@@ -97,7 +97,7 @@ A useful first pass after the build is:
 ./scripts/trace.sh
 ```
 
-It writes retained evidence into `trace-output/`.
+It replays the walkthrough's evidence commands — the source-declaration greps, both dependency trees, the plugin resolutions, and the archive listings — in one pass, and writes retained evidence into `trace-output/`. It introduces nothing the step-by-step trace does not show.
 
 The controlled metadata experiment is:
 
@@ -163,6 +163,13 @@ It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (the las
 ./scripts/runtime-trace.sh
 ```
 
-`runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod: the difference between what was asked for and what is running.
+`runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod: the difference between what was asked for and what is running. In essence:
+
+```bash
+kubectl get deployment checkout-service \
+  -o jsonpath='{.spec.template.spec.containers[0].image}'
+kubectl get pods -l app=checkout-service \
+  -o jsonpath='{range .items[*]}{.status.containerStatuses[0].imageID}{"\n"}{end}'
+```
 
 Like `k8s/`, this is optional example material and is not part of the walkthrough in `TRACE.md`.

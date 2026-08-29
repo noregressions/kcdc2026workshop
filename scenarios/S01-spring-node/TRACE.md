@@ -47,15 +47,11 @@ put it — nothing here is artificial except the smallness.
 
 ---
 
-# 1. Start clean
-
-## Why
+# 1. Initial setup
 
 Supply-chain tracing is only useful if we know which build produced the artefacts we are inspecting. Old `target/`, `dist/`, SBOM, or experiment output can make later evidence ambiguous.
 
 We therefore begin by removing generated state while keeping source and lockfiles intact.
-
-## Approach
 
 The project contains a `clean.sh` wrapper so every run starts from the same state. It removes Maven targets, npm-installed modules, frontend build output, SBOM output, and controlled-experiment output.
 
@@ -69,21 +65,15 @@ It deliberately preserves `package-lock.json` because that is part of the depend
 ./scripts/clean.sh
 ```
 
-## Establish
-
-Generated build, frontend, trace, and SBOM artefacts are removed. Source and lockfiles remain.
-
 ---
 
 # 2. Inspect the source declarations
 
-## Why
 
 Before asking a resolver or scanner what exists, we need to know what the developers actually asked the build to do.
 
 A declaration is only intent. It may contain no version, may inherit a version from elsewhere, may later be overridden, or may describe a transformation that never actually happens. We will keep that distinction visible throughout the lab.
 
-## Approach
 
 Look at the source configuration directly rather than asking Maven or npm to reinterpret it for us. This gives us the literal declarations against which we can compare later resolver and artefact evidence.
 
@@ -94,13 +84,13 @@ Look at:
 - `pom.xml`
 - `frontend/package.json`
 
-## Jackson
+### Jackson
 
 `service/pom.xml` declares `jackson-databind` without a local version. The root `pom.xml` imports the Spring Boot dependency-management BOM.
 
 At this point we know Jackson is requested, but not which version Maven will select.
 
-## commons-codec
+### commons-codec
 
 `normalizer/pom.xml` declares `commons-codec` using the property `${commons-codec.version}`. The root `pom.xml` defines that property as `1.17.1`.
 
@@ -114,7 +104,7 @@ com.acme.internal.codec
 
 At source-inspection time this is only the intended transformation.
 
-## lodash
+### lodash
 
 `frontend/package.json` declares:
 
@@ -124,19 +114,15 @@ lodash: 4.17.21
 
 ## Establish
 
-These are source declarations/configuration, not proof of what gets resolved or shipped.
+These are source declarations/configuration only. They are not proof of what gets resolved or shipped.
 
 ---
 
 # 3. Build
 
-## Why
-
 The interesting evidence only appears once the build has actually run. Resolution chooses concrete versions; Vite changes JavaScript package structure; Shade rewrites bytecode; Spring Boot assembles the executable JAR.
 
 Until those transformations happen, we only have configuration.
-
-## Approach
 
 `build.sh` runs the project's normal build path in the correct order, so we inspect outputs produced by the same path the application actually uses.
 
@@ -164,13 +150,9 @@ The build performs:
 
 # 4. Resolve Jackson
 
-## Why
-
 The source POM did not state a Jackson version. The version that matters to the build is the one Maven resolves after applying dependency management.
 
 This is our first example of the difference between **declared dependency** and **resolved dependency**.
-
-## Approach
 
 We ask Maven's dependency plugin for the resolved dependency tree of the `service` module.
 
@@ -212,13 +194,9 @@ This proves Maven selected `jackson-databind:2.19.4`. It does not yet prove it w
 
 # 5. Resolve commons-codec for normalizer
 
-## Why
-
 Shade will transform `commons-codec`. Before looking at that transformation, we need a baseline: which version did the `normalizer` module actually resolve before shading?
 
 Without that baseline we could not later tell whether the shaded code and metadata still correspond to the resolved component.
-
-## Approach
 
 Again we use Maven's resolved dependency tree, but this time for `normalizer`. The `-Dincludes` filter keeps the result focused on `commons-codec`.
 
@@ -250,13 +228,9 @@ Resolved
 
 # 6. Resolve lodash
 
-## Why
-
 Frontend dependencies behave differently from Java JARs. Vite will later fold lodash into a generated JavaScript bundle, so now is the point where its package identity is strongest and easiest to prove.
 
 We want both the installed package view and the lockfile evidence before bundling destroys that structure.
-
-## Approach
 
 `npm ls lodash` asks npm to show the installed dependency graph for just lodash.
 
@@ -300,13 +274,11 @@ These are our resolved tracer versions before packaging transformations obscure 
 
 # 7. Confirm Jackson in the application
 
-## Why
 
 A dependency tree tells us what Maven resolved. It does not prove that those bytes ended up in the product.
 
 Jackson is our uncomplicated control case: if Spring Boot packages it normally, we should find an ordinary nested JAR with the same version Maven resolved.
 
-## Approach
 
 Spring Boot executable JARs store dependency JARs under `BOOT-INF/lib`. We list the archive and filter for `jackson-databind`.
 
@@ -341,13 +313,10 @@ Jackson `2.19.4` is both resolved and physically packaged.
 
 # 8. Inspect commons-codec after shading
 
-## Why
-
 The Shade configuration said commons-codec would be relocated. We need to prove the transformation actually happened and see what it did to the component's visible structure.
 
 This is where a simple dependency graph starts to diverge from the physical artefact.
 
-## Approach
 
 We inspect the built normalizer JAR, not the POM. First we look for classes under the new namespace, then verify that the old namespace is absent.
 
@@ -398,13 +367,11 @@ The configured relocation actually occurred.
 
 # 9. Check whether Maven identity survived shading
 
-## Why
 
 Relocating class names does not necessarily erase all evidence of the original component. Many Java archives carry Maven metadata under `META-INF/maven`.
 
 Whether that metadata survives matters because downstream inventory tools may use it to recognise software even when the bytecode namespace has changed completely.
 
-## Approach
 
 First we list the commons-codec Maven metadata entries inside the shaded JAR. Then `unzip -p` streams the contents of `pom.properties` to stdout without extracting a file to disk.
 
@@ -445,13 +412,11 @@ The Java namespace changed, but the original Maven component identity survived.
 
 # 10. Ask Syft to identify the shaded dependency
 
-## Why
 
 So far we have manually correlated relocated classes with surviving Maven metadata. A real SBOM or inventory workflow needs a tool to make that identification from the artefact itself.
 
 This step asks whether an independent artefact scanner can recover `commons-codec:1.17.1` from the finished shaded JAR.
 
-## Approach
 
 Syft is a software package cataloguer from Anchore. Given a filesystem, archive, or container image, it looks for package-identifying evidence (package-manager metadata, archive metadata) and emits a software inventory.
 
@@ -483,17 +448,23 @@ The transformed class names did not prevent component identification because ide
 
 # 11. Controlled evidence-loss experiment
 
-## Why
 
 The previous result is correlation: the metadata exists and Syft finds the package. To understand whether that evidence is actually important, we need a controlled change.
 
 We will remove only the identifying Maven metadata while leaving the relocated commons-codec bytecode unchanged, then repeat the same scan. If the result changes, the difference is attributable to the evidence we removed.
 
-## Approach
 
-`strip-codec-metadata.sh` creates a copy of the shaded normalizer JAR, removes only `META-INF/maven/commons-codec/...`, and runs the same Syft check before and after.
+`strip-codec-metadata.sh` creates a copy of the shaded normalizer JAR, removes only `META-INF/maven/commons-codec/...`, and runs the same Syft check before and after. In essence:
 
-The script is part of the project so the experiment is repeatable rather than a one-off sequence of archive edits.
+```bash
+cp normalizer/target/normalizer-1.0.0.jar \
+   trace-output/normalizer-no-codec-metadata.jar
+zip -qd trace-output/normalizer-no-codec-metadata.jar \
+   'META-INF/maven/commons-codec/commons-codec/*'
+syft trace-output/normalizer-no-codec-metadata.jar   # rescan the stripped copy
+```
+
+The `zip -qd` line is the whole intervention: one metadata directory deleted from the archive, no bytecode touched. The script is part of the project so the experiment is repeatable rather than a one-off sequence of archive edits.
 
 ## Run
 
@@ -537,13 +508,11 @@ The important distinction is:
 
 # 12. Inspect the Vite output
 
-## Why
 
 Lodash gives us a different transformation. Rather than relocating classes inside an archive, Vite incorporates npm package code into generated frontend assets.
 
 We need to see what remains of the npm package structure after bundling before asking a scanner to identify anything.
 
-## Approach
 
 We list only the generated files in `frontend/dist`. `find -maxdepth 2` keeps the listing to the deployable output and its immediate asset directories.
 
@@ -568,13 +537,11 @@ Where the build input had a `node_modules/lodash/` directory, the deployable out
 
 # 13. Scan the frontend bundle
 
-## Why
 
 We know lodash was a build input. The question is whether its package identity survives bundling strongly enough for an artefact scanner to recover `lodash@4.17.21` from the deployable frontend alone.
 
 This is the frontend counterpart to the shaded-Java experiment.
 
-## Approach
 
 We give Syft only `frontend/dist`. It does not receive `package.json`, `package-lock.json`, or `node_modules` from the build workspace.
 
@@ -620,13 +587,9 @@ Compare this with the shaded Java example:
 
 # 14. Follow the frontend into the service
 
-## Why
-
 The fact that Vite produced a bundle does not prove that bundle reached the application we ship. We need to cross the next packaging boundary.
 
 This keeps the evidence chain continuous: build input → transformed frontend → packaged application.
-
-## Approach
 
 Spring Boot serves static application resources from its packaged classes area. We inspect the finished executable JAR for the exact files we saw in `frontend/dist`.
 
@@ -657,11 +620,9 @@ We can prove the bundle was shipped even though the lodash package identity is n
 
 # 15. Follow normalizer into the service
 
-## Why
 
 We have proved what is inside the standalone normalizer JAR. Now we need to prove that this transformed component reached the final Spring Boot application as well.
 
-## Approach
 
 Spring Boot packages ordinary dependency JARs under `BOOT-INF/lib`. We inspect the service archive for `normalizer-1.0.0.jar`.
 
@@ -684,13 +645,10 @@ The shaded normalizer is present as a nested JAR in the executable application.
 
 # 16. Scan the complete Spring Boot JAR
 
-## Why
 
 We have inspected individual tracers manually. Now we want an independent inventory of the **finished application as a whole**.
 
 This is the first point where unexpected software can appear: the scanner sees nested artefacts and surviving metadata that may not be obvious from the top-level dependency model.
-
-## Approach
 
 We give Syft the complete Spring Boot JAR. Syft recursively catalogues package evidence inside the archive, including nested Java archives.
 
@@ -734,13 +692,11 @@ But the scan also reveals `commons-codec:1.18.0`, which we have not yet accounte
 
 # 17. Confirm commons-codec 1.18.0 is physically present
 
-## Why
 
 A scanner finding is evidence, but we should independently verify surprising results where possible.
 
 Syft reported a second commons-codec version. Before explaining why, we need to establish that `1.18.0` really exists as a physical nested JAR rather than being a duplicate identification or metadata artefact.
 
-## Approach
 
 We inspect the executable JAR directly for any archive whose name contains `commons-codec`.
 
@@ -766,16 +722,12 @@ The application genuinely contains two versions of commons-codec code:
 
 # 18. Explain why both versions exist
 
-## Why
-
 We now have an apparent contradiction:
 
 - `normalizer` resolved and embedded `commons-codec:1.17.1`.
 - the final service also contains `commons-codec:1.18.0`.
 
 This is where dependency resolution and physical packaging diverge. We need Maven's view of the service graph to explain the extra version.
-
-## Approach
 
 We run `dependency:tree` for `service` with `-am` so the reactor's `normalizer` module participates.
 
@@ -839,13 +791,11 @@ Therefore:
 
 # 19. Generate Maven/CycloneDX SBOMs
 
-## Why
 
 So far we have compared resolver output with artefact inspection. Now we want to see how those different viewpoints affect a formal SBOM.
 
 The first SBOM will be generated from Maven's dependency model. That means it should describe what Maven believes the project depends on, not necessarily everything physically embedded inside transformed artefacts.
 
-## Approach
 
 We invoke the CycloneDX Maven Plugin directly by its full Maven coordinate and goal:
 
@@ -889,17 +839,20 @@ CycloneDX generated a separate SBOM from the Maven dependency model of each reac
 
 # 20. Compare the Maven-generated BOMs
 
-## Why
-
 The same component can be resolved differently in different modules. We want to see whether the module-level SBOMs preserve that distinction.
 
 In particular, we expect the normalizer BOM to say `commons-codec:1.17.1` while the service BOM follows the service's managed dependency graph and says `1.18.0`.
 
-## Approach
 
 `compare-sboms.sh` reads the two generated CycloneDX JSON files and prints only our tracer components.
 
-Internally it uses `jq`, a JSON query tool, to select components by name and emit three fields: package name, version, and PURL.
+Internally it uses `jq`, a JSON query tool, to select components by name and emit three fields: package name, version, and PURL. The essential query — worth knowing, because it works on any CycloneDX SBOM — is:
+
+```bash
+jq -r '.components[]
+       | select(.name == "commons-codec")
+       | [.name, .version, .purl] | @tsv' normalizer/target/bom.json
+```
 
 A PURL (Package URL) is a standard package identifier such as:
 
@@ -945,13 +898,10 @@ The service's Maven-generated SBOM does not include the `commons-codec:1.17.1` c
 
 # 21. Generate a Syft CycloneDX SBOM from the finished JAR
 
-## Why
 
 Comparing Maven console output with Syft console output is useful, but the tools are not producing the same kind of document.
 
 To isolate the effect of **evidence source**, we want both tools to emit the same SBOM format for the same application.
-
-## Approach
 
 Syft supports CycloneDX JSON output.
 
@@ -989,15 +939,14 @@ We now have two CycloneDX SBOMs for the same application:
 
 # 22. Compare the two service CycloneDX SBOMs
 
-## Why
+
 
 This is the key SBOM comparison in the lab.
 
 If the inventories differ now, the difference cannot be blamed on SBOM format: both documents are CycloneDX. The difference comes from **where in the supply chain the inventory was observed and what evidence each producer used**.
 
-## Approach
 
-`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracer fields from both, wrapping the `jq` queries as in step 20.
+`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracer fields from both — step 20's `jq` query run twice, once against `service/target/bom.json` and once against `trace-output/service-syft.cdx.json`.
 
 ## Run
 
@@ -1057,7 +1006,6 @@ Therefore:
 
 # 23. Move from application JAR to container image
 
-## Why
 
 The application JAR is not the whole product we deploy. A container image adds a JRE, operating-system packages, native libraries, shell utilities, certificates, and other runtime material.
 
@@ -1065,13 +1013,22 @@ An application-level SBOM can therefore be correct while still describing only p
 
 The container image is the outermost boundary in this exercise.
 
-## Approach
 
 `image-trace.sh` performs three related actions:
 
 1. It builds the Docker image from the project's `Dockerfile` using the tag `registry.example.com/checkout-service:release-123`.
 2. It asks Docker for the resulting local image identity, including the repository digest. A tag is a mutable name; the digest identifies the built OCI image content.
 3. It asks Syft to catalogue the **container image**, not just the application JAR, and writes a CycloneDX image SBOM before printing the tracer components.
+
+In essence:
+
+```bash
+docker build -t registry.example.com/checkout-service:release-123 .
+docker image inspect registry.example.com/checkout-service:release-123 \
+  --format '{{.Id}} {{json .RepoTags}} {{json .RepoDigests}}'
+syft registry.example.com/checkout-service:release-123 \
+  -o cyclonedx-json=trace-output/image.cdx.json
+```
 
 The Docker build output also shows the digest to which the mutable base-image tag `eclipse-temurin:21-jre-jammy` resolved for this build. This is useful evidence because the base image itself is part of the product's software supply chain.
 

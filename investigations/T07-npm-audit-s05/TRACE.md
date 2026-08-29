@@ -6,6 +6,8 @@ track: reference
 
 # T07 — `npm audit` / S05
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use `npm audit` against S05 to distinguish:

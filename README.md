@@ -76,18 +76,12 @@ starting on time and watching Maven download.
 Add `--with-investigations` to also run the T01–T08 baselines. That is slower,
 and the T06 step downloads a large NVD dataset the first time.
 
-**3. Pick a lab.** Each scenario and investigation has two documents:
-
-```text
-OVERVIEW.md   what it is, what it needs, and how to run it
-TRACE.md      the annotated step-by-step walkthrough
-```
-
-Start with the overview, then work through the trace:
+**3. Pick a lab.** Each scenario and investigation is one document,
+`TRACE.md`: what it is, what it needs, how to run it, and the annotated
+step-by-step walkthrough.
 
 ```bash
 cd scenarios/S01-spring-node
-cat OVERVIEW.md
 cat TRACE.md
 ```
 
@@ -196,14 +190,14 @@ not that the lesson broke.
 ```text
 FACILITATOR.md    instructor-side notes: timings, expected outputs, failure playbook
 setup/            prerequisites, accounts and keys, pre-pull and pre-warm
-scenarios/        S01-S05, each with an OVERVIEW.md and a TRACE.md
-investigations/   T01-T08, each with an OVERVIEW.md and a TRACE.md
+scenarios/        S01-S05, each a single TRACE.md walkthrough
+investigations/   T01-T08, each a single TRACE.md report
 scripts/          tools-check.sh, build-all.sh
 pom.xml           builds the whole workshop as a single PDF
 ```
 
 The `README.md` in each lab directory is a short pointer for browsing the
-repository on GitHub. The content lives in `OVERVIEW.md`, because the book
+repository on GitHub. The content lives in `TRACE.md`, because the book
 build skips files named `README.md`.
 
 ## Building the workshop as a book

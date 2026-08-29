@@ -2,10 +2,7 @@
 
 | | |
 |---|---|
-| [`OVERVIEW.md`](./OVERVIEW.md) | What this scenario is, and how to run it |
-| [`TRACE.md`](./TRACE.md) | The annotated step-by-step walkthrough |
-
-Start with `OVERVIEW.md`, then work through `TRACE.md`.
+| [`TRACE.md`](./TRACE.md) | What this scenario is, how to run it, and the annotated step-by-step walkthrough |
 
 Scripts live in [`scripts/`](./scripts): `build.sh` to build, `clean.sh` to reset,
 and `proof-check.sh` to confirm the walkthrough's claims still hold.

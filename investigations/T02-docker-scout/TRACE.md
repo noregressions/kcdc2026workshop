@@ -6,6 +6,8 @@ track: reference
 
 # T02 — Docker Scout: What Does the Final Container Know?
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use Docker Scout as a final-container evidence source for the workshop scenarios that produce container images.

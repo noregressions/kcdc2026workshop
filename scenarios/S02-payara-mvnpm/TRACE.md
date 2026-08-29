@@ -1,10 +1,11 @@
 ---
 id: s02-payara-mvnpm
 oneliner: "Traces an ordinary Maven dependency alongside an mvnpm package that reaches the browser bundle only through a plugin execution realm."
-track: optional
+track: core
 ---
 
 # S02 — Payara + mvnpm Supply Chain Trace Lab
+
 
 This lab follows four different kinds of software through one build and into one running container:
 
@@ -20,6 +21,13 @@ The pattern throughout is:
 **Why → Approach → Run → Observed output → Establish**
 
 The exercise ends at the container-image boundary.
+
+## Requirements
+
+- JDK 21+
+- Maven
+- Docker for the container stage
+- Syft and jq for the optional SBOM/image trace
 
 ---
 
@@ -1219,3 +1227,28 @@ The central lesson is the same as the first trace lab:
 **Every inventory is an observation made from a particular evidence source at a particular point in the supply chain.**
 
 Those observations should be compared, not assumed to be interchangeable.
+
+---
+
+# Replay in one pass
+
+```bash
+./scripts/trace-mvnpm.sh
+./scripts/image-trace.sh
+```
+
+`trace-mvnpm.sh` replays the core evidence sequence in one pass: `commons-lang3` in the project dependency tree, `lodash-es` absent from it, `lodash-es` present in the plugin execution realm, the generated browser assets, the lodash sources named in the source map, and the relevant WAR entries.
+
+`image-trace.sh` builds the project image, prints its identity, and writes a Syft CycloneDX image SBOM to `trace-output/image.cdx.json`.
+
+---
+
+# Verify the lab still holds
+
+```bash
+./scripts/proof-check.sh
+```
+
+`proof-check.sh` re-runs the lab and asserts that it still produces the outcomes this walkthrough describes. Use it after changing dependencies or tooling versions to find out whether the walkthrough text needs updating.
+
+It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (equivalent to `--skip-runtime --skip-image`) when you only need part of the check. Run `./scripts/proof-check.sh --help` for the full list.

@@ -6,6 +6,8 @@ track: reference
 
 # T05 — pip-audit / S03
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use `pip-audit` against S03 to separate four different facts:

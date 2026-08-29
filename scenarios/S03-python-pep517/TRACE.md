@@ -6,6 +6,8 @@ track: core
 
 # S03 — Python PEP 517 Supply Chain Trace Lab
 
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
+
 This lab follows a direct Python dependency into a transitive source distribution, through PEP 517 build execution, into the installed environment, and finally into runtime behaviour.
 
 ## What PEP 517 means in this lab
@@ -41,6 +43,17 @@ The pattern is:
 The central question is simple:
 
 > Can code that was not present in a transitive dependency's source archive be created during `pip install` and then affect application runtime behaviour?
+
+## Requirements
+
+- Python 3.11+
+- `curl`
+- `tar`
+- `unzip`
+- `jq` optional
+- Syft optional
+
+The package fixtures are local, so the build does not need PyPI access.
 
 ---
 
@@ -667,3 +680,44 @@ No single one of those views explains the complete provenance chain by itself.
 The central lesson is:
 
 **A Python dependency installation is not necessarily just file extraction. Resolving an sdist can cause dependency-supplied build code to execute, create new package content, install that content, and ultimately change application runtime behaviour.**
+
+---
+
+# Package fixtures
+
+`python-repo/` contains the exact package artefacts consumed by pip:
+
+```text
+reportkit-1.0.0-py3-none-any.whl
+tracehook_demo-1.0.0.tar.gz
+```
+
+`python-sources/` contains their auditable fixture source.
+
+If you deliberately change those fixtures, rebuild the local package repository:
+
+```bash
+python3 scripts/rebuild-python-repo.py
+```
+
+---
+
+# Replay in one pass
+
+```bash
+./scripts/trace-python.sh
+```
+
+`trace-python.sh` replays the core evidence sequence in one pass: the direct declaration in `requirements.txt`, the `reportkit` wheel metadata that names the transitive dependency, the contents of the `tracehook_demo` sdist, its PEP 517 backend declaration, the generated `build-hook.json` marker in `site-packages`, and the installed package metadata.
+
+It reads the virtual environment created by `./scripts/build.sh`, so run the build first.
+
+---
+
+# Verify the lab still holds
+
+```bash
+./scripts/proof-check.sh
+```
+
+`proof-check.sh` re-runs the lab and asserts that it still produces the outcomes this walkthrough describes. Use it after changing dependencies or tooling versions to find out whether the walkthrough text needs updating.

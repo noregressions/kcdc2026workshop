@@ -6,6 +6,8 @@ track: core
 
 # S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab
 
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
+
 This lab follows runtime capability that enters a Java application through **Maven plugin execution**, rather than through the application's normal dependency graph.
 
 The tracers are:
@@ -42,6 +44,17 @@ flowchart TD
 ```
 
 In this lab, the application POM declares `trace-injector-maven-plugin`, but does **not** declare `trace-route-payload` as an application dependency: the payload is a transitive dependency of the plugin. During `generate-sources` the plugin reads it and generates Java code plus ServiceLoader metadata, which Maven compiles and packages as ordinary application content.
+
+## Requirements
+
+- JDK 21+
+- Maven 3.9+
+- `curl`
+- `unzip`
+- `jq` optional
+- Syft optional
+
+The first build needs normal Maven Central access for Maven's own plugin/API dependencies.
 
 ---
 
@@ -709,3 +722,25 @@ flowchart TD
   f --> g["ServiceLoader"]
   g --> h["GET /hidden/build-info"]
 ```
+
+---
+
+# Replay in one pass
+
+```bash
+./scripts/trace-plugin.sh
+```
+
+`trace-plugin.sh` replays the core evidence sequence in one pass: the (empty) application dependency tree, the plugin declaration in `pom.xml`, the payload declaration in the plugin's own POM, the route definition carried by the payload, the generated application source and resources, and the relevant entries in the final JAR.
+
+It needs the build output, so run `./scripts/build.sh` first.
+
+---
+
+# Verify the lab still holds
+
+```bash
+./scripts/proof-check.sh
+```
+
+`proof-check.sh` re-runs the lab and asserts that the demonstrated invariants still hold, failing non-zero if a required claim no longer does. It uses an isolated runtime port (`18084` by default) and runs the Syft and `jq` checks when those tools are installed.

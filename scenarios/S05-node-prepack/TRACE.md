@@ -6,6 +6,8 @@ track: core
 
 # S05 — Node npm `prepack` Supply Chain Trace Lab
 
+> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
+
 This lab follows a Node package from source, through an npm lifecycle hook, into a packed tarball, into `node_modules`, and finally into runtime behaviour.
 
 The pattern is:
@@ -66,6 +68,17 @@ flowchart TD
   f --> g["node_modules/trace-route-package"]
   g --> h["GET /hidden/prepack-info"]
 ```
+
+## Requirements
+
+- Node.js 20+
+- npm
+- `curl`
+- `tar`
+- Syft for the scanner comparison
+- `jq` for the walkthrough formatting
+
+No external npm packages are required.
 
 ---
 
@@ -645,3 +658,13 @@ The evidence views are:
 - Syft isolated package → no package identified in this walkthrough
 - Syft whole project → both npm package identities
 - runtime → generated behaviour executes
+
+---
+
+# Verify the lab still holds
+
+```bash
+./scripts/proof-check.sh
+```
+
+`proof-check.sh` starts from the clean state, verifies `dist/` is absent before packing, exercises `prepack`, checks the tarball and installed package, validates the npm and Syft evidence views, and runs the application on isolated port `18085`. If Syft is not installed, it skips the Syft checks with a warning.

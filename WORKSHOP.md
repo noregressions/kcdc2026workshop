@@ -117,7 +117,7 @@ question in mind throughout. The spare minutes are deliberate slack.
 
 ## Step 1 — Transformation destroys identity (~15 min)
 
-Lab: [`scenarios/S01-spring-node`](./scenarios/S01-spring-node/OVERVIEW.md) · Go deeper: [`TRACE.md`](./scenarios/S01-spring-node/TRACE.md)
+Lab: [`scenarios/S01-spring-node`](./scenarios/S01-spring-node/TRACE.md) · Go deeper: [`TRACE.md`](./scenarios/S01-spring-node/TRACE.md)
 
 **Question:** does the software survive the build with its identity intact?
 
@@ -184,7 +184,7 @@ identity you can match a CVE against.
 
 ## Step 2 — The dependency graph is not the supply chain (~15 min)
 
-Lab: [`scenarios/S04-maven-plugin-hidden-content`](./scenarios/S04-maven-plugin-hidden-content/OVERVIEW.md) · Go deeper: [`TRACE.md`](./scenarios/S04-maven-plugin-hidden-content/TRACE.md)
+Lab: [`scenarios/S04-maven-plugin-hidden-content`](./scenarios/S04-maven-plugin-hidden-content/TRACE.md) · Go deeper: [`TRACE.md`](./scenarios/S04-maven-plugin-hidden-content/TRACE.md)
 
 **Question:** can an application gain runtime behaviour from software that is
 not in its dependency tree?
@@ -225,7 +225,7 @@ matters.
 
 ## Step 3 — It's not a Maven quirk (~8 min)
 
-Lab: [`scenarios/S05-node-prepack`](./scenarios/S05-node-prepack/OVERVIEW.md) · Go deeper: [`TRACE.md`](./scenarios/S05-node-prepack/TRACE.md)
+Lab: [`scenarios/S05-node-prepack`](./scenarios/S05-node-prepack/TRACE.md) · Go deeper: [`TRACE.md`](./scenarios/S05-node-prepack/TRACE.md)
 
 *Instructor may run this as a demo if time is short.*
 
@@ -264,7 +264,7 @@ execution boundary.
 
 ## Step 4 — And not a JavaScript quirk either (~8 min)
 
-Lab: [`scenarios/S03-python-pep517`](./scenarios/S03-python-pep517/OVERVIEW.md) · Go deeper: [`TRACE.md`](./scenarios/S03-python-pep517/TRACE.md)
+Lab: [`scenarios/S03-python-pep517`](./scenarios/S03-python-pep517/TRACE.md) · Go deeper: [`TRACE.md`](./scenarios/S03-python-pep517/TRACE.md)
 
 *Instructor may run this as a demo if time is short.*
 
@@ -306,7 +306,7 @@ here is standards-documented behaviour, which is Part 5's opening line.
 
 ## Step 5 — Can a better scanner recover what's missing? (instructor demo, ~5 min)
 
-Demo: [`investigations/T01-snyk-beyond-sbom`](./investigations/T01-snyk-beyond-sbom/OVERVIEW.md), shown live against the S04 ground truth. You don't run this one.
+Demo: [`investigations/T01-snyk-beyond-sbom`](./investigations/T01-snyk-beyond-sbom/TRACE.md), shown live against the S04 ground truth. You don't run this one.
 
 A commercial SCA tool analyses S04 with everything it has. It genuinely knows
 more than a plain SBOM, and still cannot name the plugin or its payload,
@@ -516,7 +516,7 @@ Planned still-to-build lab: corrupt a cached Maven artefact and see what the
 build does and doesn't check (S06, ~10 min).
 
 Also planned here: what a scanner finds once it **reads the code** instead of
-the metadata. [`investigations/T08-guarddog`](./investigations/T08-guarddog/OVERVIEW.md)
+the metadata. [`investigations/T08-guarddog`](./investigations/T08-guarddog/TRACE.md)
 runs GuardDog against S05 and S03 and gets two clean results for opposite
 reasons: the mechanism excluded from the artefact (S05), and the mechanism
 present but benign (S03). A malicious positive control proves the scanner
@@ -616,17 +616,17 @@ Nothing below is part of the timed route.
 
 **Optional lab** — same lessons, another ecosystem:
 
-- [S02 — Payara + mvnpm](./scenarios/S02-payara-mvnpm/OVERVIEW.md), if you use Jakarta EE
+- [S02 — Payara + mvnpm](./scenarios/S02-payara-mvnpm/TRACE.md), if you use Jakarta EE
 
 **Reference investigations** — one tool at a time, in depth:
 
-- [T01 per-scenario Snyk traces](./investigations/T01-snyk-beyond-sbom/OVERVIEW.md)
-- [T02 — Docker Scout](./investigations/T02-docker-scout/OVERVIEW.md)
-- [T03 — Trivy](./investigations/T03-trivy-s01/OVERVIEW.md)
-- [T04 — Grype](./investigations/T04-grype-s02/OVERVIEW.md)
-- [T05 — pip-audit](./investigations/T05-pip-audit-s03/OVERVIEW.md)
-- [T06 — OWASP Dependency-Check](./investigations/T06-owasp-dependency-check-s04/OVERVIEW.md)
-- [T07 — npm audit](./investigations/T07-npm-audit-s05/OVERVIEW.md)
+- [T01 per-scenario Snyk traces](./investigations/T01-snyk-beyond-sbom/TRACE.md)
+- [T02 — Docker Scout](./investigations/T02-docker-scout/TRACE.md)
+- [T03 — Trivy](./investigations/T03-trivy-s01/TRACE.md)
+- [T04 — Grype](./investigations/T04-grype-s02/TRACE.md)
+- [T05 — pip-audit](./investigations/T05-pip-audit-s03/TRACE.md)
+- [T06 — OWASP Dependency-Check](./investigations/T06-owasp-dependency-check-s04/TRACE.md)
+- [T07 — npm audit](./investigations/T07-npm-audit-s05/TRACE.md)
 
 **Tool reference:** [`reference/tools.md`](./reference/tools.md): every
 tool the workshop touches, grouped by the evidence boundary it observes,

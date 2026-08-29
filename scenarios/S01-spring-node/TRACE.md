@@ -13,9 +13,29 @@ This lab follows three specific components through a small but realistic softwar
 
 The objective is to see **what evidence exists at each stage, what survives the next transformation, and what different tools can legitimately know**.
 
-Each step follows the same beats:
 
-**Why → Approach → Run → Observed output → Establish**
+## Overview
+
+```text
+control          jackson-databind agrees in resolver and artefact scan
+shading          commons-codec identified — until only its metadata is removed
+bundling         lodash's fingerprints are in the bundle; no package identified
+```
+
+## Requirements
+
+For the basic build:
+
+- JDK 21
+- Maven 3.9+
+- Node.js 20+ / npm
+
+For the full trace:
+
+- `jq`
+- `syft`
+- `zip`
+- Docker
 
 ---
 
@@ -23,35 +43,21 @@ Each step follows the same beats:
 
 The application is a small "checkout" web service in three modules:
 
-```text
-frontend/     React single-page app, bundled by Vite. Fetches
-              /api/trace and renders the result, sorted with lodash
-              (imported whole: `import _ from 'lodash'`).
+|module|type|description|
+|--------------|-----------|-----------------------------------------|
+|frontend|     React single-page app, bundled by Vite| Fetches /api/trace and renders the result, sorted with lodash (imported whole: `import _ from 'lodash'`).|
+|normalizer|   Java Library| Trims and lower-cases a string, then SHA-256 hashes it — hex-encoded with commons-codec. The Shade Plugin relocates that codec bytecode to com.acme.internal.codec inside the normalizer JAR.|
+|service|      Spring Boot REST service| GET /api/trace?value=... returns the normalised value, its hash, and the tracer list as JSON (serialised by jackson-databind, version managed by Spring Boot). Serves the built frontend as its static content.|
 
-normalizer/   Library module. Trims and lower-cases a string, then
-              SHA-256 hashes it — hex-encoded with commons-codec.
-              The Shade Plugin relocates that codec bytecode to
-              com.acme.internal.codec inside the normalizer JAR.
-
-service/      Spring Boot REST service. GET /api/trace?value=...
-              returns the normalised value, its hash, and the tracer
-              list as JSON (serialised by jackson-databind, version
-              managed by Spring Boot). Serves the built frontend as
-              its static content.
-```
 
 At runtime it is one executable Spring Boot JAR on port 8080; the
 `Dockerfile` copies that JAR onto `eclipse-temurin:21-jre-jammy` as the
-`checkout-service` image. Each tracer is planted where a real project would
-put it.
+`checkout-service` image.
 
 ---
 
 # 1. Initial setup
 
-Supply-chain tracing is only useful if we know which build produced the artefacts we are inspecting. Old `target/`, `dist/`, SBOM, or experiment output can make later evidence ambiguous.
-
-We therefore begin by removing generated state while keeping source and lockfiles intact.
 
 The project contains a `clean.sh` wrapper so every run starts from the same state. It removes Maven targets, npm-installed modules, frontend build output, SBOM output, and controlled-experiment output.
 
@@ -84,15 +90,15 @@ Look at:
 - `pom.xml`
 - `frontend/package.json`
 
-### Jackson
+### `service/pom.xml`
 
-`service/pom.xml` declares `jackson-databind` without a local version. The root `pom.xml` imports the Spring Boot dependency-management BOM.
+Declares `jackson-databind` without a local version. The root `pom.xml` imports the Spring Boot dependency-management BOM.
 
 At this point we know Jackson is requested, but not which version Maven will select.
 
-### commons-codec
+### `normalizer/pom.xml`
 
-`normalizer/pom.xml` declares `commons-codec` using the property `${commons-codec.version}`. The root `pom.xml` defines that property as `1.17.1`.
+Declares `commons-codec` using the property `${commons-codec.version}`. The root `pom.xml` defines that property as `1.17.1`.
 
 The Maven Shade Plugin is also configured to relocate:
 
@@ -104,15 +110,15 @@ com.acme.internal.codec
 
 At source-inspection time this is only the intended transformation.
 
-### lodash
+###  `frontend/package.json`
 
-`frontend/package.json` declares:
+declares lodash
 
 ```text
 lodash: 4.17.21
 ```
 
-## Establish
+## Evidence
 
 These are source declarations/configuration only. They are not proof of what gets resolved or shipped.
 
@@ -121,8 +127,6 @@ These are source declarations/configuration only. They are not proof of what get
 # 3. Build
 
 The interesting evidence only appears once the build has actually run. Resolution chooses concrete versions; Vite changes JavaScript package structure; Shade rewrites bytecode; Spring Boot assembles the executable JAR.
-
-Until those transformations happen, we only have configuration.
 
 `build.sh` runs the project's normal build path in the correct order, so we inspect outputs produced by the same path the application actually uses.
 
@@ -136,19 +140,9 @@ For the frontend install, the script prefers `npm ci`, which installs exactly wh
 ./scripts/build.sh
 ```
 
-## Establish
-
-The build performs:
-
-- npm — resolves and installs dependencies
-- Vite — creates the frontend bundle
-- Maven — resolves Java dependencies
-- Maven Shade — builds the transformed normalizer
-- Spring Boot — builds the executable service JAR
-
 ---
 
-# 4. Resolve Jackson
+# Step 4. Identify Jackson version
 
 The source POM did not state a Jackson version. The version that matters to the build is the one Maven resolves after applying dependency management.
 
@@ -175,26 +169,21 @@ mvn -pl service -am dependency:tree \
 ```
 
 
-## Establish
+## Evidence
+
 
 ```text
-Source
-    jackson-databind
-    no local version
-
-        ↓ Maven resolution
-
-Resolved
-    jackson-databind:2.19.4
+The original non-specified version of  jackson-databind is now  jackson-databind:2.19.4
+This proves Maven selected jackson-databind:2.19.4. It does not yet prove it was packaged.
 ```
 
-This proves Maven selected `jackson-databind:2.19.4`. It does not yet prove it was packaged.
+
 
 ---
 
-# 5. Resolve commons-codec for normalizer
+# Step 5. Resolve commons-codec for normalizer
 
-Shade will transform `commons-codec`. Before looking at that transformation, we need a baseline: which version did the `normalizer` module actually resolve before shading?
+The Shade plugin will transform `commons-codec`. Before looking at that transformation, we need a baseline: which version did the `normalizer` module actually resolve before shading?
 
 Without that baseline we could not later tell whether the shaded code and metadata still correspond to the resolved component.
 
@@ -212,23 +201,17 @@ mvn -pl normalizer dependency:tree \
 [INFO] \- commons-codec:commons-codec:jar:1.17.1:compile
 ```
 
-## Establish
+## Evidence
 
 ```text
-Source configuration
-    commons-codec version property → 1.17.1
-
-        ↓ Maven resolution
-
-Resolved
-    commons-codec:1.17.1
+Resolved commons-codec:1.17.1
 ```
 
 ---
 
-# 6. Resolve lodash
+# Step 6. Resolve lodash
 
-Frontend dependencies behave differently from Java JARs. Vite will later fold lodash into a generated JavaScript bundle, so now is the point where its package identity is strongest and easiest to prove.
+Frontend Node dependencies behave differently from Java JARs. Vite will later fold lodash into a generated JavaScript bundle, so now is the point where its package identity is strongest and easiest to prove.
 
 We want both the installed package view and the lockfile evidence before bundling destroys that structure.
 
@@ -262,17 +245,17 @@ Look at the `node_modules/lodash` entry in `frontend/package-lock.json`.
 }
 ```
 
-## Establish
+## What we Established
 
-- `jackson-databind` 2.19.4
-- `commons-codec` 1.17.1
-- `lodash` 4.17.21
+- `jackson-databind` version is 2.19.4
+- `commons-codec` version is 1.17.1
+- `lodash` version is 4.17.21
 
-These are our resolved tracer versions before packaging transformations obscure or duplicate them.
+These are our resolved component versions before packaging transformations obscure or duplicate them.
 
 ---
 
-# 7. Confirm Jackson in the application
+# Step 7. Confirm Jackson in the application
 
 
 A dependency tree tells us what Maven resolved. It does not prove that those bytes ended up in the product.
@@ -311,9 +294,9 @@ Jackson `2.19.4` is both resolved and physically packaged.
 
 ---
 
-# 8. Inspect commons-codec after shading
+# Step 8. Inspect commons-codec after shading
 
-The Shade configuration said commons-codec would be relocated. We need to prove the transformation actually happened and see what it did to the component's visible structure.
+The Shade plugin configuration said commons-codec would be relocated. We need to prove the transformation actually happened and see what it did to the component's visible structure.
 
 This is where a simple dependency graph starts to diverge from the physical artefact.
 
@@ -365,7 +348,7 @@ The configured relocation actually occurred.
 
 ---
 
-# 9. Check whether Maven identity survived shading
+# Step 9. Check whether Maven component identity survived shading
 
 
 Relocating class names does not necessarily erase all evidence of the original component. Many Java archives carry Maven metadata under `META-INF/maven`.
@@ -404,13 +387,13 @@ groupId=commons-codec
 version=1.17.1
 ```
 
-## Establish
+## What we established
 
 The Java namespace changed, but the original Maven component identity survived.
 
 ---
 
-# 10. Ask Syft to identify the shaded dependency
+# Step 10. Ask Syft to identify the shaded dependency
 
 
 So far we have manually correlated relocated classes with surviving Maven metadata. A real SBOM or inventory workflow needs a tool to make that identification from the artefact itself.
@@ -434,7 +417,7 @@ commons-codec  1.17.1   java-archive
 normalizer     1.0.0    java-archive
 ```
 
-## Establish
+## What we've established
 
 ```mermaid
 flowchart TD
@@ -446,7 +429,7 @@ The transformed class names did not prevent component identification because ide
 
 ---
 
-# 11. Controlled evidence-loss experiment
+# Step 11. Controlled evidence-loss experiment
 
 
 The previous result is correlation: the metadata exists and Syft finds the package. To understand whether that evidence is actually important, we need a controlled change.
@@ -506,7 +489,7 @@ The important distinction is:
 
 ---
 
-# 12. Inspect the Vite output
+# Step 12. Inspect the Vite output
 
 
 Lodash gives us a different transformation. Rather than relocating classes inside an archive, Vite incorporates npm package code into generated frontend assets.
@@ -535,7 +518,7 @@ Where the build input had a `node_modules/lodash/` directory, the deployable out
 
 ---
 
-# 13. Scan the frontend bundle
+# Step 13. Scan the frontend bundle
 
 
 We know lodash was a build input. The question is whether its package identity survives bundling strongly enough for an artefact scanner to recover `lodash@4.17.21` from the deployable frontend alone.
@@ -585,7 +568,7 @@ Compare this with the shaded Java example:
 
 ---
 
-# 14. Follow the frontend into the service
+# Step 14. Follow the frontend into the service
 
 The fact that Vite produced a bundle does not prove that bundle reached the application we ship. We need to cross the next packaging boundary.
 
@@ -618,7 +601,7 @@ We can prove the bundle was shipped even though the lodash package identity is n
 
 ---
 
-# 15. Follow normalizer into the service
+# Step 15. Follow normalizer into the service
 
 
 We have proved what is inside the standalone normalizer JAR. Now we need to prove that this transformed component reached the final Spring Boot application as well.
@@ -1146,3 +1129,62 @@ flowchart TD
 Compare those views rather than assuming they are interchangeable.
 
 A separate reverse-provenance exercise should examine the different problem of starting from a binary/container and determining whether it is possible to identify the corresponding source repository and exact source commit.
+
+---
+
+# Running the application
+
+The trace does not require the application to be running, but it is a real
+service. After the build:
+
+```bash
+java -jar service/target/service-1.0.0.jar
+curl 'http://localhost:8080/api/trace?value=Hello%20Supply%20Chain'
+```
+
+Then open <http://localhost:8080/>. Ctrl-C stops the service when you are done.
+
+---
+
+# Replay in one pass
+
+```bash
+./scripts/trace.sh
+```
+
+It replays the walkthrough's evidence commands — the source-declaration greps,
+both dependency trees, the plugin resolutions, and the archive listings — in
+one pass, and writes retained evidence into `trace-output/`. It introduces
+nothing the step-by-step trace does not show.
+
+---
+
+# Verify the lab still holds
+
+```bash
+./scripts/proof-check.sh
+```
+
+`proof-check.sh` re-runs the lab and asserts that it still produces the outcomes this walkthrough describes: the embedded `commons-codec` at `1.17.1`, the service's `1.18.0`, `jackson-databind` at `2.19.4`, `lodash` at `4.17.21`, and the normalizer at `1.0.0`. Use it after changing dependencies or tooling versions to find out whether the walkthrough text needs updating.
+
+It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (the last being equivalent to `--skip-runtime --skip-image`) when you only need part of the check. Run `./scripts/proof-check.sh --help` for the full list.
+
+---
+
+# Optional: runtime image identity
+
+The `k8s/` directory holds optional example deployment files; they are not
+part of the walkthrough above.
+
+```bash
+./scripts/runtime-trace.sh
+```
+
+`runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod: the difference between what was asked for and what is running. In essence:
+
+```bash
+kubectl get deployment checkout-service \
+  -o jsonpath='{.spec.template.spec.containers[0].image}'
+kubectl get pods -l app=checkout-service \
+  -o jsonpath='{range .items[*]}{.status.containerStatuses[0].imageID}{"\n"}{end}'
+```

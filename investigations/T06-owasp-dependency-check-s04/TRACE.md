@@ -6,6 +6,8 @@ track: reference
 
 # T06 — OWASP Dependency-Check / S04
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use OWASP Dependency-Check against S04 to distinguish:

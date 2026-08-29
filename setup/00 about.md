@@ -94,12 +94,8 @@ using a particular evidence source, and does so competently. The interesting
 question is which boundary, and therefore what becomes visible or invisible as a
 consequence.
 
-Every scenario and investigation has two documents:
-
-```text
-OVERVIEW.md   what it is, what it needs, and how to run it
-TRACE.md      the annotated step-by-step walkthrough
-```
+Every scenario and investigation is one document, `TRACE.md`: what it is,
+what it needs, how to run it, and the annotated step-by-step walkthrough.
 
 ## How to read a trace
 

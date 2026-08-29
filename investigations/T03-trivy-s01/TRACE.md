@@ -6,6 +6,8 @@ track: reference
 
 # T03 — Trivy Across S01 Boundaries
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use one vulnerability tool, Trivy, against several evidence boundaries in S01.

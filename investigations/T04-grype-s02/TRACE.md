@@ -6,6 +6,8 @@ track: reference
 
 # T04 — Grype / S02
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
+
 ## The question
 
 Use Grype against S02 to separate:

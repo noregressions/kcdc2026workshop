@@ -6,6 +6,8 @@ track: instructor-demo
 
 # T01 — Snyk Beyond the SBOM
 
+> **Workshop track: INSTRUCTOR DEMO** — shown live during the workshop against S04 ground truth. You don't need to run it yourself; the per-scenario sections are reference material.
+
 ## The question
 
 > What does a commercial SCA tool know that an ordinary SBOM does not, and which supply-chain transformations remain invisible even to it?
@@ -31,8 +33,8 @@ and compares several evidence types:
 
 ## The instrument
 
-The tool under investigation is Snyk Open Source, exercised in every mode the
-labs support:
+The observed runs used Snyk CLI 1.1305.2, authenticated, exercised in every
+mode the labs support:
 
 - project scans against Maven, npm and pip dependency models
 - `--include-provenance` enrichment of those scans
@@ -45,6 +47,26 @@ The headline result, stated up front:
 **better package identity ≠ complete supply-chain history**
 
 Snyk often provides richer identity, vulnerability and dependency-path information than a basic SBOM. But it does not reconstruct every build realm, lifecycle action, code-generation step, bundling transformation, or publication-time mutation after those facts have disappeared from the dependency model. The probes below establish both halves of that sentence, scenario by scenario.
+
+## Running the probes
+
+Each scenario's probes are driven by a baseline/run/compare script triplet,
+run from `investigations/T01-snyk-beyond-sbom` with the scenario labs built:
+
+```bash
+./scripts/baseline.sh && ./scripts/run-snyk.sh && ./scripts/compare.sh          # S04
+./scripts/baseline-s01.sh && ./scripts/run-snyk-s01.sh && ./scripts/compare-s01.sh
+./scripts/baseline-s02.sh && ./scripts/run-snyk-s02.sh && ./scripts/compare-s02.sh
+./scripts/baseline-s03.sh && ./scripts/run-snyk-s03.sh && ./scripts/compare-s03.sh
+./scripts/baseline-s05.sh && ./scripts/run-snyk-s05.sh && ./scripts/compare-s05.sh
+```
+
+The scripts expect the scenarios at `../../scenarios/`; override with, for
+example, `S04_DIR=/path/to/S04-maven-plugin-hidden-content ./scripts/baseline.sh`.
+Requirements beyond the scenarios themselves: Maven 3.9+, JDK 21+, an
+authenticated Snyk CLI, `jq`, and Syft for the baseline scanner comparisons.
+`./scripts/proof-check.sh` reruns the investigation and asserts the observed
+evidence boundaries.
 
 ---
 

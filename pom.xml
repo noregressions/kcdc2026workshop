@@ -112,6 +112,11 @@
                             <axis>
                                 <name>kind</name>
                                 <title>Kind</title>
+                                <!-- Label-only: classes, badges and site
+                                     landing pages, but no divider pages —
+                                     the Parts and appendices are the book's
+                                     structure, not the kinds. -->
+                                <dividers>false</dividers>
                                 <values>
                                     <value>
                                         <id>scenario</id>
@@ -164,15 +169,10 @@
                                 <title>Part 2 — Can We Identify What We Ship?</title>
                                 <includes>
                                     <include>workshop/02-identification.md</include>
-                                    <include>scenarios/S01-spring-node/OVERVIEW.md</include>
                                     <include>scenarios/S01-spring-node/TRACE.md</include>
-                                    <include>scenarios/S04-maven-plugin-hidden-content/OVERVIEW.md</include>
                                     <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
-                                    <include>scenarios/S05-node-prepack/OVERVIEW.md</include>
                                     <include>scenarios/S05-node-prepack/TRACE.md</include>
-                                    <include>scenarios/S03-python-pep517/OVERVIEW.md</include>
                                     <include>scenarios/S03-python-pep517/TRACE.md</include>
-                                    <include>investigations/T01-snyk-beyond-sbom/OVERVIEW.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
                                 </includes>
                             </section>
@@ -209,7 +209,6 @@
                             <section>
                                 <title>Appendix — Optional Labs</title>
                                 <includes>
-                                    <include>scenarios/S02-payara-mvnpm/OVERVIEW.md</include>
                                     <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
                                 </includes>
                             </section>
@@ -232,17 +231,11 @@
                             <section>
                                 <title>Appendix — Reference Investigations</title>
                                 <includes>
-                                    <include>investigations/T02-docker-scout/OVERVIEW.md</include>
                                     <include>investigations/T02-docker-scout/TRACE.md</include>
-                                    <include>investigations/T03-trivy-s01/OVERVIEW.md</include>
                                     <include>investigations/T03-trivy-s01/TRACE.md</include>
-                                    <include>investigations/T04-grype-s02/OVERVIEW.md</include>
                                     <include>investigations/T04-grype-s02/TRACE.md</include>
-                                    <include>investigations/T05-pip-audit-s03/OVERVIEW.md</include>
                                     <include>investigations/T05-pip-audit-s03/TRACE.md</include>
-                                    <include>investigations/T06-owasp-dependency-check-s04/OVERVIEW.md</include>
                                     <include>investigations/T06-owasp-dependency-check-s04/TRACE.md</include>
-                                    <include>investigations/T07-npm-audit-s05/OVERVIEW.md</include>
                                     <include>investigations/T07-npm-audit-s05/TRACE.md</include>
                                 </includes>
                             </section>
@@ -265,14 +258,14 @@
                             <emitHtml>${project.build.directory}/book.html</emitHtml>
                             <!--
                                 The printed book is the workshop handout: the timed
-                                route plus the tools appendix, and nothing else.
+                                route plus the Optional Labs and tools appendices.
                                 combine.self="override" replaces the shared <book>
                                 wholesale (Maven merging would otherwise splice the
                                 two section lists positionally), so this is a full
-                                copy of the shared book minus the Optional Labs and
-                                Reference Investigations sections — those stay in
-                                the site editions above. Keep the two copies'
-                                common parts in step when editing either.
+                                copy of the shared book minus the Reference
+                                Investigations section — that stays in the site
+                                edition above. Keep the two copies' common parts
+                                in step when editing either.
                             -->
                             <book combine.self="override">
 
@@ -298,6 +291,7 @@
                                     <axis>
                                         <name>kind</name>
                                         <title>Kind</title>
+                                        <dividers>false</dividers>
                                         <values>
                                             <value>
                                                 <id>scenario</id>
@@ -341,17 +335,11 @@
                                         <title>Part 2 — Can We Identify What We Ship?</title>
                                         <includes>
                                             <include>workshop/02-identification.md</include>
-                                            <include>scenarios/S01-spring-node/OVERVIEW.md</include>
                                             <include>scenarios/S01-spring-node/TRACE.md</include>
-                                            <include>scenarios/S02-payara-mvnpm/OVERVIEW.md</include>
-                                            <include>scenarios/S03-python-pep517/OVERVIEW.md</include>
+                                            <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
                                             <include>scenarios/S03-python-pep517/TRACE.md</include>
-                                            <include>scenarios/S04-maven-plugin-hidden-content/OVERVIEW.md</include>
                                             <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
-                                            <include>scenarios/S05-node-prepack/OVERVIEW.md</include>
                                             <include>scenarios/S05-node-prepack/TRACE.md</include>
-
-                                            <include>investigations/T01-snyk-beyond-sbom/OVERVIEW.md</include>
                                             <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
                                         </includes>
                                     </section>
@@ -383,6 +371,12 @@
                                         <title>Part 7 — Wrap-Up</title>
                                         <includes>
                                             <include>workshop/07-wrap-up.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — Optional Labs</title>
+                                        <includes>
+                                            <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
                                         </includes>
                                     </section>
                                     <section>

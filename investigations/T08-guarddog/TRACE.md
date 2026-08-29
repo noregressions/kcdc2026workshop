@@ -6,6 +6,10 @@ track: reference
 
 # T08 — GuardDog / S05 + S03
 
+> **Workshop track: REFERENCE** — self-study material, not part of the timed
+> route. Pairs with Part 5, where the question is what a tool can detect once
+> it stops trusting metadata and starts reading code.
+
 ## The question
 
 Part 2 showed that metadata-only scanners miss code that a build generates or
@@ -25,6 +29,13 @@ The central question:
 > it was handed?
 
 ## The instrument
+
+[GuardDog](https://github.com/DataDog/guarddog) (Datadog, Apache-2.0) is a
+malicious-package scanner for npm, PyPI, Go, RubyGems, GitHub Actions and
+editor extensions. It works two ways: **source-code heuristics** (Semgrep and
+YARA rules over the package's actual code, looking for obfuscation, download-
+and-execute, install hooks, exfiltration) and **metadata heuristics**
+(typosquatting, expired maintainer domains, and the like).
 
 ```text
 guarddog 3.2.0

@@ -1,238 +1,122 @@
-# You Don't Know What You're Shipping
+# Software Supply Chain Trace Lab
 
-*The Software Supply Chain Trace Lab* — a hands-on workshop about what you
-can and cannot know about the software you ship.
+Empirical benchmarks and analysis of software component identifiability, build transformations, and vulnerability scanner visibility across supply chain boundaries.
 
-> Every project has dependencies it knows about. Most have dependencies it
-> doesn't.
+## Core Technical Architecture
 
-Every scenario in this repository takes a component you declared, follows it
-through a real build, and asks the same question at each boundary: **is it still
-identifiable here?** Sometimes it is. Often the code survives while the evidence
-of what it was does not.
-
-The labs are deliberately small, but the builds are real: Maven, npm, Vite,
-esbuild, Maven Shade, Spring Boot, PEP 517, npm lifecycle hooks, Docker. Nothing
-is faked or stubbed.
-
-## The central idea
-
-A dependency declaration, a resolved dependency graph, a packaged artefact, an
-SBOM and a container image are five different observations, made at five
-different points, from five different evidence sources. They are not
-interchangeable, and they routinely disagree for entirely legitimate reasons.
+Component tracking across the software lifecycle encounters multiple representation transformations:
 
 ```text
 source configuration
-        ↓
+        |
 resolver model
-        ↓
+        |
 build transformation
-        ↓
-application artefact
-        ↓
+        |
+application artifact
+        |
 SBOM producer
-        ↓
+        |
 container image
 ```
 
-The workshop's recurring finding is that **software presence and software
-identifiability are different questions.** A build can preserve behaviour
-perfectly while destroying every trace of where that behaviour came from.
+Technical finding: **Software presence does not equal software identifiability.** Build-time transformations (bytecode relocation, shading, frontend bundling, and build-time code generation) frequently preserve runtime logic while stripping the package metadata required by static scanners.
 
-## Attending the workshop?
+## Workshop Execution Guide
 
-**Go straight to [`WORKSHOP.md`](./WORKSHOP.md)**: the timed, canonical route.
-You are not expected to work through every scenario and investigation in this
-repository; the workshop route selects what matters and links to the rest.
+The timed execution route is documented in [`WORKSHOP.md`](./WORKSHOP.md).
 
-## Getting started
+## Environment Setup
 
-You need a JDK 21+, Maven 3.9+, Node.js 20+, Python 3.11+ and Docker. Full
-details and install commands are in [`setup/`](./setup).
+Requirements: JDK 21+, Maven 3.9+, Node.js 20+, Python 3.11+, and Docker. See [`setup/`](./setup) for complete configuration instructions.
 
-**Zero-install option:** if you have Docker, you don't need anything else —
-`./container/build.sh && ./container/run.sh` drops you into a shell with
-every tool installed, every lab prebuilt, and the scanner databases
-prewarmed. Details in [`setup/01 getting-started.md`](./setup/01%20getting-started.md).
+### 1. Preconfigured Container Environment
 
-**1. Check your machine.** Reports the version of every tool the workshop uses,
-flags anything too old, and prints an install link for anything missing. Changes
-nothing.
+```bash
+./container/build.sh
+./container/run.sh
+```
+
+### 2. Host Prerequisites Verification
 
 ```bash
 ./scripts/tools-check.sh
 ```
 
-**2. Warm it up.** Pulls the container base images, builds all five scenarios,
-builds the scenario container images, and downloads the scanner databases. Do
-this *before* the workshop, on a good network: it is the difference between
-starting on time and watching Maven download.
+### 3. Pre-Warm Caches and Build Targets
 
 ```bash
 ./scripts/build-all.sh
 ```
 
-Add `--with-investigations` to also run the T01–T08 baselines. That is slower,
-and the T06 step downloads a large NVD dataset the first time.
+Append `--with-investigations` to execute baseline scans across T01–T08.
 
-**3. Pick a lab.** Each scenario and investigation is one document,
-`TRACE.md`: what it is, what it needs, how to run it, and the annotated
-step-by-step walkthrough.
+## Scenarios Reference
 
-```bash
-cd scenarios/S01-spring-node
-cat TRACE.md
-```
-
-## Scenarios
-
-Five supply chains that each hide software somewhere different, plus a
-provenance lab (S07) built on the first.
-
-| | Lab | What it follows |
+| Lab | Identifier | Tracked Transformations |
 |---|---|---|
-| **S01** | [`Spring + Node`](./scenarios/S01-spring-node) | An ordinary Java dependency, a shaded-and-relocated one, and an npm package bundled into frontend JavaScript — through to a container image |
-| **S02** | [`Payara + mvnpm`](./scenarios/S02-payara-mvnpm) | Four kinds of software through one build into one running container, including a package that reaches the bundle only via a Maven **plugin** execution realm |
-| **S03** | [`Python PEP 517`](./scenarios/S03-python-pep517) | A direct dependency into a transitive sdist, through PEP 517 **build-backend execution**, into the installed environment and runtime |
-| **S04** | [`Maven plugin hidden content`](./scenarios/S04-maven-plugin-hidden-content) | Runtime capability entering an application through **Maven plugin execution** rather than its dependency graph — the application's dependency tree is empty |
-| **S05** | [`Node npm prepack`](./scenarios/S05-node-prepack) | A package through an npm **lifecycle hook** into a tarball, into `node_modules`, and into runtime behaviour |
-| **S07** | [`Reverse provenance`](./scenarios/S07-provenance-s01) | Reuses S01's image: trace a finished artefact home, then record provenance in four layers (**git → OCI labels → SBOM → attestation**) until you can |
+| [`Spring + Node`](./scenarios/S01-spring-node) | **S01** | Standard dependency resolution, shaded bytecode relocation, and bundled frontend JavaScript. |
+| [`Payara + mvnpm`](./scenarios/S02-payara-mvnpm) | **S02** | WAR packaging, mvnpm client dependencies, and Maven plugin execution realms. |
+| [`Python PEP 517`](./scenarios/S03-python-pep517) | **S03** | Source distribution build backends generating runtime modules during `pip install`. |
+| [`Maven plugin hidden content`](./scenarios/S04-maven-plugin-hidden-content) | **S04** | Runtime code generation via Maven plugin execution where the application dependency graph is empty. |
+| [`Node npm prepack`](./scenarios/S05-node-prepack) | **S05** | Dynamic artifact generation during npm `prepack` lifecycle hook execution. |
+| [`Reverse provenance`](./scenarios/S07-provenance-s01) | **S07** | Layered provenance verification (Git commit properties, OCI labels, CycloneDX SBOM, Cosign attestations). |
 
-## Investigations
+## Investigations Reference
 
-Eight tools pointed at those scenarios, asking what each one can actually see.
-
-| | Investigation | Against |
+| Tool Evaluation | Target Scenario | Focus Area |
 |---|---|---|
-| **T01** | [`Snyk beyond the SBOM`](./investigations/T01-snyk-beyond-sbom) | All five scenarios, with a cross-scenario matrix |
-| **T02** | [`Docker Scout`](./investigations/T02-docker-scout) | S01, S02 (the container-producing scenarios) |
-| **T03** | [`Trivy`](./investigations/T03-trivy-s01) | S01 |
-| **T04** | [`Grype`](./investigations/T04-grype-s02) | S02 |
-| **T05** | [`pip-audit`](./investigations/T05-pip-audit-s03) | S03 |
-| **T06** | [`OWASP Dependency-Check`](./investigations/T06-owasp-dependency-check-s04) | S04 |
-| **T07** | [`npm audit`](./investigations/T07-npm-audit-s05) | S05 |
-| **T08** | [`GuardDog`](./investigations/T08-guarddog) | S05, S03 (a code-reading scanner, plus a positive control) |
+| [`Snyk`](./investigations/T01-snyk-beyond-sbom) (**T01**) | S01–S05 | Commercial SCA analysis across shaded, bundled, and plugin-generated artifacts. |
+| [`Docker Scout`](./investigations/T02-docker-scout) (**T02**) | S01, S02 | Final container image layer analysis vs upstream build provenance. |
+| [`Trivy`](./investigations/T03-trivy-s01) (**T03**) | S01 | Finding divergence across manifests, JARs, bundles, and container images. |
+| [`Grype`](./investigations/T04-grype-s02) (**T04**) | S02 | Static cataloging and CVE matching against WAR and container targets. |
+| [`pip-audit`](./investigations/T05-pip-audit-s03) (**T05**) | S03 | Evaluation of installed virtual environments against PEP 517 build execution. |
+| [`OWASP Dependency-Check`](./investigations/T06-owasp-dependency-check-s04) (**T06**) | S04 | CPE matching against plugin-generated application bytecode. |
+| [`npm audit`](./investigations/T07-npm-audit-s05) (**T07**) | S05 | Manifest dependency evaluation vs physical package contents. |
+| [`GuardDog`](./investigations/T08-guarddog) (**T08**) | S05, S03 | Static AST code scanning of package archives vs metadata analysis. |
 
-The point is to see which boundary each one observes, and what that choice
-makes visible or invisible, not to rank the tools.
+## Script Interface Conventions
 
-## How a walkthrough is structured
-
-The two kinds of lab read differently, and the beats tell you which kind you
-are in.
-
-A **scenario** `TRACE.md` is a walkthrough — five beats per step, so you always
-know which part is argument and which part is evidence:
-
-```text
-Why                the question this step answers
-Approach           what the command does, and why this one
-Run                the command
-Observed output    what it actually printed
-Establish          what that does and does not prove
-```
-
-An **investigation** `TRACE.md` is an experiment report: ground truth first,
-then a series of probes, each falsifiable because its prediction comes before
-its result:
-
-```text
-Question       what this probe asks of the tool
-Expectation    what ground truth predicts, stated before the output
-Observed       what the tool actually reported
-Verdict        seen or missed, and what that does and does not prove
-```
-
-Every investigation ends with a scorecard of what the tool identified at each
-boundary, in a shared vocabulary, so the tools can be laid side by side.
-
-In both kinds, the observed-output blocks are real captured output, not
-illustrations. If yours differs, that is worth investigating: versions and
-vulnerability databases move.
-
-## Conventions
-
-The scenarios share a common script interface. S01 has no runtime, so it has
-no `run.sh` or `stop.sh`:
-
-| Script | Does |
+| Script | Function |
 |---|---|
-| `./scripts/build.sh` | Build it |
-| `./scripts/run.sh` | Start the runtime |
-| `./scripts/stop.sh` | Stop it — **run this when you finish a lab** |
-| `./scripts/clean.sh` | Return to a known-clean state |
-| `./scripts/proof-check.sh` | Assert the walkthrough's claims still hold |
+| `./scripts/build.sh` | Compiles targets and packages artifacts |
+| `./scripts/run.sh` | Starts background service runtime |
+| `./scripts/stop.sh` | Stops running background service |
+| `./scripts/clean.sh` | Cleans target directories and generated artifacts |
+| `./scripts/proof-check.sh` | Validates structural assertion rules against current output |
 
-Several scenarios also have a trace helper (`trace.sh`, `trace-mvnpm.sh`,
-`trace-python.sh`, `trace-plugin.sh`) that replays the core evidence sequence in
-one pass, once you have already been through it step by step.
-
-**Ports.** The scenarios use distinct ports so they can run side by side:
+### Configured Service Ports
 
 ```text
-S02   8080      S04   8082
-S03   8081      S05   8083
+S02: 8080    S04: 8082
+S03: 8081    S05: 8083
 ```
 
-`run.sh` refuses to start if its port is already busy, and each detached runtime
-is tracked in `.runtime.pid`. If you skip `stop.sh`, the next `run.sh` will tell
-you.
-
-**`proof-check.sh`** is how you find out whether a walkthrough has gone stale.
-It asserts the structural claims: which components appear, which are omitted.
-Note that some also assert exact vulnerability counts, and those *will* drift as
-databases change; a failure there means the recorded numbers need refreshing,
-not that the lesson broke.
-
-## Repository layout
+## Repository Structure
 
 ```text
-FACILITATOR.md    instructor-side notes: timings, expected outputs, failure playbook
-setup/            prerequisites, accounts and keys, pre-pull and pre-warm
-scenarios/        S01-S05, each a single TRACE.md walkthrough
-investigations/   T01-T08, each a single TRACE.md report
-scripts/          tools-check.sh, build-all.sh
-pom.xml           builds the whole workshop as a single PDF
+FACILITATOR.md    Instruction timings, expected outputs, and troubleshooting
+setup/            Prerequisites, authentication configuration, and pre-warm guides
+scenarios/        Scenario definitions and TRACE.md walkthroughs (S01-S05, S07)
+investigations/   Tool evaluations and TRACE.md reports (T01-T08)
+scripts/          Environment validation and build orchestration scripts
+pom.xml           Build configuration for aggregated manual PDF compilation
 ```
 
-The `README.md` in each lab directory is a short pointer for browsing the
-repository on GitHub. The content lives in `TRACE.md`, because the book
-build skips files named `README.md`.
-
-## Building the workshop as a book
-
-The `setup/`, `scenarios/` and `investigations/` markdown is assembled into one
-PDF:
+## PDF Document Generation
 
 ```bash
 mvn package
-# -> target/book.pdf   (US Letter, running headers, page numbers)
+# -> target/book.pdf
 ```
+## Setup and Configuration Reference
 
-## Prerequisites in full
-
-- [`setup/00 about.md`](./setup/00%20about.md) — what the workshop is for, the
-  approach it takes, and how to read a trace
-- [`setup/02 tools.md`](./setup/02%20tools.md) — required tools and versions,
-  plus notes on using Podman
-- [`setup/INSTALL.md`](./setup/INSTALL.md) — full install transcripts for
-  macOS and Debian/Ubuntu
-- [`setup/VERSIONS.md`](./setup/VERSIONS.md) — the versions the walkthroughs
-  were recorded against, and what legitimately drifts
-- [`setup/03 ACCOUNTS-AND-KEYS.md`](./setup/03%20ACCOUNTS-AND-KEYS.md) — Snyk
-  authentication and the NVD API key
-- [`setup/04 PREPULL-PREWARM.md`](./setup/04%20PREPULL-PREWARM.md) — what
-  `build-all.sh` automates, and the manual equivalent
-
-Two things are worth knowing before you start:
-
-- **Docker is the canonical engine.** Podman works for the S01/S02 container
-  build and run stages, but the scripts invoke `docker` directly. T02 needs
-  Docker Scout, which Podman does not provide.
-- **An NVD API key changes T06.** With `NVD_API_KEY` set, T06 uses
-  Dependency-Check 13.0.0; without it, 12.2.2. Both work, but they are not the
-  same tool version.
+- [`setup/00 about.md`](./setup/00%20about.md) — Workshop architecture and evaluation methodology.
+- [`setup/02 tools.md`](./setup/02%20tools.md) — Tool specifications and version minimums.
+- [`setup/03 ACCOUNTS-AND-KEYS.md`](./setup/03%20ACCOUNTS-AND-KEYS.md) — Snyk authentication and NVD API key configuration.
+- [`setup/04 PREPULL-PREWARM.md`](./setup/04%20PREPULL-PREWARM.md) — Pre-warm procedures and cache initialization.
+- [`setup/INSTALL.md`](./setup/INSTALL.md) — OS-specific installation transcripts.
+- [`setup/VERSIONS.md`](./setup/VERSIONS.md) — Baseline verified versions and dependency pins.
 
 ## License
 

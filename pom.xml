@@ -41,9 +41,9 @@
                         header/footer templates and the diagnostics page,
                         assets/ the cover image. Content stays scattered
                         across the repo (setup/, workshop/, scenarios/, ...)
-                        and is selected by the <sections> globs below —
-                        <book><root> defaults to the module basedir, which is
-                        exactly what those patterns resolve against.
+                        and is selected by the <sections> globs below,
+                        which resolve against the <book><root> declared in
+                        each book.
                     -->
                     <theme>noregressions</theme>
                     <!--
@@ -66,6 +66,17 @@
                     <pageSize>letter</pageSize>
                     <margins>14 12</margins>
                     <book>
+                        <!--
+                            Content lives scattered across the repo (setup/,
+                            workshop/, scenarios/, ...), so the patterns in
+                            <sections> below resolve against the module
+                            basedir. Declared, not inferred: an undeclared
+                            <root> now follows the same convention as every
+                            other way of naming a book and lands on the book
+                            home, src/main/paperband/ — which holds only
+                            layouts/, styles/ and assets/, and no cards.
+                        -->
+                        <root>${project.basedir}</root>
 
                         <index>auto</index>
                         <cover>
@@ -268,6 +279,8 @@
                                 in step when editing either.
                             -->
                             <book combine.self="override">
+                                <!-- Kept in step with the shared book's root above. -->
+                                <root>${project.basedir}</root>
 
                                 <index>auto</index>
                                 <cover>
@@ -336,7 +349,12 @@
                                         <includes>
                                             <include>workshop/02-identification.md</include>
                                             <include>scenarios/S01-spring-node/TRACE.md</include>
-                                            <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
+                                            <!--
+                                                S02 is not here: it belongs to the Optional
+                                                Labs appendix below, and the first section to
+                                                claim a card keeps it. Listing it in both left
+                                                the appendix empty.
+                                            -->
                                             <include>scenarios/S03-python-pep517/TRACE.md</include>
                                             <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
                                             <include>scenarios/S05-node-prepack/TRACE.md</include>

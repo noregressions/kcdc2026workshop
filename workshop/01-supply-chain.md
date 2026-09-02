@@ -1,33 +1,24 @@
 ---
 id: workshop-01-supply-chain
-oneliner: "What a software supply chain is, why dependency trees are only part of it, and the question the whole workshop keeps asking."
+oneliner: "Software supply chain architecture, dependency resolution boundaries, and inventory identification scope."
 track: core
-status: placeholder
+status: planned
 ---
 
-# Introduction
+# Part 1: Supply Chain Fundamentals
 
-> **PLACEHOLDER** — presentation content to be written. Outline and timing
-> below are the working plan from the transformation TODO.
+**Target duration:** 15 minutes
 
-**Target duration:** 15 min presentation
+## Technical Outline
 
-## Planned content
-
-- **While-you-listen machine check** (first slide): attendees run
-  `./scripts/tools-check.sh`, fix what it reports, then
-  `./scripts/build-all.sh`. Broken machines get fixed here, during talk time,
-  not during the S01 exercise.
-- Define a software supply chain as more than dependencies: development,
-  selection, testing, integration, build, repositories, deployment,
-  maintenance, security, support, EOL.
-- Every dependency brings decisions made by other people.
-- Single application diagram: our source, Maven deps, transitives, npm
-  packages, build plugins, build tools, JDK/runtime, container base, OS
-  packages.
-- The opening question: *Can you tell me exactly what software this
-  application contains?*
-- Why we care: vulnerability matching, remediation, compliance, audit,
-  customer evidence, cyber insurance.
-- Verify or drop the "10% own code / 90% dependencies" and "150 deps per
-  application" claims before use.
+- **Environment Verification:** Execute `./scripts/tools-check.sh` and `./scripts/build-all.sh` to initialize build caches and container images.
+- **Supply Chain Architecture Scope:** Complete supply chain definition spanning source development, component selection, test execution, dependency resolution, build-time code execution, packaging transformations, repository distribution, runtime environments, and lifecycle support/EOL.
+- **External Dependency Ingress:** Direct dependencies, transitive graphs, build plugins, build engines, execution runtimes (JDK/Node/Python), base images, and operating system packages.
+- **Application Composition Boundary Model:**
+  - Source declarations
+  - Direct and transitive dependency graphs
+  - Build plugin execution realms
+  - Bundled/shaded application artifacts
+  - Runtime and container environments
+- **Core Evaluation Query:** *Can you determine the complete set of software components present in a deployed artifact?*
+- **Operational Drivers:** Vulnerability correlation, patch remediation, compliance verification, provenance tracking, and security auditing.

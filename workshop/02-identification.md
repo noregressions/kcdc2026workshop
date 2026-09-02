@@ -1,29 +1,36 @@
 ---
 id: workshop-02-identification
-oneliner: "The main practical block: S01 transformation, S04 hidden build content, S05 npm lifecycle, S03 PEP 517, and the scanner demo."
+oneliner: "Practical evaluation of software identifiability: build transformations (S01), plugin execution (S04), lifecycle hooks (S05), build backends (S03), and scanner visibility limits (T01)."
 track: core
-status: placeholder
+status: planned
 ---
 
-# Introduction
+# Part 2: Software Identifiability Across Boundaries
 
-> **PLACEHOLDER** — presentation content to be written. Outline and timing
-> below are the working plan from the transformation TODO.
+**Target duration:** 55 minutes
 
-**Target duration:** 55 min hands-on
+## Modules and Objectives
 
-## Planned content
+1. **S01 — Build Transformations and Metadata Stripping (15 min):**
+   - Control: Standard Maven dependency resolution (`jackson-databind`) verified across resolver, artifact bytecode, and SBOM metadata.
+   - Bytecode Shading: Relocating `commons-codec` into application namespaces and observing detection failure when Maven metadata is removed.
+   - Frontend Bundling: Vite/esbuild bundling of `lodash`, eliminating individual package boundaries from static artifact inspection.
 
-- S01 curated: normal vs shaded vs bundled — 15 minutes. Opens with
-  jackson-databind as the agreement baseline (the control; S00 was dropped).
-- ~5 minutes deliberate slack in this part.
-- S04: the dependency graph is not the supply chain — 15 minutes.
-- S05: not Maven-specific (npm prepack) — attendee exercise, ~8 min
-  (instructor demo if late).
-- S03: and not JavaScript-specific either (PEP 517) — attendee exercise,
-  ~8 min (instructor demo if late). Promoted from optional 2026-08-24 so
-  Python is first-class, per the abstract.
-- T01 instructor demo against S04 ground truth: better analysis of available
-  evidence does not create missing evidence.
-- Closes with the shared evidence table (what each source sees / misses),
-  carried into later parts.
+2. **S04 — Maven Plugin Execution Realms (15 min):**
+   - Demonstration of runtime endpoint injection (`trace-route-payload`) via build-time plugin execution (`trace-injector-maven-plugin`).
+   - Comparison of empty application `dependency:tree` against actual compiled classes in the target JAR.
+
+3. **S05 — npm Package Lifecycle Hooks (8 min):**
+   - Tarball generation via `prepack` lifecycle scripts executing before artifact packaging.
+   - Contrast between declared repository source files and packaged distributable artifacts.
+
+4. **S03 — Python PEP 517 Build Backends (8 min):**
+   - Package construction during `pip install` via dynamic PEP 517 build backends in source distributions.
+   - Comparison of source distribution contents against installed `site-packages` runtime structures.
+
+5. **T01 — Commercial SCA Capabilities and Boundary Limits (5 min):**
+   - Evaluation of advanced scanner analysis against S04 ground truth.
+   - Demonstration that algorithmic analysis cannot synthesize metadata destroyed or omitted prior to artifact generation.
+
+6. **Synthesis — The Evidence Boundary Matrix:**
+   - Systematic classification of what each evidence source (Manifest, Resolver, SBOM, Artifact Scanner, Container Scanner) detects versus what it systematically omits.

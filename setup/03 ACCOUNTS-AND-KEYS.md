@@ -1,159 +1,88 @@
 ---
 id: setup-accounts-and-keys
-oneliner: "Snyk authentication and the NVD API key: the two credentials some investigations need."
+oneliner: "Authentication configuration, API keys, and external endpoint access requirements."
 track: core
 ---
 
-# Accounts and Keys
+# Accounts and API Keys
 
-A small number of investigations need authentication or API access; set
-these up before the workshop.
+Configuration instructions for investigations requiring authenticated API endpoints and registry access.
 
-## Snyk
+## Snyk Authentication (T01)
 
-T01 requires an authenticated Snyk CLI. **A free Snyk account is
-sufficient**: nothing in this workshop needs a paid tier.
+T01 requires an authenticated Snyk CLI session (free tier account is sufficient):
 
 ```bash
 snyk auth
 ```
 
-Verify:
+Verify authentication status:
 
 ```bash
 snyk --version
 snyk config get api
 ```
 
-Do not commit Snyk credentials to the repository.
+## NVD API Key (T06)
 
----
-
-# NVD API key for T06
-
-T06 uses the OWASP Dependency-Check Maven Plugin.
-
-The harness behaves as follows:
+T06 executes the OWASP Dependency-Check Maven Plugin. The test harness dynamically selects the plugin version based on key availability:
 
 ```text
-NVD_API_KEY present
-    -> Dependency-Check 13.0.0
-
-NVD_API_KEY absent
-    -> Dependency-Check 12.2.2
+NVD_API_KEY present  -> Dependency-Check 13.0.0 (uses NVD 2.0 API with elevated rate limits)
+NVD_API_KEY absent   -> Dependency-Check 12.2.2 (fallback version avoiding key-required API paths)
 ```
 
-This is deliberate because Dependency-Check 13.0.0 has a known no-key regression in the NVD update path.
+### Request an NVD API Key
 
-For the exact T06 run used to produce the workshop evidence, use a valid NVD API key.
+1. Navigate to: `https://nvd.nist.gov/developers/request-an-api-key`
+2. Complete the registration form and accept the Terms of Use.
+3. Activate the key using the confirmation link sent by NIST (valid for 7 days).
+4. Store the API key in a secure local credentials store.
 
-## Request an NVD API key
-
-Go to:
-
-```text
-https://nvd.nist.gov/developers/request-an-api-key
-```
-
-The form asks for:
-
-```text
-organisation name
-email address
-organisation type
-```
-
-Then:
-
-```text
-1. Accept the NVD Terms of Use.
-2. Submit the request.
-3. Check your email for the activation message.
-4. Open the activation link.
-5. Activate the key.
-6. Copy the key into a secure secret store.
-```
-
-The activation link is single-use and expires after seven days.
-
-Do not commit the NVD API key to the repository.
-
-## Export the key
+### Export Environment Variable
 
 ```bash
-export NVD_API_KEY='your-key-here'
+export NVD_API_KEY='your-api-key'
 ```
 
-Verify that it is exported:
+Verify the variable is set:
 
 ```bash
-printenv NVD_API_KEY >/dev/null &&
-  echo "NVD_API_KEY is exported"
+printenv NVD_API_KEY >/dev/null && echo "NVD_API_KEY is exported"
 ```
 
-The T06 harness should then print:
+When executing `./scripts/run-dependency-check-s04.sh`, the script logs:
 
 ```text
 NVD API key: supplied via NVD_API_KEY environment variable
 ```
 
-If it prints:
+## Docker Registry Authentication (T02)
 
-```text
-NVD API key: not supplied
-```
-
-then the variable is either unset or not exported into the shell running the script.
-
----
-
-# Docker account
-
-Docker Scout may require Docker authentication in some environments.
-
-Before the workshop:
+Docker Scout requires an authenticated Docker CLI session:
 
 ```bash
 docker login
-```
-
-Verify:
-
-```bash
 docker scout version
 ```
 
-T02 requires Docker Scout, which Podman does not provide.
+## npm Registry Verification (T07)
 
----
-
-# npm registry access
-
-T07 uses:
-
-```text
-https://registry.npmjs.org/
-```
-
-You do not need a special npm account for the audit experiment, but your machine must be able to reach the public npm registry.
-
-Check:
+T07 requires outbound connectivity to the public npm registry:
 
 ```bash
 npm config get registry
 ```
 
-Expected:
+Expected output:
 
 ```text
 https://registry.npmjs.org/
 ```
 
----
+## Network Endpoint Requirements
 
-# Network access
-
-The workshop may need outbound access to:
+The build and scanner harnesses require outbound TCP/HTTPS (port 443) access to the following endpoints:
 
 ```text
 repo.maven.apache.org
@@ -168,6 +97,4 @@ raw.githubusercontent.com
 pypi.org
 ```
 
-Corporate proxies, VPNs and TLS interception can interfere with Maven, npm, Docker pulls and scanner database downloads.
-
-If you are using a managed laptop, test the pre-warm steps in [`04 PREPULL-PREWARM.md`](./04%20PREPULL-PREWARM.md) before arriving at the workshop.
+Environments utilizing SSL interception proxies or custom CA certificates must configure the corresponding CA trust stores for Java (`cacerts`), Node.js (`NODE_EXTRA_CA_CERTS`), and Python (`REQUESTS_CA_BUNDLE`).

@@ -1,61 +1,52 @@
 ---
 id: setup-tools
-oneliner: "The tools and minimum versions the workshop needs, how to check them in one command, and what Podman can and cannot substitute for."
+oneliner: "Tool prerequisites, minimum version specifications, automated verification, and container engine compatibility."
 track: core
 ---
 
-# Install Before the Workshop
+# Tool Prerequisites
 
-Install the tooling below before attending the workshop. One command tells
-you where you stand:
+Verify the local environment against the required tool specifications:
 
 ```bash
 ./scripts/tools-check.sh
 ```
 
-It reports every tool it finds against the workshop minimum and prints
-install instructions for anything missing; it installs nothing and changes
-nothing. Exit status is non-zero if a required tool is missing or too old.
+The script evaluates installed binaries against the minimum version thresholds and outputs install documentation for any missing tools. Non-zero exit status indicates a missing or outdated prerequisite.
 
-To see the install instructions for every tool (useful when preparing a
-machine you do not have in front of you):
+To display installation URLs for all tools:
 
 ```bash
 ./scripts/tools-check.sh --urls
 ```
 
-## Minimum environment
+## Environment Specifications
 
-| Tool | Requirement |
-|---|---|
-| Bash | System Bash is sufficient |
-| Git | Current |
-| JDK | 21+ |
-| Maven | 3.9+ |
-| Node.js | 20+ |
-| npm | Bundled with Node.js |
-| Python | 3.11+ |
-| pip / venv | Bundled or installed with Python |
-| Docker | Current Docker Desktop or Docker Engine |
-| jq | Current |
-| Syft | Current |
-| Snyk CLI | Current and authenticated |
-| Trivy | Current |
-| Grype | Current |
-| pip-audit | Current |
-| Docker Scout | Current |
-| curl | Current/system |
-| zip / unzip / tar | Current/system |
-| grep / find / sort / diff / tee | System versions |
+| Tool | Requirement | Source / Packaging |
+|---|---|---|
+| Bash | 4+ or macOS system Bash | System |
+| Git | 2.30+ | System package manager |
+| JDK | 21+ | OpenJDK / Temurin / Zulu |
+| Maven | 3.9+ | Apache Maven |
+| Node.js | 20+ | Node.js |
+| npm | 10+ | Bundled with Node.js |
+| Python | 3.11+ | Python.org / system package manager |
+| pip / venv | Compatible with Python | Bundled with Python |
+| Docker | Current Docker Desktop or Docker Engine | Docker Engine 24+ |
+| jq | 1.6+ | System package manager |
+| Syft | 1.0+ | Anchore |
+| Snyk CLI | Current | npm (`snyk`) |
+| Trivy | 0.50+ | Aqua Security |
+| Grype | 0.75+ | Anchore |
+| pip-audit | 2.7+ | PyPA (`pipx install pip-audit`) |
+| Docker Scout | Current | Bundled with Docker Desktop / Docker plugin |
+| curl | System standard | System |
+| zip / unzip / tar | System standard | System |
+| coreutils (grep, find, sort, diff, tee) | System standard | System |
 
-You do not need to install `npm audit` (supplied by npm), `jar`/`javap`
-(supplied by the JDK), or `pip` (supplied by Python). The Maven-side tooling
-— the CycloneDX, Shade, Spring Boot, esbuild and OWASP Dependency-Check
-plugins, and the mvnpm artefacts — is resolved by Maven during the builds.
+Note: `npm audit` is provided by npm; `jar` and `javap` are provided by the JDK; `pip` is provided by Python. Maven plugins (CycloneDX, Shade, Spring Boot, frontend/esbuild, OWASP Dependency-Check) and mvnpm artifacts are resolved automatically during build executions.
 
-## Installing what's missing
-
-On macOS with Homebrew, most of the list is one command:
+## Installation Commands (macOS / Homebrew)
 
 ```bash
 brew install openjdk@21 maven node python jq syft grype trivy pipx
@@ -63,27 +54,18 @@ pipx install pip-audit
 npm install -g snyk
 ```
 
-plus Docker Desktop (which includes Docker Scout).
+Install Docker Desktop for the Docker daemon and Docker Scout CLI integration.
 
-The full copy-paste transcripts — including the Debian/Ubuntu equivalents,
-per-tool verification, and Podman setup — are in
-[`setup/INSTALL.md`](./INSTALL.md) in the repository. Follow the links
-`tools-check.sh` prints, or work through that file, then re-run the check.
+For Debian/Ubuntu APT commands, manual installation procedures, and version verification tests, see [`setup/INSTALL.md`](./INSTALL.md).
 
-The versions the walkthroughs were recorded against (and which versions the
-repository pins itself) are in [`setup/VERSIONS.md`](./VERSIONS.md): if your
-output differs from what a walkthrough records, compare there first.
+For the baseline versions used when capturing scenario results, see [`setup/VERSIONS.md`](./VERSIONS.md).
 
-## A note on Podman
+## Container Engine Compatibility (Podman)
 
-Docker is the workshop's canonical container engine; the scripts invoke
-`docker` directly. Podman works for
-the basic S01 and S02 container build/run stages if you run the equivalent
-`podman` commands manually or use a Docker-compatible shim, but it is not a
-transparent replacement:
+Docker is the target container engine invoked by scenario build scripts. Podman can execute basic build and run steps for S01 and S02 when using a Docker alias or socket emulation, with the following technical constraints:
 
-- T02 uses **Docker Scout**, which Podman does not provide.
-- T03 tells Trivy to use Docker as the image source.
-- T04 feeds Grype a Docker image source.
+- **T02 (Docker Scout):** Requires Docker Scout CLI and Docker daemon integration; not supported under standalone Podman.
+- **T03 (Trivy):** Uses the `docker:` image target source.
+- **T04 (Grype):** Uses the `docker:` image target source.
 
-Install commands for Podman are in [`setup/INSTALL.md`](./INSTALL.md).
+Refer to [`setup/INSTALL.md`](./INSTALL.md) for Podman socket and configuration requirements.

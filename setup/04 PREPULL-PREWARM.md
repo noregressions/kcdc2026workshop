@@ -1,98 +1,84 @@
 ---
 id: setup-prepull-prewarm
-oneliner: "Pull the images and warm the scanner databases before the workshop — one command, and what it does."
+oneliner: "Container image pre-pulling, scenario compilation, and scanner vulnerability database initialization."
 track: core
 ---
 
-# Pre-Pull and Pre-Warm
+# Pre-Pull and Pre-Warm Procedures
 
-Do this before the workshop, on a good network. The goal is to avoid
-spending workshop time downloading container images, vulnerability databases
-or large scanner datasets.
+Initialize container images, local dependency caches, and scanner vulnerability databases prior to running scenario benchmarks.
 
-## The one-command route
+## Automated Execution
 
 ```bash
 ./scripts/build-all.sh
 ```
 
-That pulls the base images, builds all five scenarios, builds the S01 and S02
-container images, and warms the Grype, Trivy and Syft data. It starts no
-servers and leaves no container running.
+This command executes the following operations without starting persistent background services:
+1. Pulls required base container images.
+2. Builds all five scenario targets (S01–S05).
+3. Compiles S01 and S02 container images.
+4. Initializes local vulnerability databases for Grype, Trivy, and Syft.
 
-To include the investigation baselines as well (slower, and the T06 step
-downloads a large NVD dataset the first time):
+To include baseline runs for investigations T01–T08:
 
 ```bash
 ./scripts/build-all.sh --with-investigations
 ```
 
-Useful variants:
+Additional CLI options:
 
 ```bash
-./scripts/build-all.sh --list     # show which phases would run
-./scripts/build-all.sh --quick    # scenarios only, no pulls or database warming
-./scripts/build-all.sh --help     # all options
+./scripts/build-all.sh --list     # List configured build phases
+./scripts/build-all.sh --quick    # Build scenarios only; skip container pulls and DB downloads
+./scripts/build-all.sh --help     # Display CLI option summary
 ```
 
-Each phase runs independently and records its own result, so a single run
-tells you everything that needs attention rather than stopping at the first
-problem. The exit status is non-zero if any step failed.
+The script evaluates each phase independently and returns a non-zero exit status if any step fails.
 
-## What it does
+## Pre-Warm Operations Summary
 
-| Step | What warms up | By hand |
+| Step | Target Resource | Direct CLI Command |
 |---|---|---|
-| Pull base images | `eclipse-temurin:21-jre-jammy` (S01), `payara/server-web:7.2026.7` (S02) | `docker pull` each |
-| Build S01, S02, S04 | Maven plugins and dependencies into your local repository | each scenario's `./scripts/build.sh` |
-| Build S05 | npm dependencies — and proves npm lifecycle scripts can execute | `scenarios/S05-node-prepack/scripts/build.sh` |
-| Build S03 | the Python environment (fixtures are local; no PyPI needed) | `scenarios/S03-python-pep517/scripts/build.sh` |
-| Warm Grype | its vulnerability database | `grype db update && grype db status` |
-| Warm Trivy | its vulnerability database, via a throwaway scan | `trivy fs --scanners vuln --no-progress scenarios/S01-spring-node` |
-| Warm Syft | first-run downloads | `syft scenarios/S01-spring-node -o table >/dev/null` |
+| Container Base Images | `eclipse-temurin:21-jre-jammy`, `payara/server-web:7.2026.7` | `docker pull eclipse-temurin:21-jre-jammy && docker pull payara/server-web:7.2026.7` |
+| Maven Scenarios (S01, S02, S04) | Plugins and dependencies in `~/.m2/repository` | `./scripts/build.sh` within each scenario directory |
+| npm Scenario (S05) | Node packages and lifecycle script validation | `scenarios/S05-node-prepack/scripts/build.sh` |
+| Python Scenario (S03) | Virtual environment and package dependencies | `scenarios/S03-python-pep517/scripts/build.sh` |
+| Grype Database | Local vulnerability database cache | `grype db update && grype db status` |
+| Trivy Database | Local vulnerability database cache | `trivy fs --scanners vuln --no-progress scenarios/S01-spring-node` |
+| Syft Cache | Asset index and binary dependencies | `syft scenarios/S01-spring-node -o table >/dev/null` |
 
-Every step above, done entirely by hand with its verification commands, is in
-[`setup/PREWARM-MANUAL.md`](./PREWARM-MANUAL.md) in the repository — follow
-it if `build-all.sh` reports a failure you need to investigate on its own.
+For step-by-step manual execution procedures, see [`setup/PREWARM-MANUAL.md`](./PREWARM-MANUAL.md).
 
-## Two steps it does not do for you
+## Manual Configuration Requirements
 
-**Snyk authentication** (needed for T01):
+### 1. Snyk CLI Authentication (T01)
 
 ```bash
 snyk auth
 ```
 
-**OWASP Dependency-Check / NVD data** (needed for T06, and the most
-important pre-warm: the first run may populate a large local NVD database).
-With your `NVD_API_KEY` exported (see
-[`03 ACCOUNTS-AND-KEYS.md`](./03%20ACCOUNTS-AND-KEYS.md)):
+### 2. OWASP Dependency-Check NVD Cache (T06)
+
+Populate the local NVD dataset using an exported `NVD_API_KEY`:
 
 ```bash
 cd investigations/T06-owasp-dependency-check-s04
-
 ./scripts/baseline-s04.sh
 ./scripts/run-dependency-check-s04.sh
-
 cd ../..
 ```
 
-Dependency-Check stores its data under
-`~/.cache/kcdc-dependency-check/<version>` and reuses it on later runs.
-Without an NVD API key, the harness falls back to Dependency-Check 12.2.2.
-(`build-all.sh --with-investigations` covers this step too.)
+Data is persisted in `~/.cache/kcdc-dependency-check/<version>`. If `NVD_API_KEY` is not set, the harness executes against Dependency-Check version 12.2.2.
 
-## Ready when
+## Verification
 
-```bash
-./scripts/tools-check.sh                   # exits 0
-./scripts/build-all.sh                     # reports 0 failed
-```
-
-and the two base images are present:
+Verify completion with the following checks:
 
 ```bash
-docker image inspect eclipse-temurin:21-jre-jammy >/dev/null &&
-docker image inspect payara/server-web:7.2026.7 >/dev/null &&
+./scripts/tools-check.sh
+./scripts/build-all.sh
+docker image inspect eclipse-temurin:21-jre-jammy >/dev/null && \
+docker image inspect payara/server-web:7.2026.7 >/dev/null && \
 echo "Workshop base images ready"
 ```

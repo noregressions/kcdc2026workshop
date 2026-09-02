@@ -1,21 +1,16 @@
 ---
 id: setup-install
-oneliner: "Full copy-paste install transcripts for macOS and Debian/Ubuntu, Podman setup, and the manual verification commands."
+oneliner: "Copy-paste installation commands for macOS and Linux, Podman setup, and binary verification checks."
 track: reference
 ---
 
-# Install Transcripts
+# Installation Transcripts
 
-The copy-paste detail behind [`02 tools.md`](./02%20tools.md). Run
-`./scripts/tools-check.sh` first — it tells you which of these you actually
-need, and `./scripts/tools-check.sh --urls` prints an installation link for
-every tool.
+Detailed installation and environment configuration commands corresponding to [`02 tools.md`](./02%20tools.md). Run `./scripts/tools-check.sh` to determine missing packages.
 
-## macOS
+## macOS (Homebrew)
 
-The commands below assume Homebrew is installed.
-
-### Core development and analysis tools
+### Core Development and Analysis Tools
 
 ```bash
 brew install \
@@ -30,7 +25,7 @@ brew install \
   pipx
 ```
 
-Verify:
+Verify installations:
 
 ```bash
 java -version
@@ -72,13 +67,9 @@ docker version
 docker scout version
 ```
 
-Docker Desktop includes Docker Scout.
+## Linux (Debian / Ubuntu APT)
 
-## Linux
-
-The examples below use Debian/Ubuntu package names.
-
-### Base utilities
+### Base Utilities
 
 ```bash
 sudo apt-get update
@@ -98,9 +89,7 @@ sudo apt-get install -y \
 
 ### JDK 21
 
-Install a JDK 21 distribution.
-
-For example, with Eclipse Temurin, install `temurin-21-jdk` from the Adoptium repository.
+Install a JDK 21 distribution (such as `temurin-21-jdk` from Adoptium).
 
 Verify:
 
@@ -116,13 +105,11 @@ sudo apt-get install -y maven
 mvn --version
 ```
 
-The workshop requires Maven 3.9 or newer. If your distribution ships an older Maven, install a current Maven 3.9.x binary distribution instead.
+Maven 3.9+ is required.
 
 ### Node.js
 
-The repository requires Node.js 20 or newer.
-
-Using `nvm` avoids old distribution packages:
+Node.js 20+ is required. Installation via `nvm`:
 
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
@@ -166,7 +153,7 @@ grype version
 
 ### Trivy
 
-Install Trivy using Aqua Security's package repository for your distribution.
+Install Trivy from the Aqua Security package repository.
 
 Verify:
 
@@ -183,7 +170,7 @@ snyk --version
 
 ### Docker
 
-Install Docker Desktop for Linux or Docker Engine.
+Install Docker Engine or Docker Desktop for Linux.
 
 Verify:
 
@@ -192,18 +179,14 @@ docker version
 docker scout version
 ```
 
-If Docker Scout is not present, install the Docker Scout CLI separately.
+## Podman Configuration
 
-## Podman
-
-Podman can substitute for Docker only in the S01/S02 container build and run
-stages — see the limitations in [`02 tools.md`](./02%20tools.md).
+Podman compatibility is limited to scenarios S01/S02 container builds. See constraints in [`02 tools.md`](./02%20tools.md).
 
 ### macOS
 
 ```bash
 brew install podman
-
 podman machine init
 podman machine start
 podman info
@@ -214,14 +197,12 @@ podman info
 ```bash
 sudo apt-get update
 sudo apt-get install -y podman
-
 podman info
 ```
 
-## Manual verification
+## Manual Verification Matrix
 
-`./scripts/tools-check.sh` performs all of these checks for you. The
-equivalents by hand:
+Automated verification is provided by `./scripts/tools-check.sh`. Manual validation equivalents:
 
 ```bash
 git --version
@@ -256,7 +237,7 @@ pip-audit --version
 For T06:
 
 ```bash
-printenv NVD_API_KEY >/dev/null &&
-  echo "NVD API key: configured" ||
+printenv NVD_API_KEY >/dev/null && \
+  echo "NVD API key: configured" || \
   echo "NVD API key: not configured"
 ```

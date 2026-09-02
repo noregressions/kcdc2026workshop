@@ -1,109 +1,89 @@
 ---
 id: setup-getting-started
-oneliner: "Clone the repository, check your tools, install what's missing, warm everything up: the four commands that make you workshop-ready."
+oneliner: "Clone repository, verify dependencies, install missing tools, and pre-warm build caches."
 track: core
 ---
 
 # Getting Started
 
-Two ways in. **The container is the zero-install path** — the only thing
-your machine needs is Docker. The local install gives you everything
-natively.
+Environment setup can be completed via a preconfigured Docker container environment or direct host installation.
 
-## Option A — the workshop container (install only Docker)
+## Option A: Workshop Container Environment
 
-Install Docker Desktop (or Docker Engine on Linux) and make sure the
-machine has **~20GB of free disk** — two container images plus build
-headroom. Then from the repository root:
+Requirements: Docker Desktop or Docker Engine on Linux with at least 20 GB free disk space.
+
+Execute from the repository root:
 
 ```bash
-./container/build.sh     # or: docker pull <published image, when available>
+./container/build.sh
 ./container/run.sh
 ```
 
-Every tool is preinstalled, every lab prebuilt, and the scanner databases
-are already downloaded — the shell you land in is workshop-ready. Run
-`./scripts/tools-check.sh` inside it to confirm.
+The container provides preinstalled tools, precompiled scenario targets, and pre-cached vulnerability databases. Validate the environment inside the container:
 
-It is two images under the hood — a big, rarely-changing tools image and a
-small workshop-code image on top — so when the workshop content updates,
-re-running `./container/build.sh` (or re-pulling) only fetches the small
-part.
+```bash
+./scripts/tools-check.sh
+```
 
-Two things to know:
+Architecture details:
+- The container accesses the host Docker daemon via a mounted Unix socket (`/var/run/docker.sock`). Images built by scenarios S01 and S02 are registered directly with the host daemon and publish ports to `localhost`.
+- Scenario servers in S03, S04, and S05 bind within the container network namespace. Issue `curl` verification requests from within the container shell.
+- Authentication tokens can be forwarded by exporting `SNYK_TOKEN` and `NVD_API_KEY` before executing `./container/run.sh`.
 
-- The container drives **your** Docker daemon through a mounted socket, so
-  the images S01/S02 build appear on your machine and their published
-  ports are reachable from your own browser.
-- The S03/S04/S05 servers bind inside the container — run their `curl`
-  commands in the container shell, exactly as WORKSHOP.md prints them.
+## Option B: Local Host Installation
 
-Have a Snyk token or NVD key? Export `SNYK_TOKEN` / `NVD_API_KEY` before
-`./container/run.sh` and they pass through.
+Complete the following four steps:
 
-## Option B — local install, four steps
-
-Do them before the workshop on a good network; the opening presentation
-includes time to re-run them and fix stragglers.
-
-## 1. Clone the repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/noregressions/kcdc2026workshop.git
 cd kcdc2026workshop
 ```
 
-If you already have it:
+To update an existing checkout:
 
 ```bash
 git pull
 ```
 
-## 2. Check your tools
+### 2. Check Tool Prerequisites
 
 ```bash
 ./scripts/tools-check.sh
 ```
 
-This reports the version of every tool the workshop uses, flags anything below
-the minimum, and prints an installation link for anything missing. It installs
-nothing and changes nothing.
+This utility inspects installed binaries against the minimum required versions and outputs installation links for missing dependencies. It makes no system modifications.
 
-## 3. Install anything missing
+### 3. Install Missing Prerequisites
 
-Follow the links `tools-check.sh` printed, or use the full install guide in
-the next chapter: it has copy-paste commands for macOS and Debian/Ubuntu.
+Install missing packages using the system package manager or refer to [`setup/INSTALL.md`](./INSTALL.md) for OS-specific commands (macOS Homebrew, Debian/Ubuntu APT).
 
-Then re-run the check until it reports ready:
+Re-run validation:
 
 ```bash
 ./scripts/tools-check.sh
 ```
 
-## 4. Warm everything up
+### 4. Pre-Warm Caches and Compile Targets
 
 ```bash
 ./scripts/build-all.sh
 ```
 
-This pulls the two container base images, builds all five scenarios, builds
-the scenario container images, and downloads the scanner vulnerability
-databases. It starts no servers and leaves nothing running.
+This script:
+1. Pulls required container base images (`eclipse-temurin:21-jre-jammy`, `payara/server-web:7.2026.7`).
+2. Builds Maven, npm, and Python targets across scenarios S01–S05.
+3. Builds container image targets.
+4. Initializes local vulnerability databases for Grype, Trivy, and Syft.
 
-It prints a summary of what passed, what failed, and what was skipped and why.
-Exit status is non-zero if anything failed.
+Returns exit code 0 when all pre-warm steps succeed.
 
-## You are ready when
+## Verification Criteria
+
+Setup is complete when:
 
 ```text
-tools-check.sh   exits 0 (optional tools may still be absent)
+tools-check.sh   exits 0
 build-all.sh     reports 0 failed
 ```
-
-That is everything. The workshop itself starts at Part 1.
-
-The remaining chapters in this section are the reference detail behind these
-four steps: exact version requirements, the two credentials some optional
-material uses, and what `build-all.sh` warms up. The full per-OS install
-transcripts and the manual equivalent of every pre-warm step live alongside
-them in the repository, in `setup/INSTALL.md` and `setup/PREWARM-MANUAL.md`.

@@ -133,7 +133,7 @@ not_contains results/s03/snyk/snyk-pip-sbom.json \
   'S03 Snyk SBOM omits generated-file lineage'
 
 # S04
-contains results/baseline/plugin-resolution.txt \
+contains results/baseline/maven-resolve-plugins.txt \
   'trace-route-payload' \
   'S04 Maven plugin resolution contains payload'
 not_contains results/snyk/snyk-test.txt \
@@ -142,7 +142,7 @@ not_contains results/snyk/snyk-test.txt \
 not_contains results/snyk/snyk-sbom.json \
   'trace-route-payload' \
   'S04 Snyk SBOM omits plugin payload'
-contains results/snyk/snyk-unmanaged.txt \
+contains results/snyk/snyk-unmanaged-jar.txt \
   ' @ unknown' \
   'S04 final custom JAR is unknown to Snyk unmanaged scan'
 

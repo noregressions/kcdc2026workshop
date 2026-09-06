@@ -32,10 +32,13 @@ Requirements: JDK 21+, Maven 3.9+, Node.js 20+, Python 3.11+, and Docker. See [`
 
 ### 1. Preconfigured Container Environment
 
+Pulls the published image `noregressions/ydnwys-workshop:0.0.1` on first run:
+
 ```bash
-./container/build.sh
 ./container/run.sh
 ```
+
+To build the image locally instead, see [`container/build.sh`](./container/build.sh).
 
 ### 2. Host Prerequisites Verification
 

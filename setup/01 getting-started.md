@@ -12,12 +12,13 @@ Environment setup can be completed via a preconfigured Docker container environm
 
 Requirements: Docker Desktop or Docker Engine on Linux with at least 20 GB free disk space.
 
-Execute from the repository root:
+Execute from the repository root. The first run pulls the published image `noregressions/ydnwys-workshop:0.0.1` (about 2.6 GB):
 
 ```bash
-./container/build.sh
 ./container/run.sh
 ```
+
+To build the image locally instead of pulling it, run `./container/build.sh` and then `WORKSHOP_IMAGE=shipping-workshop:latest ./container/run.sh`.
 
 The container provides preinstalled tools, precompiled scenario targets, and pre-cached vulnerability databases. Validate the environment inside the container:
 

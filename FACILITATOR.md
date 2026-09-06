@@ -24,10 +24,12 @@ cd ../..
 If an attendee environment cannot be resolved locally, deploy the preconfigured container environment (Docker required):
 
 ```bash
-./container/build.sh && ./container/run.sh
+./container/run.sh
 ```
 
-Pre-warm the container base image (`./container/build.sh --base`) to ensure vulnerability databases are initialized.
+This pulls the published image `noregressions/ydnwys-workshop:0.0.1` from Docker Hub (about 2.6 GB). Ask attendees to pull it on the venue network ahead of time.
+
+Before the workshop, rebuild and republish so the vulnerability databases are fresh: `./container/build.sh --base`, then `./container/publish.sh <version>` (requires a Docker Hub login with write access to the `noregressions` namespace). Bump the tag in `container/run.sh` to match.
 
 ### Live Network Dependencies and Offline Fallbacks
 

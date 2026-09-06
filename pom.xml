@@ -26,7 +26,7 @@
             <plugin>
                 <groupId>dev.noregressions.paperband</groupId>
                 <artifactId>paperband-maven-plugin</artifactId>
-                <version>0.1.1</version>
+                <version>0.1.2</version>
 
                 <!--
                     Shared by every goal: what the book is, and how it renders.
@@ -57,6 +57,7 @@
                         <stylesheet>src/main/paperband/styles/kind.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/diagrams.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/fences.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/screen.css</stylesheet>
                     </stylesheets>
                     <!--
                         US Letter, with real margins: Chromium draws the
@@ -189,11 +190,11 @@
                                 <title>Part 2 — Can We Identify What We Ship?</title>
                                 <includes>
                                     <include>workshop/02-identification.md</include>
-                                    <include>scenarios/S01-spring-node/TRACE.md</include>
-                                    <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
-                                    <include>scenarios/S05-node-prepack/TRACE.md</include>
-                                    <include>scenarios/S03-python-pep517/TRACE.md</include>
-                                    <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
+                                    <include>scenarios/S01-spring-node/LESSON.md</include>
+                                    <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                    <include>scenarios/S05-node-prepack/LESSON.md</include>
+                                    <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
@@ -229,7 +230,8 @@
                             <section>
                                 <title>Appendix — Optional Labs</title>
                                 <includes>
-                                    <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                    <include>scenarios/S08-extended-sbom/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
@@ -245,18 +247,18 @@
                                 the tools appendix (see the pdf execution's book
                                 override below). The T01 per-scenario re-runs and
                                 KNOWN-GROUND-TRUTH (instructor-demo track) are out
-                                of both editions: T01/TRACE.md in Part 2 already
+                                of both editions: T01/LESSON.md in Part 2 already
                                 tells that story once.
                             -->
                             <section>
                                 <title>Appendix — Reference Investigations</title>
                                 <includes>
-                                    <include>investigations/T02-docker-scout/TRACE.md</include>
-                                    <include>investigations/T03-trivy-s01/TRACE.md</include>
-                                    <include>investigations/T04-grype-s02/TRACE.md</include>
-                                    <include>investigations/T05-pip-audit-s03/TRACE.md</include>
-                                    <include>investigations/T06-owasp-dependency-check-s04/TRACE.md</include>
-                                    <include>investigations/T07-npm-audit-s05/TRACE.md</include>
+                                    <include>investigations/T02-docker-scout/LESSON.md</include>
+                                    <include>investigations/T03-trivy-s01/LESSON.md</include>
+                                    <include>investigations/T04-grype-s02/LESSON.md</include>
+                                    <include>investigations/T05-pip-audit-s03/LESSON.md</include>
+                                    <include>investigations/T06-owasp-dependency-check-s04/LESSON.md</include>
+                                    <include>investigations/T07-npm-audit-s05/LESSON.md</include>
                                 </includes>
                             </section>
                         </sections>
@@ -359,17 +361,17 @@
                                         <title>Part 2 — Can We Identify What We Ship?</title>
                                         <includes>
                                             <include>workshop/02-identification.md</include>
-                                            <include>scenarios/S01-spring-node/TRACE.md</include>
+                                            <include>scenarios/S01-spring-node/LESSON.md</include>
                                             <!--
                                                 S02 is not here: it belongs to the Optional
                                                 Labs appendix below, and the first section to
                                                 claim a card keeps it. Listing it in both left
                                                 the appendix empty.
                                             -->
-                                            <include>scenarios/S03-python-pep517/TRACE.md</include>
-                                            <include>scenarios/S04-maven-plugin-hidden-content/TRACE.md</include>
-                                            <include>scenarios/S05-node-prepack/TRACE.md</include>
-                                            <include>investigations/T01-snyk-beyond-sbom/TRACE.md</include>
+                                            <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                            <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/S05-node-prepack/LESSON.md</include>
+                                            <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>
@@ -405,7 +407,8 @@
                                     <section>
                                         <title>Appendix — Optional Labs</title>
                                         <includes>
-                                            <include>scenarios/S02-payara-mvnpm/TRACE.md</include>
+                                            <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                            <include>scenarios/S08-extended-sbom/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>

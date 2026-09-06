@@ -21,7 +21,7 @@ usage() {
 Usage: ./scripts/proof-check.sh [options]
 
 Proves that the S02 Payara + mvnpm demo still produces the outcomes
-described in TRACE.md.
+described in LESSON.md.
 
 Options:
   --skip-build     Check existing Maven/build output instead of rebuilding.

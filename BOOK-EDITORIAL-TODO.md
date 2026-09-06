@@ -46,9 +46,9 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
 - [ ] **T01 OVERVIEW**: opens as "an investigation over S04" though the TRACE
   spans all five scenarios (reframe with S04 as the live-demo centrepiece);
   status fence still says `S05 … next` though the S05 section is complete;
-  "See `S02-TRACE.md` / `S03-TRACE.md`" are repo-only pointers for book
+  "See `S02-LESSON.md` / `S03-LESSON.md`" are repo-only pointers for book
   readers; the Snyk CLI version (1.1305.2) is recorded here but missing from
-  the TRACE's "The instrument".
+  the LESSON's "The instrument".
 
 ## Open inclusion decisions
 
@@ -85,7 +85,7 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
   setup/03. Also: T06 claims the key "changes which tool version runs" but the
   12.2.2 no-key fallback is documented only in README/setup — add the fact or
   soften the claim.
-- [ ] **S04 OVERVIEW's large ASCII flow** repeats the TRACE's conceptual
+- [ ] **S04 OVERVIEW's large ASCII flow** repeats the LESSON's conceptual
   section back-to-back in the book; slim it (and see the diagram item below).
 
 ## Evidence recaptures (need a re-run, not an edit)
@@ -133,7 +133,7 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
   "## Repository shape"; move it to "## Follow the trace".
 - [ ] S01 OVERVIEW prerequisites list omits `unzip`, which the TRACE uses.
 - [ ] Two more text chains are convertible to mermaid like their siblings:
-  S04 OVERVIEW's flow (clean three-way fan-out) and S05 TRACE's closing
+  S04 OVERVIEW's flow (clean three-way fan-out) and S05 LESSON's closing
   evidence chain (~line 648).
 - [ ] The mermaid label fix in `src/main/paperband/styles/diagrams.css`
   (mermaid's `class="label"` collides with the theme's uppercase

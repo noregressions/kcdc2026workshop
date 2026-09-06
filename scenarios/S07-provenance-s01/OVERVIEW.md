@@ -78,6 +78,6 @@ in practice a lot of pipelines never climb past the unsigned rungs.
 
 The scripts build a throwaway copy of S01 under `work/`; S01 itself is left
 untouched. Commit ids and digests differ on every run, so the values in
-`TRACE.md` and `evidence/` are illustrative, not fixed.
+`LESSON.md` and `evidence/` are illustrative, not fixed.
 
-See `TRACE.md` for the annotated walkthrough.
+See `LESSON.md` for the annotated walkthrough.

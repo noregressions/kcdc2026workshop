@@ -35,6 +35,9 @@ Evidence Evaluation Model:
 - **CycloneDX Maven Plugin:** Generates CycloneDX SBOMs from Maven's in-memory project object model.
   - *Evidence boundary:* Maven resolver data.
   - *Visibility limitation:* Omits code introduced dynamically via build plugin executions or compiler source generation (S04).
+- **SBOM+ Maven Plugin (`dev.noregressions:sbom-plus-maven-plugin`):** Generates a CycloneDX SBOM from the project graph plus every plugin's dependency graph and imported BOMs, with a companion scan report recording `origin` and the `broughtInBy` path per row.
+  - *Evidence boundary:* Maven resolver data, extended to build tooling (marked `excluded`) and BOM imports (`?type=pom`).
+  - *Visibility limitation:* Still a resolver-level claim: names the plugin that generated code, not the generated code; resolves from repositories, so uninstalled sibling modules land in `unresolved` (S08).
 
 ## 3. Vulnerability Scanners
 

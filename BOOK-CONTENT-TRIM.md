@@ -32,15 +32,15 @@ also the sparsest content in it (T07's trace: 1,515 words over 18 pages).
 Certain wins — duplication or wrong audience. **~24 pages.**
 **Done 2026-08-26** — all five includes removed from the shared book.
 
-- [x] `investigations/T01-snyk-beyond-sbom/S01-TRACE.md` (pp. 207–213, 7pp)
+- [x] `investigations/T01-snyk-beyond-sbom/S01-LESSON.md` (pp. 207–213, 7pp)
   — long-form re-run of the S01 section already inside
-  `investigations/T01-snyk-beyond-sbom/TRACE.md` (Part 2). Same ground
+  `investigations/T01-snyk-beyond-sbom/LESSON.md` (Part 2). Same ground
   truth, same Snyk runs, same conclusions.
-- [x] `investigations/T01-snyk-beyond-sbom/S02-TRACE.md` (pp. 214–219, 6pp)
-  — duplicates T01 TRACE.md § "S02 — Payara + mvnpm".
-- [x] `investigations/T01-snyk-beyond-sbom/S03-TRACE.md` (pp. 220–226, 7pp)
-  — duplicates T01 TRACE.md § "S03 — Python + PEP 517".
-- [x] `investigations/T01-snyk-beyond-sbom/S05-TRACE.md` (p. 227, 1pp)
+- [x] `investigations/T01-snyk-beyond-sbom/S02-LESSON.md` (pp. 214–219, 6pp)
+  — duplicates T01 LESSON.md § "S02 — Payara + mvnpm".
+- [x] `investigations/T01-snyk-beyond-sbom/S03-LESSON.md` (pp. 220–226, 7pp)
+  — duplicates T01 LESSON.md § "S03 — Python + PEP 517".
+- [x] `investigations/T01-snyk-beyond-sbom/S05-LESSON.md` (p. 227, 1pp)
   — an unfinished stub: diagram + the three harness commands, no
   Observe/Establish, no findings. Drop from the book either way; separately
   decide whether to finish or delete the file.
@@ -66,7 +66,7 @@ Options, pick one:
   `<book combine.self="override">` without this section (and without
   Optional Labs); the shared `<book>` remains the site edition.
 - [ ] **Overviews only**: keep each `OVERVIEW.md` (~1–2pp each), drop the six
-  `TRACE.md` files from the PDF. Saves ~68pp.
+  `LESSON.md` files from the PDF. Saves ~68pp.
 - [ ] **Keep but rewrite** each TRACE to a 2–3 page findings summary
   (what the tool saw / missed / why), pointing at the repo for the
   step-by-step. Most work, saves ~55pp.
@@ -97,8 +97,8 @@ Files affected:
 **Correction 2026-08-26:** the "81 empty fences" figure was a measurement
 error — the regex matched a closing fence + blank line + the next opening
 fence, i.e. ordinary adjacent blocks. A proper fence parser finds exactly
-**two** empty fences (`S03-python-pep517/TRACE.md:239`,
-`S04-maven-plugin-hidden-content/TRACE.md:595`), and both are deliberate:
+**two** empty fences (`S03-python-pep517/LESSON.md:239`,
+`S04-maven-plugin-hidden-content/LESSON.md:595`), and both are deliberate:
 the empty output *is* the finding ("There is no matching output"). No
 action taken; nothing to fix.
 
@@ -117,9 +117,9 @@ blocks), and many fences hold *concept word-lists*, not commands or output
 `dependency graph != complete physical software inventory` as a one-line
 fence. Each costs a bordered panel + padding + margins. Convert these to
 bullets or bold prose. Applies to every TRACE file kept in the book;
-worst: `scenarios/S01-spring-node/TRACE.md` (88 blocks),
-`scenarios/S02-payara-mvnpm/TRACE.md` (89),
-`investigations/T01-snyk-beyond-sbom/TRACE.md` (72).
+worst: `scenarios/S01-spring-node/LESSON.md` (88 blocks),
+`scenarios/S02-payara-mvnpm/LESSON.md` (89),
+`investigations/T01-snyk-beyond-sbom/LESSON.md` (72).
 Estimated saving across kept chapters: **15–25pp**.
 
 ### D3. Merge the duplicate setup entry points

@@ -18,7 +18,7 @@ usage() {
   cat <<'EOF'
 Usage: ./scripts/proof-check.sh [options]
 
-Proves that the S01 demo still produces the outcomes described in TRACE.md.
+Proves that the S01 demo still produces the outcomes described in LESSON.md.
 
 Options:
   --skip-build     Check existing build output instead of rebuilding.

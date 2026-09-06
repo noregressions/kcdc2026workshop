@@ -194,7 +194,7 @@ Original checklist kept for the record:
   - container scan if useful
 - [ ] Make everything agree.
 - [ ] Add `OVERVIEW.md`.
-- [ ] Add `TRACE.md`.
+- [ ] Add `LESSON.md`.
 - [ ] Add `scripts/build.sh`.
 - [ ] Add `scripts/clean.sh`.
 - [ ] Add `scripts/proof-check.sh`.
@@ -231,7 +231,7 @@ software presence != software identifiability
   - plugin dependency
   - generated source
   - generated service metadata
-  - final JAR *(compressed in the workshop step: the endpoint names its own chain and the JAR grep shows the generated class + ServiceLoader entry; full backward trace stays in TRACE.md as go-deeper)*
+  - final JAR *(compressed in the workshop step: the endpoint names its own chain and the JAR grep shows the generated class + ServiceLoader entry; full backward trace stays in LESSON.md as go-deeper)*
 - [x] Reduce the participant instructions to the shortest sequence that proves the point. *(six commands, verified end-to-end)*
 - [x] Target attendee time: 15 minutes. *(measured machine time: 5s build + ~2s commands)*
 
@@ -334,7 +334,7 @@ finding
   - subsequent edits
   - exploit information if relevant
   - KEV addition if relevant *(all captured as raw API responses in evidence/, dated 2026-08-24)*
-- [x] Build a chronological timeline. *(TRACE.md section 9)*
+- [x] Build a chronological timeline. *(LESSON.md section 9)*
 - [x] Preserve timestamps and source links. *(every date traced to a captured file or linked page)*
 - [x] Show at least one material change to the record over time. *(Oracle/embedding CPEs added 2022-04-29, +26 months; also CWE remaps, 2026-06-17 edit)*
 - [x] Explain what changed and why a scanner could produce different results at different dates. *(TRACE step 5: March vs May 2022 Oracle scan)*
@@ -753,7 +753,7 @@ What this proves
 What this does NOT prove
 ```
 
-- [ ] Keep detailed technical explanation in scenario `TRACE.md` files.
+- [ ] Keep detailed technical explanation in scenario `LESSON.md` files.
 - [ ] Link to those as "Go deeper".
 - [ ] Add checkpoints such as:
 

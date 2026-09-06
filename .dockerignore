@@ -15,3 +15,6 @@ target
 book-themes
 setup/000 contents.md
 BOOK-REVIEW-TODO.md
+scenarios/S05-node-prepack/npm-repo
+scenarios/S05-node-prepack/package-lock.json
+scenarios/S07-provenance-s01/work

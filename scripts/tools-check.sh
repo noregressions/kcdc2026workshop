@@ -228,6 +228,17 @@ install_help() {
       echo "  npm install -g snyk"
       echo "  Then authenticate:  snyk auth"
       ;;
+    cosign)
+      echo "https://docs.sigstore.dev/cosign/system_config/installation/"
+      [[ "$OS" == macos ]] && echo "  brew install cosign"
+      [[ "$OS" == linux ]] && echo "  Download the cosign-linux-<arch> release binary to /usr/local/bin/cosign"
+      echo "  Required by S07 (signing and attestation)."
+      ;;
+    guarddog)
+      echo "https://github.com/DataDog/guarddog"
+      echo "  pipx install guarddog"
+      echo "  Required by T08."
+      ;;
     jq)
       echo "https://jqlang.github.io/jq/download/"
       [[ "$OS" == macos ]] && echo "  brew install jq"
@@ -404,6 +415,8 @@ check_optional "syft"      syft      'syft version'      syft      "S01, S02, T0
 check_optional "grype"     grype     'grype version'     grype     "T04"
 check_optional "trivy"     trivy     'trivy --version'   trivy     "T03"
 check_optional "pip-audit" pip-audit 'pip-audit --version' pip-audit "T05"
+check_optional "cosign"    cosign    'cosign version 2>&1 | grep -i "^GitVersion"' cosign "S07"
+check_optional "guarddog"  guarddog  'guarddog --version'  guarddog  "T08"
 
 if check_optional "snyk" snyk 'snyk --version' snyk "T01"; then
   if snyk whoami >/dev/null 2>&1; then
@@ -513,7 +526,7 @@ print_help_for() {
 if [[ "$SHOW_ALL_URLS" == 1 ]]; then
   section "Installation instructions (all tools)"
   for k in git java mvn node python3 pipx pip-audit docker docker-scout \
-           syft grype trivy snyk jq curl zip brew nvd-key snyk-auth; do
+           syft grype trivy snyk cosign guarddog jq curl zip brew nvd-key snyk-auth; do
     printf '\n  %s%s%s\n' "$C_BOLD" "$k" "$C_RESET"
     install_help "$k" | while IFS= read -r line; do
       case "$line" in

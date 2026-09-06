@@ -53,7 +53,7 @@ Build transformations can preserve executable logic while eliminating the metada
 - **Scenarios (S01–S05):** Build pipelines demonstrating component obscurity across distinct mechanisms: bytecode relocation, Maven plugin execution realms, PEP 517 build backends, npm lifecycle hooks, and frontend bundlers.
 - **Investigations (T01–T07):** Tool evaluations (Snyk, Docker Scout, Trivy, Grype, pip-audit, OWASP Dependency-Check, npm audit) measuring detection capability against the scenario artifacts.
 
-Each scenario and investigation is documented in a standalone `TRACE.md` containing requirements, reproduction commands, and annotated walkthroughs.
+Each scenario and investigation is documented in a standalone `LESSON.md` containing requirements, reproduction commands, and annotated walkthroughs.
 
 ## Trace Format
 

@@ -136,7 +136,7 @@ Technical conclusion: Algorithmic analysis cannot reconstruct component identity
 
 # Part 3: Vulnerability Ingestion and CPE Matching (1:15–1:50)
 
-Guided analysis: [`investigations/CVE-tomcat-85/TRACE.md`](./investigations/CVE-tomcat-85/TRACE.md)
+Guided analysis: [`investigations/CVE-tomcat-85/LESSON.md`](./investigations/CVE-tomcat-85/LESSON.md)
 
 1. **Severity Classification:** Compare Apache CNA ("Important") against CVSS v2 (7.5) and CVSS v3.1 (9.8 CRITICAL).
 2. **CPE Configurations:** 38 matching entries; 20 Oracle embedding CPEs added 26 months post-disclosure.

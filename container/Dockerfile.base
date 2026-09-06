@@ -53,9 +53,22 @@ RUN curl -sSfL https://get.anchore.io/syft  | sh -s -- -b /usr/local/bin \
     && curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin \
     && npm install -g snyk
 
-# --- pip-audit (pipx, on PATH) ------------------------------------------------
+# --- pip-audit + GuardDog (pipx, on PATH) ------------------------------------
+# GuardDog (T08) pulls in semgrep; pipx keeps both isolated from the S03 venv.
 ENV PIPX_BIN_DIR=/usr/local/bin
-RUN pipx install pip-audit
+ARG GUARDDOG_VERSION=3.2.0
+RUN pipx install pip-audit \
+    && pipx install "guarddog==${GUARDDOG_VERSION}" \
+    && guarddog --version
+
+# --- cosign (S07 signing + attestation) --------------------------------------
+# Static release binary; no daemon needed at build time.
+ARG COSIGN_VERSION=3.1.3
+RUN arch=$(dpkg --print-architecture) \
+    && curl -fsSL -o /usr/local/bin/cosign \
+      "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-${arch}" \
+    && chmod +x /usr/local/bin/cosign \
+    && cosign version
 
 # --- Docker Scout CLI plugin (T02) -------------------------------------------
 # Direct release download: Scout's install.sh refuses to run without a
@@ -69,6 +82,11 @@ RUN arch=$(dpkg --print-architecture) \
     && docker scout version
 
 # --- scanner databases (the bulk of this image; refresh = rebuild base) ------
+# The DB is as old as the base image, so Grype would otherwise print
+# "WARN current database is invalid ... built N days ago" on every scan and
+# try to re-download it over the workshop network. Trust the baked copy.
+ENV GRYPE_DB_VALIDATE_AGE=false \
+    GRYPE_DB_AUTO_UPDATE=false
 RUN grype db update \
     && trivy image --download-db-only \
     && trivy image --download-java-db-only \

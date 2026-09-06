@@ -3,6 +3,11 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
+# Grype warns "current database is invalid ... built N days ago" once the DB
+# passes its 5-day default age limit. That is noise in a demo: the lab is about
+# what the scanner can see at each boundary, not about feed freshness.
+export GRYPE_DB_VALIDATE_AGE="${GRYPE_DB_VALIDATE_AGE:-false}"
+
 require_command() {
   command -v "$1" >/dev/null 2>&1 || {
     echo "$1 is required" >&2

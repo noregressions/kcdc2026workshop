@@ -22,6 +22,7 @@ brew install \
   syft \
   grype \
   trivy \
+  cosign \
   pipx
 ```
 
@@ -45,6 +46,13 @@ python3 -m pip --version
 pipx ensurepath
 pipx install pip-audit
 pip-audit --version
+```
+
+### GuardDog
+
+```bash
+pipx install guarddog
+guarddog --version
 ```
 
 ### Snyk CLI
@@ -133,6 +141,13 @@ pipx install pip-audit
 pip-audit --version
 ```
 
+### GuardDog
+
+```bash
+pipx install guarddog
+guarddog --version
+```
+
 ### Syft
 
 ```bash
@@ -149,6 +164,17 @@ curl -sSfL https://get.anchore.io/grype \
   | sudo sh -s -- -b /usr/local/bin
 
 grype version
+```
+
+### cosign
+
+```bash
+COSIGN_VERSION=3.1.3
+sudo curl -fsSL -o /usr/local/bin/cosign \
+  "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-$(dpkg --print-architecture)"
+sudo chmod +x /usr/local/bin/cosign
+
+cosign version
 ```
 
 ### Trivy
@@ -232,6 +258,8 @@ snyk --version
 trivy --version
 grype version
 pip-audit --version
+cosign version
+guarddog --version
 ```
 
 For T06:

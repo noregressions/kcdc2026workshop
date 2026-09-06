@@ -97,8 +97,8 @@ S03: 8081    S05: 8083
 ```text
 FACILITATOR.md    Instruction timings, expected outputs, and troubleshooting
 setup/            Prerequisites, authentication configuration, and pre-warm guides
-scenarios/        Scenario definitions and TRACE.md walkthroughs (S01-S05, S07)
-investigations/   Tool evaluations and TRACE.md reports (T01-T08)
+scenarios/        Scenario definitions and LESSON.md walkthroughs (S01-S05, S07, S08)
+investigations/   Tool evaluations and LESSON.md reports (T01-T08)
 scripts/          Environment validation and build orchestration scripts
 pom.xml           Build configuration for aggregated manual PDF compilation
 ```

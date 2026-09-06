@@ -18,7 +18,7 @@ usage() {
 Usage: ./scripts/proof-check.sh [options]
 
 Proves that the S03 Python PEP 517 demo still produces the outcomes
-recorded in TRACE.md.
+recorded in LESSON.md.
 
 Options:
   --skip-build     Check the existing .venv and trace-output instead of rebuilding.

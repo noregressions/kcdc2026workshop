@@ -75,7 +75,7 @@ Evaluation of component identifiability across build transformations, plugin exe
 
 ## Step 1: Build Transformations and Metadata Stripping (15 min)
 
-Lab reference: [`scenarios/S01-spring-node/TRACE.md`](./scenarios/S01-spring-node/TRACE.md)
+Lab reference: [`scenarios/S01-spring-node/LESSON.md`](./scenarios/S01-spring-node/LESSON.md)
 
 **Objective:** Evaluate component detection across standard resolution, bytecode shading, and frontend bundling.
 
@@ -115,7 +115,7 @@ syft frontend/dist
 
 ## Step 2: Build Plugin Execution Realms (15 min)
 
-Lab reference: [`scenarios/S04-maven-plugin-hidden-content/TRACE.md`](./scenarios/S04-maven-plugin-hidden-content/TRACE.md)
+Lab reference: [`scenarios/S04-maven-plugin-hidden-content/LESSON.md`](./scenarios/S04-maven-plugin-hidden-content/LESSON.md)
 
 **Objective:** Measure visibility of code injected via Maven plugin execution where the project dependency graph is empty.
 
@@ -133,11 +133,13 @@ unzip -l target/maven-plugin-hidden-content-1.0.0.jar | grep -E 'Generated|servi
 
 **Technical Finding:** Dependency resolvers evaluate the application dependency graph; they do not index transitive dependencies inside plugin execution ClassRealms.
 
+Go deeper: [`scenarios/S08-extended-sbom/LESSON.md`](./scenarios/S08-extended-sbom/LESSON.md) runs a second SBOM generator ([SBOM+](https://noregressions.github.io/sbom-plus-maven-plugin/)) against the same POM. The standard CycloneDX SBOM has 0 components; the extended one lists the plugin and its payload as `excluded` build tooling, with the path that brought them in.
+
 ---
 
 ## Step 3: Package Lifecycle Hooks (8 min)
 
-Lab reference: [`scenarios/S05-node-prepack/TRACE.md`](./scenarios/S05-node-prepack/TRACE.md)
+Lab reference: [`scenarios/S05-node-prepack/LESSON.md`](./scenarios/S05-node-prepack/LESSON.md)
 
 **Objective:** Inspect runtime artifact generation occurring during package creation hooks (`prepack`).
 
@@ -158,7 +160,7 @@ curl -sS http://localhost:8083/hidden/prepack-info | jq
 
 ## Step 4: Python PEP 517 Build Backends (8 min)
 
-Lab reference: [`scenarios/S03-python-pep517/TRACE.md`](./scenarios/S03-python-pep517/TRACE.md)
+Lab reference: [`scenarios/S03-python-pep517/LESSON.md`](./scenarios/S03-python-pep517/LESSON.md)
 
 **Objective:** Evaluate package generation executed during `pip install` by source distribution build backends.
 
@@ -180,7 +182,7 @@ curl -sS http://localhost:8081/trace | jq
 
 ## Step 5: Commercial SCA Boundary Evaluation (5 min)
 
-Investigation reference: [`investigations/T01-snyk-beyond-sbom/TRACE.md`](./investigations/T01-snyk-beyond-sbom/TRACE.md)
+Investigation reference: [`investigations/T01-snyk-beyond-sbom/LESSON.md`](./investigations/T01-snyk-beyond-sbom/LESSON.md)
 
 **Analysis against S04 ground truth:** Static analysis across SBOMs and binary hashes cannot identify components when no coordinate or signature evidence is preserved in the target artifact:
 
@@ -212,7 +214,7 @@ software -> identity -> package/product mapping -> CVE record -> affected versio
 
 ## Case Study: Apache Tomcat 8.5 (Ghostcat / CVE-2020-1938)
 
-Investigation reference: [`investigations/CVE-tomcat-85/TRACE.md`](./investigations/CVE-tomcat-85/TRACE.md)
+Investigation reference: [`investigations/CVE-tomcat-85/LESSON.md`](./investigations/CVE-tomcat-85/LESSON.md)
 
 Data source: `evidence/cve-org.json`, `evidence/nvd.json`, `evidence/nvd-history.json`.
 
@@ -289,7 +291,7 @@ Evaluation of build execution attack surfaces and layered provenance architectur
 
 ## Layered Reverse Provenance (S07)
 
-Lab reference: [`scenarios/S07-provenance-s01/TRACE.md`](./scenarios/S07-provenance-s01/TRACE.md)
+Lab reference: [`scenarios/S07-provenance-s01/LESSON.md`](./scenarios/S07-provenance-s01/LESSON.md)
 
 Execution steps:
 
@@ -307,7 +309,7 @@ Audit layers:
 
 ## Code AST Analysis (GuardDog / T08)
 
-Investigation reference: [`investigations/T08-guarddog/TRACE.md`](./investigations/T08-guarddog/TRACE.md)
+Investigation reference: [`investigations/T08-guarddog/LESSON.md`](./investigations/T08-guarddog/LESSON.md)
 
 Static AST analysis of package archives (S05, S03) demonstrating detection capability when source code is packaged vs omitted.
 
@@ -357,13 +359,14 @@ Outline: [`workshop/07-wrap-up.md`](./workshop/07-wrap-up.md)
 
 # Reference Labs and Investigations
 
-- [S02: Payara + mvnpm](./scenarios/S02-payara-mvnpm/TRACE.md)
-- [T01: Snyk Cross-Scenario Matrix](./investigations/T01-snyk-beyond-sbom/TRACE.md)
-- [T02: Docker Scout](./investigations/T02-docker-scout/TRACE.md)
-- [T03: Trivy](./investigations/T03-trivy-s01/TRACE.md)
-- [T04: Grype](./investigations/T04-grype-s02/TRACE.md)
-- [T05: pip-audit](./investigations/T05-pip-audit-s03/TRACE.md)
-- [T06: OWASP Dependency-Check](./investigations/T06-owasp-dependency-check-s04/TRACE.md)
-- [T07: npm audit](./investigations/T07-npm-audit-s05/TRACE.md)
-- [T08: GuardDog](./investigations/T08-guarddog/TRACE.md)
+- [S02: Payara + mvnpm](./scenarios/S02-payara-mvnpm/LESSON.md)
+- [S08: Extended SBOM (SBOM+ vs CycloneDX)](./scenarios/S08-extended-sbom/LESSON.md)
+- [T01: Snyk Cross-Scenario Matrix](./investigations/T01-snyk-beyond-sbom/LESSON.md)
+- [T02: Docker Scout](./investigations/T02-docker-scout/LESSON.md)
+- [T03: Trivy](./investigations/T03-trivy-s01/LESSON.md)
+- [T04: Grype](./investigations/T04-grype-s02/LESSON.md)
+- [T05: pip-audit](./investigations/T05-pip-audit-s03/LESSON.md)
+- [T06: OWASP Dependency-Check](./investigations/T06-owasp-dependency-check-s04/LESSON.md)
+- [T07: npm audit](./investigations/T07-npm-audit-s05/LESSON.md)
+- [T08: GuardDog](./investigations/T08-guarddog/LESSON.md)
 - [Tooling Reference](./reference/tools.md)

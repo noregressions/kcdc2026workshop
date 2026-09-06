@@ -39,18 +39,21 @@ To display installation URLs for all tools:
 | Trivy | 0.50+ | Aqua Security |
 | Grype | 0.75+ | Anchore |
 | pip-audit | 2.7+ | PyPA (`pipx install pip-audit`) |
+| cosign | 3.0+ | Sigstore (S07 signing and attestation) |
+| GuardDog | 3.0+ | Datadog (`pipx install guarddog`, T08) |
 | Docker Scout | Current | Bundled with Docker Desktop / Docker plugin |
 | curl | System standard | System |
 | zip / unzip / tar | System standard | System |
 | coreutils (grep, find, sort, diff, tee) | System standard | System |
 
-Note: `npm audit` is provided by npm; `jar` and `javap` are provided by the JDK; `pip` is provided by Python. Maven plugins (CycloneDX, Shade, Spring Boot, frontend/esbuild, OWASP Dependency-Check) and mvnpm artifacts are resolved automatically during build executions.
+Note: `npm audit` is provided by npm; `jar` and `javap` are provided by the JDK; `pip` is provided by Python. Maven plugins (CycloneDX, Shade, Spring Boot, frontend/esbuild, OWASP Dependency-Check) and mvnpm artifacts are resolved automatically during build executions. SBOM+ (S08) is not yet on Maven Central; the scenario installs a vendored copy from `scenarios/S08-extended-sbom/plugin-repo/` when it cannot be fetched.
 
 ## Installation Commands (macOS / Homebrew)
 
 ```bash
-brew install openjdk@21 maven node python jq syft grype trivy pipx
+brew install openjdk@21 maven node python jq syft grype trivy cosign pipx
 pipx install pip-audit
+pipx install guarddog
 npm install -g snyk
 ```
 

@@ -1,17 +1,5 @@
 # Investigation Cheat Sheet
 
-One page per investigation: what to run, in order, why, and what the output should look like.
-Every command is run from the investigation's own directory unless a `cd` is shown.
-The `#` line above each command says what that command is for.
-Counts, CVE ids and match totals are as observed when the lessons were written. Vulnerability databases move, so expect drift in the vulnerability numbers; package identities and the seen/lost pattern are the invariants.
-
-Investigations in numeric order below: T01 to T08, then the CVE-2020-1938 record study.
-Workshop placement: T01 is the Part 2 instructor demo, the Tomcat CVE study is the Part 3 worked example, T08 pairs with Part 5. T02 to T07 are reference material for self-study.
-
-Every investigation follows the same shape: a `baseline` script rebuilds the scenario and captures ground truth without the tool under test, a `run-*` script drives the tool, a `compare` script prints the two side by side, and `proof-check.sh` asserts the lesson's claims against the captured `results/` files. Passing proof checks end with `Failed: 0` or `RESULT: PASS`.
-
-None of the investigations has a clean script except T01. Their `results/` directories are rebuilt on each run. To reset a scenario, use that scenario's own `./scripts/clean.sh`.
-
 ## Before the workshop
 
 ```bash
@@ -19,11 +7,10 @@ None of the investigations has a clean script except T01. Their `results/` direc
 ./scripts/build-all.sh --with-investigations
 ```
 
-Tool prerequisites by investigation: T01 Snyk CLI (authenticated), T02 Docker Scout (Docker Desktop, logged in), T03 Trivy, T04 Grype + Syft, T05 pip-audit, T06 Maven + NVD API key, T07 npm, T08 GuardDog, CVE study curl + jq.
 
 ---
 
-## T01 — Snyk beyond the SBOM (instructor demo, all five scenarios)
+## T01 — Snyk beyond the SBOM
 
 Question: what does a commercial SCA tool know that an SBOM does not, and which transformations stay invisible even to it?
 Needs: Maven 3.9+, JDK 21+, `jq`, Syft, and an authenticated Snyk CLI. S01 to S05 built.
@@ -31,7 +18,7 @@ Needs: Maven 3.9+, JDK 21+, `jq`, Syft, and an authenticated Snyk CLI. S01 to S0
 ```bash
 cd investigations/T01-snyk-beyond-sbom
 
-# Log in once; every run-snyk script starts by recording `snyk --version`.
+# Log in once; every run snyk script should start by recording `snyk --version`.
 snyk auth
 ```
 

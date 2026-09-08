@@ -22,3 +22,7 @@ ship-check/
 
 # Investigation and scenario scan output
 results/
+
+# IDE configuration
+.idea/
+*.iml

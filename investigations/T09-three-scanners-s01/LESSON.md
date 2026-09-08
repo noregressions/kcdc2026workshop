@@ -21,14 +21,14 @@ difference.
 > up*?
 
 That distinction is the whole investigation. A tool can miss a component
-because it could not identify it — the Part 2 failure — or it can identify it
+because it could not identify it, or it can identify it
 perfectly and still report nothing, because the database it joins against has
 no record. Those two failures look identical in a dashboard and have
 completely different remedies.
 
 ## The instruments
 
-Three free CLI scanners, no account required, deliberately chosen to differ:
+Three free CLI scanners, no account required, (deliberately chosen to differ) :
 
 | Tool | Identity method | Advisory source |
 |---|---|---|
@@ -40,8 +40,7 @@ Grype and Trivy overlap heavily in method and diverge in data. OSV-Scanner
 diverges in both: it is PURL-native, has no CPE matching, and queries a single
 open database. Three tools, two different kinds of difference.
 
-Record the exact versions — this comparison is meaningless without them, and
-they change weekly:
+Record the exact versions, they change weekly:
 
 ```text
 captured:     2026-09-08T19:18:44Z
@@ -53,8 +52,6 @@ osv-scanner:  2.3.8    (v2 CLI form)
 ## The target
 
 S01, because its component states are already known independently of any scanner
-(the ground truth is established in the S01 lesson and re-derived by this
-investigation's baseline script).
 
 ```text
 jackson-databind 2.19.4   ordinary Maven dependency, shipped intact
@@ -65,9 +62,9 @@ lodash 4.17.21            bundled by Vite; npm package boundary gone
 normalizer 1.0.0          local application library
 ```
 
-Plus one controlled variant, which is the sharpest instrument here:
-`normalizer-no-codec-metadata.jar` removes only
+Plus one controlled variant: `normalizer-no-codec-metadata.jar` removes only
 `META-INF/maven/commons-codec/commons-codec/*` and changes **no bytecode**.
+
 Any tool whose answer differs between the two JARs is reading metadata. Any
 tool whose answer is unchanged is either reading code or ignoring both.
 
@@ -86,9 +83,7 @@ The same seven targets, for every tool:
 | `container-image` | The final image, which should be the superset |
 
 Each tool gets whatever invocation makes it work on that target — `fs` vs
-`rootfs` vs `image`, staged directories for bare JARs. Handicapping a tool
-with the wrong invocation would produce a difference that says nothing about
-the tool. The scripts encode the right one for each.
+`rootfs` vs `image`, staged directories for bare JARs. 
 
 ## Run
 
@@ -105,13 +100,11 @@ Or the stages individually, if one of them needs re-running:
 ./scripts/compare-s01.sh         # the matrix — this is what gets pasted below
 ```
 
-Any tool that is not installed is skipped with a note rather than failing the
-run; two of three is still a comparison. `./scripts/proof-check.sh` asserts
-the structural claims afterwards, and `./scripts/clean.sh` removes `results/`.
+Any tool that is not installed is skipped with a note.
+
+`./scripts/proof-check.sh` asserts the structural claims afterwards, and `./scripts/clean.sh` removes `results/`.
 
 ---
-
-# A lead worth chasing before you teach Part 4
 
 All three tools, independently, report vulnerabilities against
 `lodash@4.17.21`:
@@ -127,20 +120,6 @@ a prototype pollution issue in `_.unset` / `_.omit` (the first and third IDs in
 each row are aliases of one another) and a code injection issue via
 `_.template`.
 
-An earlier edition of Part 4 recorded **zero** advisories for
-`pkg:npm/lodash@4.17.21`, from a Sonatype OSS Index query, and used that clean
-result to make a point about what "clean" means.
-
-Chased down on 2026-09-08, and it turned out to be worth more than a footnote:
-deps.dev returns the same three identifiers these scanners do, the artefact has
-not changed since February 2021, and the OSS Index query that produced the
-original zero cannot be run any more — the site redirects to a commercial
-product and the API returns 401. Part 4 is now built around that before-and-
-after, with the captures in `workshop/evidence/`.
-
-The finding stays recorded here because it is where it surfaced: a
-cross-scanner comparison turned up a stale claim in a different chapter, which
-is the kind of thing running more than one tool is for.
 
 ---
 
@@ -154,8 +133,7 @@ untransformed dependency?
 ## Expectation
 
 Yes, everywhere it appears. If a tool misses the control, the probe is
-misconfigured and nothing downstream of it can be trusted. This block exists
-to be boring.
+misconfigured and nothing downstream of it can be trusted.
 
 ## Observed
 
@@ -188,7 +166,7 @@ for.
 
 Three tools, three different ideas of which artefacts are worth reading. None
 of them is wrong. If you run one, you have chosen one of these shapes without
-being told you were choosing.
+knowing..
 
 ---
 
@@ -234,7 +212,7 @@ changed.** The relocated codec classes are byte-for-byte identical in both
 JARs, and the code still executes in the running application.
 
 So the answer to "can a scanner find a shaded dependency" is: only while the
-paperwork survives the build. Both tools are matching on embedded package
+metadata survives the build. Both tools are matching on embedded package
 metadata, and metadata is the thing a build transformation is most likely to
 discard — for perfectly ordinary reasons, with no attacker involved.
 

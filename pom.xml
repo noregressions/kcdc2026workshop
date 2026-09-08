@@ -11,6 +11,22 @@
 
     <name>Software Supply Chain Trace Lab Manual</name>
 
+    <!--
+        The canonical home for "where does this project live". Declaring it
+        here gives the build ${project.scm.url}, which the book's repoUrl var
+        below is filled from, so the URL is written down once.
+
+        If you would rather derive it from the actual git remote than declare
+        it, git-commit-id-maven-plugin exposes ${git.remote.origin.url} — but
+        that needs a .git directory at build time, and the book has to build
+        from a source export too.
+    -->
+    <scm>
+        <url>https://github.com/noregressions/kcdc2026workshop</url>
+        <connection>scm:git:https://github.com/noregressions/kcdc2026workshop.git</connection>
+        <developerConnection>scm:git:git@github.com:noregressions/kcdc2026workshop.git</developerConnection>
+    </scm>
+
 
     <properties>
         <java.version>21</java.version>
@@ -111,6 +127,24 @@
                         <sidebar/>
                         <vars>
                             <subtitle>KCDC 2026 Workshop</subtitle>
+                            <!--
+                                Filled from <scm><url> above; reference in a card as
+                                {{ vars.repoUrl }}.
+
+                                One hard limit: vars expand in prose only, never in
+                                code — not in a fence, not in an inline span. That is
+                                correct rather than a bug, because the book contains
+                                Docker format strings like {{.Id}} that must survive
+                                verbatim. A `git clone` line therefore cannot be
+                                templated, and setup/01 getting-started.md and
+                                setup/PREWARM-MANUAL.md have to carry the URL literally.
+
+                                So those two clone lines are the only places the URL
+                                is written out by hand. If the repository ever moves,
+                                grep for the old name: the POM value above and those two
+                                lines are all there is to change.
+                            -->
+                            <repoUrl>${project.scm.url}</repoUrl>
                             <!--
                             <authors><author>Steve Poole</author>
                                 <author>Brian Vermeer</author></authors>
@@ -340,6 +374,8 @@
                                 <sidebar/>
                                 <vars>
                                     <subtitle>KCDC 2026 Workshop</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
                                     <mermaidTheme>neutral</mermaidTheme>
                                 </vars>
                                 <!-- Kept in step with the shared book's kind axis above. -->
@@ -528,6 +564,8 @@
                                 <sidebar/>
                                 <vars>
                                     <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
                                     <mermaidTheme>neutral</mermaidTheme>
                                 </vars>
                                 <!--
@@ -606,6 +644,8 @@
                                 <sidebar/>
                                 <vars>
                                     <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
                                     <mermaidTheme>neutral</mermaidTheme>
                                 </vars>
                                 <axes>
@@ -675,6 +715,8 @@
                                 <sidebar/>
                                 <vars>
                                     <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
                                     <mermaidTheme>neutral</mermaidTheme>
                                 </vars>
                                 <axes>

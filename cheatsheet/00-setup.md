@@ -17,6 +17,11 @@ route order.
 
 ## Before the workshop
 
+Everything below happens inside a checkout of
+<{{ vars.repoUrl }}> — clone it first if you are starting from nothing
+(*Getting Started* has the exact commands, and the container route if your
+machine will not cooperate).
+
 Run these on a good network, in advance. The pre-warm is the slowest thing in
 the whole workshop, and doing it in the room is how people fall behind.
 

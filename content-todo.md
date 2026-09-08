@@ -1,27 +1,39 @@
+# Content backlog
 
-Add CVE process, walkthrough Tomcat 8.5 CVE details and show how CPEs work.
-Explore timing so that its clear that a CVE is not a point in time but an evolving event
-explain how CVEs against older software may or may not show up.
-explore how forks are or are not tracked...
+What is still missing from the workshop. Everything else on the original list
+is built — see the "Delivered" note at the foot for where each item landed.
 
+## Still to do
 
-Talk about malicious dependency types - typosquatting , dep confusion etc
+- [ ] **Remediation tooling.** Nothing in the route shows how a finding
+  actually gets fixed at scale. Candidates: OSV's remediation tooling
+  (<https://osv.dev/#use-remediation-tools>), Dependabot/Renovate-style
+  automated PRs, and commercial "evergreen" offerings. The interesting angle
+  is the one the workshop is built to ask: automated upgrade PRs are
+  themselves an ingress path — who reviews them, and against what evidence?
+  Natural home: Part 6, after the four decisions.
 
-- talk about KEV, gold eagle where CVE process is going
+- [ ] **A tools-and-sites catalogue.** A single reference list of the free
+  open-source tooling in this space, beyond the ones the labs happen to use —
+  <https://dependencytrack.org/>, <https://osv.dev/>, deps.dev,
+  endoflife.date, OpenSSF Scorecard. Natural home: `reference/tools.md`,
+  which already has the taxonomy but not the catalogue.
 
-Choosing better components - stats on what you choose,  how to check whats available
-- navigate a couple of websites providing cve+package info
-- So we need to think better about what we chose now, and look at how to assess a project for
-the chances of a project getting a CVE later.  So look at Scorecard
+- [ ] **Where the CVE process is going.** CVE 5.x record format, the CNA
+  expansion, and the various proposals to fix the enrichment backlog. Part 3
+  currently shows the process failing without saying what is being done about
+  it. Needs primary sources; do not ship speculation.
 
-- Now lets look at EOL (Mention OpenEOX and the key stages)
-   run EOL tool
+## Delivered
 
-- Need to show remediation tools. (including evergreen).
-and <https://osv.dev/#use-remediation-tools>
-- auto PR stuff?  any good or dangerous?
-
-
--- need to cover (list)all the open source tools and sites
-   <https://dependencytrack.org/>
-   <https://osv.dev/>
+| Original item | Where it landed |
+|---|---|
+| CVE process, Tomcat 8.5 walkthrough, how CPEs work | Part 3 + T10 |
+| A CVE is not a point in time but an evolving event | T10 (57 edits over six years) |
+| Whether CVEs against older software show up | Part 4 + cve-propagation cards 02 and 06 |
+| How forks are or are not tracked | cve-propagation card 03 |
+| Malicious dependency types — typosquatting, dependency confusion | Part 5 |
+| KEV | Part 3, finding 4 |
+| Choosing better components; sites providing CVE + package info | Part 4 (Scorecard, deps.dev) + Part 6's card |
+| Assessing a project's future CVE likelihood — Scorecard | Part 4, step 1 |
+| EOL, OpenEoX and the key stages; run the EOL tool | Part 4, steps 3 and 4 |

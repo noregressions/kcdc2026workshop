@@ -31,6 +31,10 @@ also the sparsest content in it (T07's trace: 1,515 words over 18 pages).
 
 Certain wins — duplication or wrong audience. **~24 pages.**
 **Done 2026-08-26** — all five includes removed from the shared book.
+**Deleted outright 2026-09-08** — all five files are gone from the repository
+as well. They were unreferenced, unmaintained, and said the same things as
+T01's own S01/S02/S03/S05 sections; keeping them meant a second copy that
+could drift from the canonical one.
 
 - [x] `investigations/T01-snyk-beyond-sbom/S01-LESSON.md` (pp. 207–213, 7pp)
   — long-form re-run of the S01 section already inside

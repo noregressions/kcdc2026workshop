@@ -21,6 +21,20 @@ flowchart LR
   d --> e["repository"]
 ```
 
+## What you need
+
+This lab reuses [S01](../S01-spring-node/LESSON.md)'s Spring Boot service and
+Docker image rather than building a new application, so S01 needs to be
+buildable — but there is no new app to learn. On top of S01's own toolchain
+(Maven, JDK 21, Node, Docker) the provenance layers add **`syft`** for the
+SBOM and **`cosign`** for signing and attestation, plus a throwaway local
+registry so the image has a real content digest to key everything on.
+
+**The scripts never modify S01.** They build a throwaway copy under `work/`,
+so you can run this as many times as you like and your S01 lab is untouched.
+Commit ids and digests differ on every run, which means the values printed
+below and in `evidence/` are illustrative rather than fixed.
+
 ---
 
 # Tooling observed
@@ -197,6 +211,12 @@ calls) turned an anonymous image into one that can prove where it came from.
 provenance is a ladder: unsigned claims (embedded + labelled) < inventory < signed attestation
 only the top rung is verifiable by someone who does not trust your build
 ```
+
+Worth saying plainly: most pipelines never climb past the unsigned rungs. An
+embedded commit id and an OCI label are the same trust tier — both are claims
+anyone able to build an image could fake, differing only in how easily a tool
+finds them. They are genuinely useful for debugging and worth nothing against
+an adversary.
 
 # What this does NOT prove
 

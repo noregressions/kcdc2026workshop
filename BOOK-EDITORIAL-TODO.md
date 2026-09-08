@@ -52,8 +52,8 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
 - [ ] **T01 OVERVIEW**: opens as "an investigation over S04" though the TRACE
   spans all five scenarios (reframe with S04 as the live-demo centrepiece);
   status fence still says `S05 … next` though the S05 section is complete;
-  "See `S02-LESSON.md` / `S03-LESSON.md`" are repo-only pointers for book
-  readers; the Snyk CLI version (1.1305.2) is recorded here but missing from
+  (the "See `S02-LESSON.md` / `S03-LESSON.md`" pointers are moot — those files
+  were deleted on 2026-09-08 as duplicates of T01's own sections); the Snyk CLI version (1.1305.2) is recorded here but missing from
   the LESSON's "The instrument".
 
 ## Open inclusion decisions

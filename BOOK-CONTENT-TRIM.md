@@ -82,6 +82,12 @@ Files affected:
 
 ## C. Decide: Appendix — Optional Labs (S02)
 
+> **MOOT 2026-09-08.** S02 and S08 are core route (Part 2, steps 6 and 3), so
+> there is no Optional Labs appendix left to make site-only. The 29 pages are
+> in both editions and are no longer a trim candidate: cutting them would now
+> cut the route. Section B's options remain the live lever on page count.
+
+
 - [x] `scenarios/S02-payara-mvnpm/{OVERVIEW,TRACE}.md` (pp. 173–201,
   **29pp**) — the longest single chapter in the book and explicitly off the
   timed route. If the PDF is the workshop handout, make it site-only; if the
@@ -181,3 +187,32 @@ A+B+C+D: **~140–150pp** — right-sized for ~45k words.
 measurement error), rebuilt with `mvn process-resources`:
 **308 → 168 pages.** The PDF is the timed route + The Tools appendix; the
 site keeps Optional Labs (S02) and Reference Investigations (T02–T07).
+
+---
+
+## Re-measure 2026-09-08 — the book is back to 304 pages
+
+The 168-page result did not hold, and it is worth being precise about why,
+because only a fifth of the regrowth is from the September restructure.
+
+| Since the trim | Pages |
+|---|---|
+| Baseline after the 2026-08-26 trim | 168 |
+| `workshop/cve-propagation/` research note (7 cards, ~1,670 lines) added after the trim, plus spine chapters growing from ~350 to ~1,070 lines | +108 |
+| Three labs reinstated on 2026-09-08 (CVE-tomcat-85, T08, S07) — measured directly by building with and without them | +28 |
+| **Current** | **304** |
+
+The three reinstated labs are not negotiable — Parts 3 and 5 assert their
+findings, and a reader cannot check an assertion against a chapter that is not
+in the book. So if the page budget matters, the candidates are:
+
+- **The cve-propagation cards.** Six research cards inside Parts 3 and 4,
+  written as prose rather than traces. They are the densest writing in the
+  book and the least likely to waste pages, but they are also the largest
+  single addition since the trim.
+- **Section B, option 2 or 3** (unchecked above): shrink the reinstated and
+  remaining traces to findings summaries rather than full step-by-step.
+- **D2 de-fencing** applied to the three reinstated labs, which never had it —
+  they were site-only or absent when that pass ran.
+
+Nothing here is actioned. Decide the target page count first.

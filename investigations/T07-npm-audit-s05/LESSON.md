@@ -6,8 +6,6 @@ track: reference
 
 # T07 — `npm audit` / S05
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use `npm audit` against S05 to distinguish:
@@ -45,7 +43,7 @@ the tool under investigation.
 
 ## Fixture
 
-S05's tracer is `trace-route-package 1.0.0`, a local package whose `prepack`
+S05's tracked component is `trace-route-package 1.0.0`, a local package whose `prepack`
 lifecycle hook generates its runtime code at pack time. Four states matter:
 the package source before packing, the lifecycle execution itself, the
 published tarball, and the provenance evidence the generator deliberately
@@ -53,7 +51,7 @@ plants in its output.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s05.sh
 ```
 
@@ -61,7 +59,7 @@ plants in its output.
 
 Before packing, the package source contained:
 
-```text
+```output
 packages/trace-route-package/build-input/route.json
 packages/trace-route-package/package.json
 packages/trace-route-package/scripts/generate-dist.js
@@ -190,7 +188,7 @@ are where it would show.
 
 All eight probes are driven by one script:
 
-```bash
+```command
 ./scripts/run-npm-audit-s05.sh
 ```
 
@@ -221,7 +219,7 @@ vanished generator) surfaces alongside it.
 
 The application audit produced:
 
-```text
+```output
 json=true
 vulnerabilityRecords=0
 dependencyTotal=1
@@ -256,7 +254,7 @@ change nothing.
 
 Running:
 
-```text
+```output
 npm audit --package-lock-only
 ```
 
@@ -301,7 +299,7 @@ themselves, it should refuse, however auditable the directory looks.
 
 A normal audit in the source package failed:
 
-```text
+```output
 npm error code ENOLOCK
 npm error audit This command requires an existing lockfile.
 npm error audit Try creating one first with: npm i --package-lock-only
@@ -354,7 +352,7 @@ input and the lifecycle declaration should create no inventory entries.
 
 Running the source package with:
 
-```text
+```output
 --no-package-lock
 ```
 
@@ -401,7 +399,7 @@ auditable.
 A normal audit of the unpacked published tarball failed with the same
 `ENOLOCK` condition:
 
-```text
+```output
 This command requires an existing lockfile.
 ```
 
@@ -446,7 +444,7 @@ should be indistinguishable to it.
 
 Running the published package with:
 
-```text
+```output
 --no-package-lock
 ```
 
@@ -503,7 +501,7 @@ at least one of them should surface.
 
 Across all S05 audit outputs:
 
-```text
+```output
 scripts/generate-dist.js     not found
 npm-prepack-generated        not found
 prepack-evidence.json        not found
@@ -550,7 +548,7 @@ otherwise every clean result above is suspect.
 
 The isolated public control used:
 
-```text
+```output
 lodash 4.17.21
 ```
 

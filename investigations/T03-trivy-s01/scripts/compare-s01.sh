@@ -23,7 +23,7 @@ grep -E \
 cat "$BASE/npm-lodash.txt" || true
 
 echo
-echo "== Trivy tracer identity by boundary =="
+echo "== Trivy tracked identity by boundary =="
 
 for label in \
   normalizer-pom \
@@ -42,12 +42,12 @@ do
   elif [[ -s "$TRIVY/$label.tracers.txt" ]]; then
     cat "$TRIVY/$label.tracers.txt"
   else
-    echo "(no tracer identities)"
+    echo "(no tracked identities)"
   fi
 done
 
 echo
-echo "== Trivy tracer vulnerabilities by boundary =="
+echo "== Trivy tracked vulnerabilities by boundary =="
 
 for label in \
   normalizer-pom \
@@ -66,7 +66,7 @@ do
   elif [[ -s "$TRIVY/$label.vulns.txt" ]]; then
     cat "$TRIVY/$label.vulns.txt"
   else
-    echo "(no tracer vulnerability findings)"
+    echo "(no tracked vulnerability findings)"
   fi
 done
 

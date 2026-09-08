@@ -48,7 +48,7 @@ for label in default-maven plugin-aware-maven final-jar plugin-payload-controls;
   if [[ -f "$dir/result.dependency-count.txt" ]]; then
     echo "Dependencies: $(cat "$dir/result.dependency-count.txt")"
     echo "Vulnerability records: $(cat "$dir/result.vulnerability-count.txt")"
-    echo "S04 tracers:"
+    echo "S04 tracked components:"
     if [[ -s "$dir/result.tracers.tsv" ]]; then
       cat "$dir/result.tracers.tsv"
     else
@@ -91,5 +91,5 @@ echo "  3. How much larger is the build-tooling dependency universe when plugins
 echo "  4. Does scanning only the final application JAR reconstruct either build-time component?"
 echo "  5. Does the final JAR still contain the generated runtime behaviour even if those package identities are absent?"
 echo "  6. When the plugin/payload JARs are directly supplied, can Dependency-Check identify them?"
-echo "  7. Are any vulnerability findings tied to the two controlled tracer packages?"
+echo "  7. Are any vulnerability findings tied to the two controlled packages?"
 echo "  8. Is any difference caused by vulnerability data, or by what was admitted to the dependency inventory?"

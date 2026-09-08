@@ -1,13 +1,10 @@
 ---
 id: s08-extended-sbom
 oneliner: "Two SBOMs from the same POMs: the standard CycloneDX plugin describes what ships, SBOM+ also records the build tooling and BOM imports that shaped it, and marks them so a consumer can tell the two apart."
-track: reference
+track: core
 ---
 
 # S08 — Extended SBOM: What Built This, Not Just What Ships
-
-> **Workshop track: REFERENCE** — a short follow-on to S04 and S01. Nothing new
-> is built; two SBOM generators are pointed at code you already have.
 
 Every SBOM so far in this workshop was generated from one of two places: the
 resolver's view of the **application dependency graph** (the CycloneDX Maven
@@ -20,7 +17,7 @@ This lab asks whether a Maven-model SBOM *has* to stop there. It runs a second
 generator, [SBOM+](https://noregressions.github.io/sbom-plus-maven-plugin/),
 against the same POMs, with no changes to them, and compares.
 
-The tracers are S04's and S01's, unchanged:
+The tracked components are S04's and S01's, unchanged:
 
 - `trace-injector-maven-plugin` and `trace-route-payload` — S04's build-time
   software that never appears in `dependency:tree`.
@@ -78,27 +75,27 @@ not model.
 
 ## Run
 
-```bash
+```command
 cd scenarios/S08-extended-sbom
 ./scripts/scan-s04.sh
 ```
 
 The script runs, in S04's own scenario-local repository:
 
-```bash
+```command
 mvn -Dmaven.repo.local=.maven-repo org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom -DoutputFormat=json
 mvn -Dmaven.repo.local=.maven-repo dev.noregressions:sbom-plus-maven-plugin:1.0.0:scan
 ```
 
 ## Observed output
 
-```text
+```output
 ===== S04: what each SBOM says =====
 standard : 0 components    specVersion=1.6
 extended : 171 components  excluded=171  specVersion=1.5
 SBOM+ report: 194 rows across 1 module(s)  BUILD_TOOLING=194  unresolved=0
 
--- The S04 tracers --
+-- The S04 tracked components --
 standard SBOM:
    (absent)
 extended SBOM:
@@ -141,7 +138,7 @@ view add, and where does it disagree with the standard one?
 
 ## Run
 
-```bash
+```command
 ./scripts/scan-s01.sh
 ```
 
@@ -153,7 +150,7 @@ frontend is an npm build outside Maven's model).
 
 On a fresh checkout that has been packaged but not installed:
 
-```text
+```output
 [WARNING] SBOM+ scan: 1 dependency could not be resolved for dev.noregressions.trace:service
 [WARNING]   - dev.noregressions.trace:normalizer:1.0.0 (compile) - Could not find artifact ... in central
 
@@ -163,7 +160,7 @@ extended : 265 components  excluded=230  required=35  specVersion=1.5
 SBOM+ report: 642 rows across 3 module(s)  BOM=1  BUILD_TOOLING=569  MAIN_BUILD=72  unresolved=1
 ```
 
-The tracers:
+The tracked components:
 
 ```text
 standard SBOM:
@@ -237,11 +234,11 @@ down.
 
 ## Go deeper: close the gap and re-scan
 
-```bash
+```command
 (cd ../S01-spring-node && mvn -q install -DskipTests) && ./scripts/scan-s01.sh
 ```
 
-```text
+```output
 extended : 267 components  excluded=230  required=37  specVersion=1.5
 SBOM+ report: 644 rows across 3 module(s)  BOM=1  BUILD_TOOLING=569  MAIN_BUILD=74  unresolved=0
 ...
@@ -325,7 +322,7 @@ Is anything in this record known to be missing?       the unresolved list
 
 # Run
 
-```bash
+```command
 cd scenarios/S08-extended-sbom
 ./scripts/scan-s04.sh        # S04: 0 components versus 171 build-tooling components
 ./scripts/scan-s01.sh        # S01: the shade plugin, the BOM, and the sibling-module gap

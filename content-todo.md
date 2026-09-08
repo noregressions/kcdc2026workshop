@@ -18,10 +18,10 @@ the chances of a project getting a CVE later.  So look at Scorecard
    run EOL tool
 
 - Need to show remediation tools. (including evergreen).
-and https://osv.dev/#use-remediation-tools
+and <https://osv.dev/#use-remediation-tools>
 - auto PR stuff?  any good or dangerous?
 
 
 -- need to cover (list)all the open source tools and sites
-   https://dependencytrack.org/
-   https://osv.dev/
+   <https://dependencytrack.org/>
+   <https://osv.dev/>

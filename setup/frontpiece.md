@@ -1,6 +1,6 @@
 ---
 id: front
-oneliner: "Welcome to the KCDC 2026 workshop: the session abstract, what you will leave with, how the morning runs, and how to use this manual."
+oneliner: "Welcome to the KCDC 2026 workshop: the session abstract, what you will leave with, how it is arranged, and how to use this manual."
 track: core
 ---
 
@@ -27,7 +27,7 @@ when you point the same tools at your own projects.
 > building.
 >
 > We use Snyk's free tier and the HeroDevs EOL database to map what you have
-> and flag what is past safe support, and the OSS Index and the OpenSSF
+> and flag what is past safe support, and coordinate indexes and the OpenSSF
 > Scorecard to see whether the project behind a library follows the security
 > practices that make future vulnerabilities less likely.
 >
@@ -53,15 +53,15 @@ when you point the same tools at your own projects.
 
 KCDC, the Kansas City Developer Conference, is a community-run conference for
 software developers held each year in Kansas City. Its workshop day gives a
-topic room to breathe: a few hours, a laptop, and enough time to run things
-rather than watch them. This manual is built for that format. Everything in
+topic room to breathe: a laptop, and the space to run things rather than
+watch them. This manual is built for that format. Everything in
 it is reproducible on your own machine, and every claim points at the command
 that produced it.
 
 ## What you will leave with
 
-By the end of the morning you will have done each of the following yourself,
-not watched someone else do it:
+By the end you will have done each of the following yourself, not watched
+someone else do it:
 
 - **Traced named components across build boundaries** and seen exactly where
   a dependency stops being identifiable: shading and relocation in Java,
@@ -77,11 +77,13 @@ not watched someone else do it:
 - **Measured project health beyond CVEs**, with OpenSSF Scorecard, the OSS
   Index and end-of-life data, and seen why a clean vulnerability scan on an
   unsupported component means less than it appears to.
-- **Seen where build-time execution lets an attacker in**, and how controlled
-  ingress, cache integrity and signed provenance close the gap, including an
-  image that can prove where it came from.
-- **Looked at what AI tooling does to a dependency tree**, and at the
-  malware written to exploit it.
+- **Seen where build-time execution lets an attacker in**, how the documented
+  incidents actually worked, and how controlled ingress, cache integrity and
+  signed provenance close the gap — including an image that can prove where
+  it came from.
+- **Run the drill you take home**: two inventories of the same build, the
+  difference between them, a lifecycle check, and a decision for every
+  finding.
 
 The recurring question in every lab is a small one:
 
@@ -91,23 +93,36 @@ is it still identifiable here?
 
 The answer, boundary by boundary, is the workshop.
 
-## How the morning runs
+## How it is arranged
+
+The workshop is four acts.
+
+**Act 1 — You can't see what you ship.** Six real builds, six ways a component
+you can name stops being identifiable — and one SBOM generator that gets some
+of it back.
+
+**Act 2 — The scanner can't either.** What happens when vulnerability data is
+laid over an inventory that was already incomplete.
+
+**Act 3 — Someone is counting on that.** The same gaps, used deliberately,
+and what actually closes them.
+
+**Act 4 — The minimum that keeps you honest.** The short drill you run every
+release, run here first.
 
 ```text
-Part 1   Supply-Chain Fundamentals               15 min   Architecture Overview
-Part 2   Software Identifiability Across Limits  60 min   Hands-on Build Traces
-Part 3   Vulnerability Ingestion and CPE Data    35 min   Analysis & API Probes
-Break                                            15 min
-Part 4   Project Health & Lifecycle EOL Data     25 min   Scorecard & EOL Scanning
-Part 5   Malicious Vectors & Defensive Controls  25 min   Provenance & Code Scanning
-Part 6   AI Tooling & Dependency Ingress         20 min   Malware Dissection
-Part 7   Synthesis & Implementation Framework    10 min   Operational Summary
+Part 1   What is actually in our software?       Act 1
+Part 2   Can we identify what we ship?           Act 1   hands-on
+Part 3   What does a CVE finding actually mean?  Act 2   guided
+Break
+Part 4   CVEs aren't enough                      Act 2   guided
+Part 5   Someone is counting on that             Act 3   hands-on
+Part 6   The minimum that keeps you honest       Act 4   hands-on
 ```
 
-The slot is 240 minutes; the route above uses 205, leaving room for setup
-stragglers, questions, and the demos that run long. Parts 2 and 5 are
-hands-on labs. The rest mixes short presentation with
-guided analysis you follow along with on your own machine.
+Part 2 alone is six hands-on labs. Nothing here is optional, so if something
+misbehaves on your machine, move on rather than debug it — every lab carries
+the output it should have produced, and you can come back to it later.
 
 ## How to use this manual
 
@@ -115,7 +130,7 @@ guided analysis you follow along with on your own machine.
 most useful thing you can do in advance is to run the readiness check and
 the pre-warm, on a good network:
 
-```bash
+```command
 ./scripts/tools-check.sh
 ./scripts/build-all.sh
 ```
@@ -123,23 +138,24 @@ the pre-warm, on a good network:
 If your machine cannot be made ready, the workshop container has every tool
 and every build already inside it; *Getting Started* explains both routes.
 
-**During the session**, follow `WORKSHOP.md` in the repository. It is the
-route: each step names the lab, the commands, and what you should see. The
-chapters in Parts 2 to 6 of this manual are the full lessons behind those
-steps, with every command, its observed output, and what that output does
-and does not establish.
+**During the session**, work through this manual front to back — it *is* the
+route. Each part opens with the commands to run and what you should see, and
+is followed by the full lesson for every lab it uses, with every command, its
+observed output, and what that output does and does not establish. If you
+lose your place after a break, `WORKSHOP.md` in the repository is the same
+route on one page.
 
-**Afterwards**, the appendices hold the optional labs and the reference
-investigations we did not have time for, one per tool, each asking the same
-questions of the same artefacts. They are self-study material, and the
+**Afterwards**, the appendices hold the reference investigations we did not
+have time for, one per tool, each asking the same questions of the same
+artefacts. They are self-study material, and the
 scripts in every lab include a proof check so you can confirm the findings
 still hold when you re-run them.
 
 Two conventions run through everything:
 
-- Every lab uses **tracers**: specific, named components followed from
-  declaration to runtime, so that "the scanner missed it" always means a
-  particular thing was missed at a particular boundary.
+- Every lab follows a handful of named dependencies — the **tracked
+  components** — from declaration to runtime, so that "the scanner missed it"
+  always means a particular thing was missed at a particular boundary.
 - Every observed output in this manual was **captured from a real run**, and
   the command that produced it is printed alongside. Versions, counts and
   database dates will drift; the structural findings should not. If one

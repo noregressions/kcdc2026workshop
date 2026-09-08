@@ -53,7 +53,7 @@ printf '%s\n' "$NORMALIZER_JAR" >"$OUT/normalizer-jar-path.txt"
 printf '%s\n' "$M2" >"$OUT/maven-repo-path.txt"
 
 echo
-echo "== Maven tracer resolution =="
+echo "== Maven tracked-component resolution =="
 
 (
   cd "$S01"
@@ -78,7 +78,7 @@ cat "$OUT/maven-service-codec.txt"
 cat "$OUT/maven-service-jackson.txt"
 
 echo
-echo "== npm tracer resolution =="
+echo "== npm tracked-component resolution =="
 (
   cd "$S01/frontend"
   npm ls lodash
@@ -130,7 +130,7 @@ find "$S01/frontend/dist" -maxdepth 2 -type f -print \
   | tee "$OUT/frontend-dist-files.txt"
 
 echo
-echo "== Final Spring Boot JAR tracer evidence =="
+echo "== Final Spring Boot JAR tracked-component evidence =="
 unzip -l "$SERVICE_JAR" \
   | grep -E 'jackson-databind|commons-codec|normalizer-1\.0\.0\.jar|BOOT-INF/classes/static/' \
   | tee "$OUT/service-jar-tracers.txt" || true

@@ -10,7 +10,7 @@ This is the second case inside **T01 — Snyk Beyond the SBOM**.
 
 S02 gives us a different kind of missing software from S04.
 
-The tracer is:
+The tracked component is:
 
 ```text
 org.mvnpm:lodash-es:4.17.21

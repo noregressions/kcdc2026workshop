@@ -40,7 +40,7 @@ cdx_summary "extended " "$OUT/plus.cdx.json"
 report_origins "$OUT/plus.report.json"
 
 echo
-echo "-- The S04 tracers --"
+echo "-- The S04 tracked components --"
 echo "standard SBOM:"
 cdx_rows "$OUT/standard.cdx.json" 'trace-injector|trace-route-payload' | sed 's/^/   /'
 [[ -n "$(cdx_rows "$OUT/standard.cdx.json" 'trace-injector|trace-route-payload')" ]] || echo "   (absent)"

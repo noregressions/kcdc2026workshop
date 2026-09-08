@@ -1,0 +1,114 @@
+
+
+
+
+
+
+
+
+
+
+4-hour workshop outline
+Demos and hands-on throughout. All tools free or free tier. Java, Node, Python,
+Objectives
+By the end, attendees can:
+Explain why discovery is hard, and how attackers exploit the gaps
+Read scanner output critically: tool capability gaps, CVE process failures, EOL blind spots
+Run the minimum practice for knowing what they ship, every release
+Explain why AI-speed vulnerability discovery and incoming regulation (CRA, US) make this urgent now
+
+
+Introductions  and Setup
+
+
+Part 1:   ~1.45HRS
+
+A: Hands-on exploration of build and deploy scenarios using Java, Node and Python - learning how information about dependencies etc can get lost or be incorrect.  Gotchas and surprises included
+B: Attestations etc.  Learning how to capture the right information to allow for reverse audit from binary to source.
+
+Break 15m
+
+Part 2:  ~ 45hr
+
+A: Q&A
+B: CVEs and all that.  How the process reality works,  some web exploring follow-along.
+B2: Chat App demo - old deps -  how long to it getting fixed
+B3:  HeroDevs EOL DS
+C: Simple types of supply chain attacks - dependency confusion, typo squatting etc - slides
+D: Basic defences  - slides
+
+Break 5m
+
+Part 3:  45hr
+
+AI …
+Wrapup 15m
+
+
+---
+4-hour workshop outline
+Demos and hands-on throughout. All tools free or free tier. Java, Node, Python,
+Objectives
+By the end, attendees can:
+Explain why discovery is hard, and how attackers exploit the gaps
+Read scanner output critically: tool capability gaps, CVE process failures, EOL blind spots
+Run the minimum practice for knowing what they ship, every release
+Explain why AI-speed vulnerability discovery and incoming regulation (CRA, US) make this urgent now
+
+10 Mins / section hands -on ?
+Part A: Discovery is hard, and attackers know it
+Declared vs shipped. Repackaging drift. The gaps are the attack surface.
+Set the scene …
+Declared vs resolved graph on a real project (mvn dependency:tree, npm ls --all, pipdeptree)
+SBOM from manifest vs SBOM from binary artefact — Syft + CycloneDX plugins, side by side
+Break the SBOM live: shade a jar, vendor source, rebuild a container. Components vanish
+How code hides: renamed classes, payloads in resources, build-time injection
+Dissect a real malicious package (from published research): manifest says one thing, binary does another
+Snyk demo --?
+Part B: Why green doesn't mean green
+Three ways the data misleads: tool gaps, CVE process failures, EOL blind spot.
+Same project, three scanners, different answers: Snyk (free tier), OSV-Scanner, Grype. Unpick why
+Live CVE/NVD walkthrough: narrow version ranges, unscored backlog, ranges that stop at the support boundary - tomcat 8.5?
+EOL blind spot: nobody files CVEs against dead branches. HeroDevs EOL DS scan (CLI or SBOM upload) to find them
+Trace a fix in a supported release back through EOL versions the scanner says  green
+endoflife.date for quick lifecycle lookups
+Part C: The minimum that keeps you informed
+Short and checklist-shaped: how to get to nothing in the ship list is a surprise.
+Inventory the artefact, not just the manifest, every build
+More than one scanner, plus a lifecycle check
+More emphasis on keeping current
+Judge before adopting: OpenSSF Scorecard, deps.dev, OSS Index  E
+IDE plugins?
+Decision path for findings: upgrade / patch in-house / accept / buy support
+Take-home: one-page checklist with commands
+Part D: The outside world has raised the bar
+Machine-speed vulnerabilities, human-speed fixes. Plus regulators.
+Vibe code etc condsequences on selected packages etc…
+AI vuln discovery outpacing fixes,  EOL code as the undefended backlog
+Demo: AI coding assistant grows the tree, picks poorly, hallucinates packages. Audit what it pulled in
+Slopsquatting: attackers register the hallucinated names for real (sourced from published research)
+CRA + US regulation: one slide each, primary sources only
+Closing decision path names HeroDevs Never-Ending Support (NES) as the drop-in option
+Part E - Wrap up
+---
+
+Others
+
+Visualiser / comparison between scanning tools?
+
+
+
+---
+
+Essential
+
+Why good scanners are a life saver -  snyk / sonatype ..
+
+Do AI as a separate part
+	Mcp’s etc ..
+AIBOMs
+Model versions / agent guards?
+Why prompts and skills are now ‘shippable code’
+
+
+https://foojay.io/today/security-doesnt-start-at-liftoff/

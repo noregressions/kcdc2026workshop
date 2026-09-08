@@ -6,10 +6,6 @@ track: reference
 
 # T08 — GuardDog / S05 + S03
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed
-> route. Pairs with Part 5, where the question is what a tool can detect once
-> it stops trusting metadata and starts reading code.
-
 ## The question
 
 Part 2 showed that metadata-only scanners miss code that a build generates or
@@ -57,7 +53,7 @@ makes their clean results interpretable.
 
 ## Run
 
-```bash
+```command
 ./scripts/positive-control.sh
 ```
 
@@ -67,7 +63,7 @@ base64-hides `child_process` and runs a download-and-execute.
 
 ## Observed
 
-```text
+```output
 ── Initial execution ──
 
 execution-risk: found 1 indicator
@@ -105,7 +101,7 @@ nothing about what the generator did.
 
 ## Run
 
-```bash
+```command
 ./scripts/scan-s05.sh
 ```
 
@@ -113,7 +109,7 @@ nothing about what the generator did.
 
 The tarball a consumer actually receives contains exactly:
 
-```text
+```output
 package/dist/index.js
 package/package.json
 package/dist/prepack-evidence.json
@@ -170,7 +166,7 @@ innocent, rather than evidence absent.
 
 ## Run
 
-```bash
+```command
 ./scripts/scan-s03.sh
 ```
 
@@ -178,7 +174,7 @@ innocent, rather than evidence absent.
 
 Unlike the S05 tarball, the S03 sdist carries its build logic:
 
-```text
+```output
 tracehook_demo-1.0.0/pyproject.toml
 tracehook_demo-1.0.0/tracehook_backend.py
 ```
@@ -243,7 +239,7 @@ generator still exists, should fire.
 
 ## Run
 
-```bash
+```command
 ./scripts/scan-malicious.sh
 ```
 
@@ -255,7 +251,7 @@ The script scans both malicious cases; this probe reads Case A, where
 
 Scan the published tarball:
 
-```text
+```output
 No risks found in CASE-A-generator-payload.tgz
 Assessment:  No risks detected  (0.0/10)
 ```
@@ -297,7 +293,7 @@ time the published-tarball scan should catch it.
 
 ## Run
 
-```bash
+```command
 ./scripts/scan-malicious.sh
 ```
 
@@ -308,7 +304,7 @@ The same script's Case B: the generator writes the `curl | sh` into
 
 Scan the published tarball:
 
-```text
+```output
 execution-risk: found 1 indicator
 │ * threat.process.spawn
 │   Detects download-and-execute patterns: fetching a remote file then executing it
@@ -398,7 +394,7 @@ score alone cannot distinguish the three; the artefact contents can.
 
 # Rerun everything
 
-```bash
+```command
 ./scripts/positive-control.sh   # High risk — the scanner is awake
 ./scripts/scan-s05.sh           # clean — benign mechanism excluded from the tarball
 ./scripts/scan-s03.sh           # clean — benign backend present

@@ -8,7 +8,7 @@ track: core
 
 Verify the local environment against the required tool specifications:
 
-```bash
+```command
 ./scripts/tools-check.sh
 ```
 
@@ -16,7 +16,7 @@ The script evaluates installed binaries against the minimum version thresholds a
 
 To display installation URLs for all tools:
 
-```bash
+```command
 ./scripts/tools-check.sh --urls
 ```
 
@@ -50,8 +50,8 @@ Note: `npm audit` is provided by npm; `jar` and `javap` are provided by the JDK;
 
 ## Installation Commands (macOS / Homebrew)
 
-```bash
-brew install openjdk@21 maven node python jq syft grype trivy cosign pipx
+```command
+brew install openjdk@21 maven node python jq syft grype trivy osv-scanner cosign pipx
 pipx install pip-audit
 pipx install guarddog
 npm install -g snyk

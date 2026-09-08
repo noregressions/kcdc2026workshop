@@ -26,7 +26,7 @@
             <plugin>
                 <groupId>dev.noregressions.paperband</groupId>
                 <artifactId>paperband-maven-plugin</artifactId>
-                <version>0.1.2</version>
+                <version>0.1.1</version>
 
                 <!--
                     Shared by every goal: what the book is, and how it renders.
@@ -57,6 +57,7 @@
                         <stylesheet>src/main/paperband/styles/kind.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/diagrams.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/fences.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/command-output.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/screen.css</stylesheet>
                     </stylesheets>
                     <!--
@@ -151,29 +152,29 @@
                             </axis>
                         </axes>
                         <sections>
-                            <section >
+                            <section>
                                 <landingPage>false</landingPage>
                                 <title>Welcome</title>
                                 <includes>
-                                <include>setup/frontpiece.md</include>
+                                    <include>setup/frontpiece.md</include>
                                 </includes>
-
                             </section>
 
                             <toc/>
 
                             <!--
-                                The book embodies the workshop route: setup, then one section per
-                                workshop section (presentation placeholder first, its labs after),
-                                then appendices for everything off the timed route. Explicit
-                                includes throughout — order is meaning here, and globs sweep.
+                                The book is the workshop: one section per part, each
+                                chapter followed by the labs it uses, then appendices
+                                for everything off the timed route. Explicit includes
+                                throughout, because order is meaning here and globs
+                                sweep. Parts 1 to 6 are the four acts:
+                                1-2 identification, 3-4 the data over the top of it,
+                                5 deliberate abuse of both, 6 what you do every release.
                             -->
                             <section>
                                 <title>Introduction and Setup</title>
                                 <includes>
-
                                     <include>setup/00 about.md</include>
-
                                     <include>setup/01 getting-started.md</include>
                                     <include>setup/02 tools.md</include>
                                     <include>setup/03 ACCOUNTS-AND-KEYS.md</include>
@@ -181,57 +182,74 @@
                                 </includes>
                             </section>
                             <section>
-                                <title>Part 1 — Supply-Chain Fundamentals</title>
+                                <title>Part 1 — What Is Actually in Our Software?</title>
                                 <includes>
                                     <include>workshop/01-supply-chain.md</include>
                                 </includes>
                             </section>
                             <section>
                                 <title>Part 2 — Can We Identify What We Ship?</title>
+                                <!--
+                                    Lab order follows the timed route in the chapter: S01
+                                    transformations, S04 plugin realms, S05 hooks, S03
+                                    S08 (the SBOM that does see S04's plugin), S05 hooks,
+                                    S03 backends, S02 as the everything-at-once Jakarta EE
+                                    case, then T01 as the scanner test. S02 and S08 were an
+                                    Optional Labs appendix until 2026-09-08; they are core
+                                    route now, so that appendix is gone.
+                                -->
                                 <includes>
                                     <include>workshop/02-identification.md</include>
                                     <include>scenarios/S01-spring-node/LESSON.md</include>
                                     <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                    <include>scenarios/S08-extended-sbom/LESSON.md</include>
                                     <include>scenarios/S05-node-prepack/LESSON.md</include>
                                     <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
                                 <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
+                                <!--
+                                    The Ghostcat investigation is the worked example the
+                                    chapter routes into, so it has to be in the book the
+                                    reader is holding.
+                                -->
                                 <includes>
                                     <include>workshop/03-vulnerabilities.md</include>
+                                    <include>investigations/T10-cve-tomcat-85/LESSON.md</include>
+                                    <include>workshop/cve-propagation/01-cve-is-not-a-graph.md</include>
+                                    <include>workshop/cve-propagation/04-scanner-classes.md</include>
+                                    <include>workshop/cve-propagation/05-database-comparison.md</include>
+                                    <include>investigations/T09-three-scanners-s01/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
                                 <title>Part 4 — CVEs Aren't Enough</title>
                                 <includes>
                                     <include>workshop/04-project-health-eol.md</include>
+                                    <include>workshop/cve-propagation/02-old-release-policies.md</include>
+                                    <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
+                                    <include>workshop/cve-propagation/06-what-this-means.md</include>
                                 </includes>
                             </section>
                             <section>
-                                <title>Part 5 — What If Someone Exploits the Gaps?</title>
+                                <title>Part 5 — Someone Is Counting on That</title>
+                                <!--
+                                    Both labs were previously in neither edition while the
+                                    chapter asserted their findings.
+                                -->
                                 <includes>
-                                    <include>workshop/05-integrity-provenance.md</include>
+                                    <include>workshop/05-attacks-and-provenance.md</include>
+                                    <include>investigations/T08-guarddog/LESSON.md</include>
+                                    <include>scenarios/S07-provenance-s01/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
-                                <title>Part 6 — AI and the Supply Chain</title>
+                                <title>Part 6 — The Minimum That Keeps You Honest</title>
                                 <includes>
-                                    <include>workshop/06-ai-dependencies.md</include>
-                                </includes>
-                            </section>
-                            <section>
-                                <title>Part 7 — Wrap-Up</title>
-                                <includes>
-                                    <include>workshop/07-wrap-up.md</include>
-                                </includes>
-                            </section>
-                            <section>
-                                <title>Appendix — Optional Labs</title>
-                                <includes>
-                                    <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
-                                    <include>scenarios/S08-extended-sbom/LESSON.md</include>
+                                    <include>workshop/06-minimum-practice.md</include>
                                 </includes>
                             </section>
                             <section>
@@ -240,18 +258,30 @@
                                     <include>reference/tools.md</include>
                                 </includes>
                             </section>
-                            <!--
-                                Site-only from here down: the per-tool reference
-                                investigations are off the timed route and are the
-                                sparsest content in the book, so the PDF stops at
-                                the tools appendix (see the pdf execution's book
-                                override below). The T01 per-scenario re-runs and
-                                KNOWN-GROUND-TRUTH (instructor-demo track) are out
-                                of both editions: T01/LESSON.md in Part 2 already
-                                tells that story once.
-                            -->
+                            <section>
+                                <title>Appendix — Vulnerability Data Sources</title>
+                                <includes>
+                                    <include>workshop/cve-propagation/07-sources.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Appendix — AI and the Supply Chain</title>
+                                <!--
+                                    Parked while the AI strand is out of scope for the
+                                    session. Kept as an appendix rather than deleted, so the
+                                    running order stays four acts.
+                                -->
+                                <includes>
+                                    <include>workshop/appendix-ai-dependencies.md</include>
+                                </includes>
+                            </section>
                             <section>
                                 <title>Appendix — Reference Investigations</title>
+                                <!--
+                                    Site only: too long for the printed manual, and off the
+                                    timed route. T08 is not here because Part 5 now carries
+                                    it as a core lab.
+                                -->
                                 <includes>
                                     <include>investigations/T02-docker-scout/LESSON.md</include>
                                     <include>investigations/T03-trivy-s01/LESSON.md</include>
@@ -279,8 +309,8 @@
                                  badges, dividers) without opening the PDF. -->
                             <emitHtml>${project.build.directory}/book.html</emitHtml>
                             <!--
-                                The printed book is the workshop handout: the timed
-                                route plus the Optional Labs and tools appendices.
+                                The printed book is the workshop handout: the whole
+                                timed route plus the reference appendices.
                                 combine.self="override" replaces the shared <book>
                                 wholesale (Maven merging would otherwise splice the
                                 two section lists positionally), so this is a full
@@ -341,6 +371,15 @@
 
                                     <toc/>
 
+                                    <!--
+                                        The book is the workshop: one section per part, each
+                                        chapter followed by the labs it uses, then appendices
+                                        for everything off the timed route. Explicit includes
+                                        throughout, because order is meaning here and globs
+                                        sweep. Parts 1 to 6 are the four acts:
+                                        1-2 identification, 3-4 the data over the top of it,
+                                        5 deliberate abuse of both, 6 what you do every release.
+                                    -->
                                     <section>
                                         <title>Introduction and Setup</title>
                                         <includes>
@@ -352,69 +391,321 @@
                                         </includes>
                                     </section>
                                     <section>
-                                        <title>Part 1 — Supply-Chain Fundamentals</title>
+                                        <title>Part 1 — What Is Actually in Our Software?</title>
                                         <includes>
                                             <include>workshop/01-supply-chain.md</include>
                                         </includes>
                                     </section>
                                     <section>
                                         <title>Part 2 — Can We Identify What We Ship?</title>
+                                        <!--
+                                            Lab order follows the timed route in the chapter: S01
+                                            transformations, S04 plugin realms, S05 hooks, S03
+                                            S08 (the SBOM that does see S04's plugin), S05 hooks,
+                                            S03 backends, S02 as the everything-at-once Jakarta EE
+                                            case, then T01 as the scanner test. S02 and S08 were an
+                                            Optional Labs appendix until 2026-09-08; they are core
+                                            route now, so that appendix is gone.
+                                        -->
                                         <includes>
                                             <include>workshop/02-identification.md</include>
                                             <include>scenarios/S01-spring-node/LESSON.md</include>
-                                            <!--
-                                                S02 is not here: it belongs to the Optional
-                                                Labs appendix below, and the first section to
-                                                claim a card keeps it. Listing it in both left
-                                                the appendix empty.
-                                            -->
-                                            <include>scenarios/S03-python-pep517/LESSON.md</include>
                                             <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/S08-extended-sbom/LESSON.md</include>
                                             <include>scenarios/S05-node-prepack/LESSON.md</include>
+                                            <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                            <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
                                             <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>
                                         <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
+                                        <!--
+                                            The Ghostcat investigation is the worked example the
+                                            chapter routes into, so it has to be in the book the
+                                            reader is holding.
+                                        -->
                                         <includes>
                                             <include>workshop/03-vulnerabilities.md</include>
+                                            <include>investigations/T10-cve-tomcat-85/LESSON.md</include>
+                                            <include>workshop/cve-propagation/01-cve-is-not-a-graph.md</include>
+                                            <include>workshop/cve-propagation/04-scanner-classes.md</include>
+                                            <include>workshop/cve-propagation/05-database-comparison.md</include>
+                                            <include>investigations/T09-three-scanners-s01/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>
                                         <title>Part 4 — CVEs Aren't Enough</title>
                                         <includes>
                                             <include>workshop/04-project-health-eol.md</include>
+                                            <include>workshop/cve-propagation/02-old-release-policies.md</include>
+                                            <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
+                                            <include>workshop/cve-propagation/06-what-this-means.md</include>
                                         </includes>
                                     </section>
                                     <section>
-                                        <title>Part 5 — What If Someone Exploits the Gaps?</title>
+                                        <title>Part 5 — Someone Is Counting on That</title>
+                                        <!--
+                                            Both labs were previously in neither edition while the
+                                            chapter asserted their findings.
+                                        -->
                                         <includes>
-                                            <include>workshop/05-integrity-provenance.md</include>
+                                            <include>workshop/05-attacks-and-provenance.md</include>
+                                            <include>investigations/T08-guarddog/LESSON.md</include>
+                                            <include>scenarios/S07-provenance-s01/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>
-                                        <title>Part 6 — AI and the Supply Chain</title>
+                                        <title>Part 6 — The Minimum That Keeps You Honest</title>
                                         <includes>
-                                            <include>workshop/06-ai-dependencies.md</include>
-                                        </includes>
-                                    </section>
-                                    <section>
-                                        <title>Part 7 — Wrap-Up</title>
-                                        <includes>
-                                            <include>workshop/07-wrap-up.md</include>
-                                        </includes>
-                                    </section>
-                                    <section>
-                                        <title>Appendix — Optional Labs</title>
-                                        <includes>
-                                            <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
-                                            <include>scenarios/S08-extended-sbom/LESSON.md</include>
+                                            <include>workshop/06-minimum-practice.md</include>
                                         </includes>
                                     </section>
                                     <section>
                                         <title>Appendix — The Tools</title>
                                         <includes>
                                             <include>reference/tools.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — Vulnerability Data Sources</title>
+                                        <includes>
+                                            <include>workshop/cve-propagation/07-sources.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — AI and the Supply Chain</title>
+                                        <!--
+                                            Parked while the AI strand is out of scope for the
+                                            session. Kept as an appendix rather than deleted, so the
+                                            running order stays four acts.
+                                        -->
+                                        <includes>
+                                            <include>workshop/appendix-ai-dependencies.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!--
+                        The cheat-sheet edition: the route-ordered cheatsheet/ cards on
+                        their own, as a PDF to print and lay beside the keyboard
+                        and a site to keep in a browser tab. Nothing narrative —
+                        every command of every lab in run order, with the output
+                        it should produce. Its own edition rather than an
+                        appendix of the manual, because the point is to have it
+                        open *while* working through a lab, not to page past the
+                        prose to reach it.
+
+                        Three executions below share one book declaration, and
+                        Maven has no way to name a <book> once and reuse it, so
+                        the declaration is copied into each. Keep the three
+                        copies in step when editing any of them.
+                    -->
+                    <execution>
+                        <id>cheatsheets-pdf</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <output>${project.build.directory}/cheatsheets.pdf</output>
+                            <emitHtml>${project.build.directory}/cheatsheets.html</emitHtml>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <!--
+                                    The kind axis again, so the two cards keep the
+                                    identity they have in the manual: scenario blue
+                                    for the lab commands, instrument violet for the
+                                    tool runs. Valued by the folder yaml files, as
+                                    in the manual.
+                                -->
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <!--
+                                    One section holding both cards: at two cards a
+                                    section apiece would be section furniture around
+                                    single entries, and the card titles already say
+                                    which sheet you are on.
+                                -->
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cheatsheets-site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Its own tree, not a subdirectory of the manual's
+                                 site: <clean>true</clean> on either build would
+                                 otherwise sweep the other's card pages. -->
+                            <outputDirectory>${project.build.directory}/cheatsheets-site</outputDirectory>
+                            <clean>true</clean>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!--
+                        And again on Maven's `site` phase, for the same reason the
+                        manual's site-lifecycle execution exists: `mvn site` runs
+                        only the reporting lifecycle, which never reaches
+                        process-resources.
+                    -->
+                    <execution>
+                        <id>cheatsheets-site-lifecycle</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/cheatsheets-site</outputDirectory>
+                            <clean>true</clean>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
                                         </includes>
                                     </section>
                                 </sections>

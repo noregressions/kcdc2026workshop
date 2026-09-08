@@ -6,8 +6,6 @@ track: reference
 
 # T02 — Docker Scout: What Does the Final Container Know?
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use Docker Scout as a final-container evidence source for the workshop scenarios that produce container images.
@@ -51,7 +49,7 @@ disagreement at the same boundary is part of the evidence.
 
 ## Ground truth
 
-Important tracer states:
+Important component states:
 
 ```text
 jackson-databind 2.19.4
@@ -78,13 +76,13 @@ lodash 4.17.21
 
 ## Question
 
-Which of these tracer identities can Docker Scout recover from the finished
+Which of these tracked identities can Docker Scout recover from the finished
 `checkout-service` image, and what evidence does it add beyond the package
 inventory?
 
 ## Expectation
 
-Ground truth: the four Java tracers ship inside the image with their Maven
+Ground truth: the four Java tracked components ship inside the image with their Maven
 identity evidence intact — including the shaded codec 1.17.1, whose package
 metadata survives relocation. A final-image scan should therefore recover all
 four. lodash's npm package boundary was destroyed by Vite before the image was
@@ -95,7 +93,7 @@ model describes.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s01.sh
 ./scripts/run-scout-s01.sh
 ./scripts/compare-s01.sh
@@ -105,7 +103,7 @@ model describes.
 
 The rebuilt image was:
 
-```text
+```output
 registry.example.com/checkout-service:release-123
 sha256:7d3b4c23011efff02feddce24a181f921f5d9a46fb9b8a72c940d316fe7dae3c
 ```
@@ -138,7 +136,7 @@ policy: FAILED (3/7)
 health score: D (44%)
 ```
 
-Scout identified the same four Java tracers:
+Scout identified the same four Java tracked components:
 
 ```text
 commons-codec      1.17.1
@@ -153,7 +151,7 @@ Scout did not identify:
 lodash 4.17.21
 ```
 
-The tracer CVE view reported five vulnerabilities, all on:
+The tracked CVE view reported five vulnerabilities, all on:
 
 ```text
 jackson-databind 2.19.4
@@ -178,7 +176,7 @@ was up to date. It also suggested Java 25 and Java 26 tags as alternative major-
 
 ## Verdict
 
-**Four Java tracers: identified. lodash 4.17.21: identity lost** — both as
+**Four Java tracked components: identified. lodash 4.17.21: identity lost** — both as
 expected.
 
 ```text
@@ -199,7 +197,7 @@ Moving the scanner later expands the deployed software universe, but does not gu
 
 ## Ground truth
 
-Important tracer states:
+Important component states:
 
 ```text
 commons-lang3 3.18.0
@@ -223,7 +221,7 @@ Payara server
 
 ## Question
 
-Which of these tracer identities can Docker Scout recover from the finished
+Which of these tracked identities can Docker Scout recover from the finished
 Payara image — and when a package family reappears at this boundary, whose
 software is it?
 
@@ -239,7 +237,7 @@ inventory well beyond S01's.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s02.sh
 ./scripts/run-scout-s02.sh
 ./scripts/compare-s02.sh
@@ -249,7 +247,7 @@ inventory well beyond S01's.
 
 The rebuilt image was:
 
-```text
+```output
 payara-mvnpm-trace-lab:local
 sha256:9ad9bb4ab46971e6639855c48b7769864c437cf43ab7e786595613895f40a98c
 ```
@@ -374,11 +372,11 @@ Once esbuild bundled the code, neither final-image scanner reconstructed the npm
 
 # Scorecard
 
-What the final-image scans established, tracer by tracer — `seen` means the
+What the final-image scans established, tracked component by tracked component — `seen` means the
 package identity was recovered from the image; `—` means it was not. Every `—`
 in this table is code that shipped in the image anyway.
 
-| Tracer | Scenario | Docker Scout (final image) |
+| Tracked component | Scenario | Docker Scout (final image) |
 | --- | --- | --- |
 | jackson-databind 2.19.4 | S01 | seen |
 | commons-codec 1.18.0 | S01 | seen |

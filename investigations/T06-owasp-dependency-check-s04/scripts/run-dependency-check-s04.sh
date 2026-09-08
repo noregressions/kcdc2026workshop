@@ -87,7 +87,7 @@ run_dc() {
     echo
     echo "Dependencies: $(cat "$report_dir/result.dependency-count.txt")"
     echo "Vulnerability records: $(cat "$report_dir/result.vulnerability-count.txt")"
-    echo "S04 tracers:"
+    echo "S04 tracked components:"
     if [[ -s "$report_dir/result.tracers.tsv" ]]; then
       cat "$report_dir/result.tracers.tsv"
     else

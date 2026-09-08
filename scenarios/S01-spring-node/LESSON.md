@@ -47,7 +47,7 @@ The application is a small "checkout" web service in three modules:
 |--------------|-----------|-----------------------------------------|
 |frontend|     React single-page app, bundled by Vite| Fetches /api/trace and renders the result, sorted with lodash (imported whole: `import _ from 'lodash'`).|
 |normalizer|   Java Library| Trims and lower-cases a string, then SHA-256 hashes it — hex-encoded with commons-codec. The Shade Plugin relocates that codec bytecode to com.acme.internal.codec inside the normalizer JAR.|
-|service|      Spring Boot REST service| GET /api/trace?value=... returns the normalised value, its hash, and the tracer list as JSON (serialised by jackson-databind, version managed by Spring Boot). Serves the built frontend as its static content.|
+|service|      Spring Boot REST service| GET /api/trace?value=... returns the normalised value, its hash, and the tracked list as JSON (serialised by jackson-databind, version managed by Spring Boot). Serves the built frontend as its static content.|
 
 
 At runtime it is one executable Spring Boot JAR on port 8080; the
@@ -67,7 +67,7 @@ It deliberately preserves `package-lock.json` because that is part of the depend
 
 ## Run
 
-```bash
+```command
 ./scripts/clean.sh
 ```
 
@@ -136,7 +136,7 @@ For the frontend install, the script prefers `npm ci`, which installs exactly wh
 
 ## Run
 
-```bash
+```command
 ./scripts/build.sh
 ```
 
@@ -158,7 +158,7 @@ We ask Maven's dependency plugin for the resolved dependency tree of the `servic
 
 ## Run
 
-```bash
+```command
 mvn -pl service -am dependency:tree \
   -Dincludes=com.fasterxml.jackson.core:jackson-databind
 ```
@@ -191,7 +191,7 @@ Again we use Maven's resolved dependency tree, but this time for `normalizer`. T
 
 ## Run
 
-```bash
+```command
 mvn -pl normalizer dependency:tree \
   -Dincludes=commons-codec:commons-codec
 ```
@@ -223,7 +223,7 @@ From `frontend/`:
 
 ## Run
 
-```bash
+```command
 npm ls lodash
 ```
 
@@ -269,7 +269,7 @@ Spring Boot executable JARs store dependency JARs under `BOOT-INF/lib`. We list 
 
 ## Run
 
-```bash
+```command
 unzip -l service/target/service-1.0.0.jar \
   | grep jackson-databind
 ```
@@ -307,7 +307,7 @@ We inspect the built normalizer JAR, not the POM. First we look for classes unde
 
 ## Run
 
-```bash
+```command
 unzip -l normalizer/target/normalizer-1.0.0.jar \
   | grep 'com/acme/internal/codec' \
   | head
@@ -326,7 +326,7 @@ Now check for the original namespace.
 
 ## Run
 
-```bash
+```command
 unzip -l normalizer/target/normalizer-1.0.0.jar \
   | grep 'org/apache/commons/codec' \
   | head
@@ -360,7 +360,7 @@ First we list the commons-codec Maven metadata entries inside the shaded JAR. Th
 
 ## Run
 
-```bash
+```command
 unzip -l normalizer/target/normalizer-1.0.0.jar \
   | grep 'META-INF/maven/commons-codec'
 ```
@@ -376,7 +376,7 @@ Inspect the identity metadata.
 
 ## Run
 
-```bash
+```command
 unzip -p normalizer/target/normalizer-1.0.0.jar \
   META-INF/maven/commons-codec/commons-codec/pom.properties
 ```
@@ -407,7 +407,7 @@ We give Syft only `normalizer-1.0.0.jar` here; it does not see the Maven depende
 
 ## Run
 
-```bash
+```command
 syft normalizer/target/normalizer-1.0.0.jar
 ```
 
@@ -439,7 +439,7 @@ We will remove only the identifying Maven metadata while leaving the relocated c
 
 `strip-codec-metadata.sh` creates a copy of the shaded normalizer JAR, removes only `META-INF/maven/commons-codec/...`, and runs the same Syft check before and after. In essence:
 
-```bash
+```command
 cp normalizer/target/normalizer-1.0.0.jar \
    trace-output/normalizer-no-codec-metadata.jar
 zip -qd trace-output/normalizer-no-codec-metadata.jar \
@@ -451,7 +451,7 @@ The `zip -qd` line is the whole intervention: one metadata directory deleted fro
 
 ## Run
 
-```bash
+```command
 ./scripts/strip-codec-metadata.sh
 ```
 
@@ -459,7 +459,7 @@ The `zip -qd` line is the whole intervention: one metadata directory deleted fro
 
 Original Syft result:
 
-```text
+```output
 commons-codec  1.17.1   java-archive
 normalizer     1.0.0    java-archive
 ```
@@ -501,7 +501,7 @@ We list only the generated files in `frontend/dist`. `find -maxdepth 2` keeps th
 
 ## Run
 
-```bash
+```command
 find frontend/dist -maxdepth 2 -type f -print
 ```
 
@@ -532,7 +532,7 @@ That distinction matters: this is an **artefact inspection** question, not a bui
 
 ## Run
 
-```bash
+```command
 syft frontend/dist
 ```
 
@@ -578,7 +578,7 @@ Spring Boot serves static application resources from its packaged classes area. 
 
 ## Run
 
-```bash
+```command
 unzip -l service/target/service-1.0.0.jar \
   | grep 'BOOT-INF/classes/static/'
 ```
@@ -611,7 +611,7 @@ Spring Boot packages ordinary dependency JARs under `BOOT-INF/lib`. We inspect t
 
 ## Run
 
-```bash
+```command
 unzip -l service/target/service-1.0.0.jar \
   | grep 'normalizer-1.0.0.jar'
 ```
@@ -629,7 +629,7 @@ The shaded normalizer is present as a nested JAR in the executable application.
 # 16. Scan the complete Spring Boot JAR
 
 
-We have inspected individual tracers manually. Now we want an independent inventory of the **finished application as a whole**.
+We have inspected individual tracked components manually. Now we want an independent inventory of the **finished application as a whole**.
 
 This is the first point where unexpected software can appear: the scanner sees nested artefacts and surviving metadata that may not be obvious from the top-level dependency model.
 
@@ -639,7 +639,7 @@ Its answer is therefore an artefact-derived inventory, not a Maven dependency tr
 
 ## Run
 
-```bash
+```command
 syft service/target/service-1.0.0.jar
 ```
 
@@ -647,7 +647,7 @@ syft service/target/service-1.0.0.jar
 
 Syft discovered 34 Java packages. Relevant entries:
 
-```text
+```output
 commons-codec     1.17.1   java-archive
 commons-codec     1.18.0   java-archive
 jackson-databind  2.19.4   java-archive
@@ -685,7 +685,7 @@ We inspect the executable JAR directly for any archive whose name contains `comm
 
 ## Run
 
-```bash
+```command
 unzip -l service/target/service-1.0.0.jar \
   | grep 'commons-codec'
 ```
@@ -718,7 +718,7 @@ We run `dependency:tree` for `service` with `-am` so the reactor's `normalizer` 
 
 ## Run
 
-```bash
+```command
 mvn -pl service -am dependency:tree \
   -Dincludes=commons-codec:commons-codec \
   -Dverbose
@@ -794,7 +794,7 @@ CycloneDX is the SBOM data standard here; the plugin is the producer.
 
 ## Run
 
-```bash
+```command
 mvn -pl service -am \
   org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
   -DoutputFormat=json
@@ -827,11 +827,11 @@ The same component can be resolved differently in different modules. We want to 
 In particular, we expect the normalizer BOM to say `commons-codec:1.17.1` while the service BOM follows the service's managed dependency graph and says `1.18.0`.
 
 
-`compare-sboms.sh` reads the two generated CycloneDX JSON files and prints only our tracer components.
+`compare-sboms.sh` reads the two generated CycloneDX JSON files and prints only our tracked components.
 
 Internally it uses `jq`, a JSON query tool, to select components by name and emit three fields: package name, version, and PURL. The essential query — worth knowing, because it works on any CycloneDX SBOM — is:
 
-```bash
+```command
 jq -r '.components[]
        | select(.name == "commons-codec")
        | [.name, .version, .purl] | @tsv' normalizer/target/bom.json
@@ -847,7 +847,7 @@ The script exists so the comparison is repeatable and does not depend on remembe
 
 ## Run
 
-```bash
+```command
 ./scripts/compare-sboms.sh
 ```
 
@@ -892,7 +892,7 @@ Syft supports CycloneDX JSON output.
 
 ## Run
 
-```bash
+```command
 mkdir -p trace-output
 
 syft service/target/service-1.0.0.jar \
@@ -929,11 +929,11 @@ This is the key SBOM comparison in the lab.
 If the inventories differ now, the difference cannot be blamed on SBOM format: both documents are CycloneDX. The difference comes from **where in the supply chain the inventory was observed and what evidence each producer used**.
 
 
-`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracer fields from both — step 20's `jq` query run twice, once against `service/target/bom.json` and once against `trace-output/service-syft.cdx.json`.
+`compare-service-sboms.sh` reads the Maven-generated and Syft-generated CycloneDX JSON documents and prints the same tracked fields from both — step 20's `jq` query run twice, once against `service/target/bom.json` and once against `trace-output/service-syft.cdx.json`.
 
 ## Run
 
-```bash
+```command
 ./scripts/compare-service-sboms.sh
 ```
 
@@ -1001,11 +1001,11 @@ The container image is the outermost boundary in this exercise.
 
 1. It builds the Docker image from the project's `Dockerfile` using the tag `registry.example.com/checkout-service:release-123`.
 2. It asks Docker for the resulting local image identity, including the repository digest. A tag is a mutable name; the digest identifies the built OCI image content.
-3. It asks Syft to catalogue the **container image**, not just the application JAR, and writes a CycloneDX image SBOM before printing the tracer components.
+3. It asks Syft to catalogue the **container image**, not just the application JAR, and writes a CycloneDX image SBOM before printing the tracked components.
 
 In essence:
 
-```bash
+```command
 docker build -t registry.example.com/checkout-service:release-123 .
 docker image inspect registry.example.com/checkout-service:release-123 \
   --format '{{.Id}} {{json .RepoTags}} {{json .RepoDigests}}'
@@ -1017,7 +1017,7 @@ The Docker build output also shows the digest to which the mutable base-image ta
 
 ## Run
 
-```bash
+```command
 ./scripts/image-trace.sh
 ```
 
@@ -1025,7 +1025,7 @@ The Docker build output also shows the digest to which the mutable base-image ta
 
 The Dockerfile requests:
 
-```text
+```output
 eclipse-temurin:21-jre-jammy
 ```
 
@@ -1049,12 +1049,12 @@ registry.example.com/checkout-service@sha256:486526852f765f196f97765b17a3f182862
 
 ## Observed image scan
 
-```text
+```output
 Packages      179
 Executables   837
 ```
 
-Tracer components:
+Tracked components:
 
 ```text
 commons-codec     1.17.1
@@ -1137,7 +1137,7 @@ A separate reverse-provenance exercise should examine the different problem of s
 The trace does not require the application to be running, but it is a real
 service. After the build:
 
-```bash
+```command
 java -jar service/target/service-1.0.0.jar
 curl 'http://localhost:8080/api/trace?value=Hello%20Supply%20Chain'
 ```
@@ -1148,7 +1148,7 @@ Then open <http://localhost:8080/>. Ctrl-C stops the service when you are done.
 
 # Replay in one pass
 
-```bash
+```command
 ./scripts/trace.sh
 ```
 
@@ -1161,7 +1161,7 @@ nothing the step-by-step trace does not show.
 
 # Verify the lab still holds
 
-```bash
+```command
 ./scripts/proof-check.sh
 ```
 
@@ -1176,13 +1176,13 @@ It takes `--skip-build`, `--skip-runtime`, `--skip-image` and `--quick` (the las
 The `k8s/` directory holds optional example deployment files; they are not
 part of the walkthrough above.
 
-```bash
+```command
 ./scripts/runtime-trace.sh
 ```
 
 `runtime-trace.sh` requires `kubectl` and a cluster with the `checkout-service` deployment from `k8s/` applied. It prints the image reference requested by the deployment spec alongside the image and resolved `imageID` actually running in each pod: the difference between what was asked for and what is running. In essence:
 
-```bash
+```command
 kubectl get deployment checkout-service \
   -o jsonpath='{.spec.template.spec.containers[0].image}'
 kubectl get pods -l app=checkout-service \

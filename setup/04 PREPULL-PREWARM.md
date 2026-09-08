@@ -10,7 +10,7 @@ Initialize container images, local dependency caches, and scanner vulnerability 
 
 ## Automated Execution
 
-```bash
+```command
 ./scripts/build-all.sh
 ```
 
@@ -22,13 +22,13 @@ This command executes the following operations without starting persistent backg
 
 To include baseline runs for investigations T01–T08:
 
-```bash
+```command
 ./scripts/build-all.sh --with-investigations
 ```
 
 Additional CLI options:
 
-```bash
+```command
 ./scripts/build-all.sh --list     # List configured build phases
 ./scripts/build-all.sh --quick    # Build scenarios only; skip container pulls and DB downloads
 ./scripts/build-all.sh --help     # Display CLI option summary
@@ -54,7 +54,7 @@ For step-by-step manual execution procedures, see [`setup/PREWARM-MANUAL.md`](./
 
 ### 1. Snyk CLI Authentication (T01)
 
-```bash
+```command
 snyk auth
 ```
 
@@ -62,7 +62,7 @@ snyk auth
 
 Populate the local NVD dataset using an exported `NVD_API_KEY`:
 
-```bash
+```command
 cd investigations/T06-owasp-dependency-check-s04
 ./scripts/baseline-s04.sh
 ./scripts/run-dependency-check-s04.sh
@@ -75,7 +75,7 @@ Data is persisted in `~/.cache/kcdc-dependency-check/<version>`. If `NVD_API_KEY
 
 Verify completion with the following checks:
 
-```bash
+```command
 ./scripts/tools-check.sh
 ./scripts/build-all.sh
 docker image inspect eclipse-temurin:21-jre-jammy >/dev/null && \

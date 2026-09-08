@@ -16,3 +16,9 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+# ship-check.sh output (Part 6 drill)
+ship-check/
+
+# Investigation and scenario scan output
+results/

@@ -6,8 +6,6 @@ track: core
 
 # S03 — Python PEP 517 Supply Chain Trace Lab
 
-> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
-
 This lab follows a direct Python dependency into a transitive source distribution, through PEP 517 build execution, into the installed environment, and finally into runtime behaviour.
 
 ## What PEP 517 means in this lab
@@ -29,7 +27,7 @@ flowchart TD
 
 In this lab, `tracehook-demo` is a **transitive** dependency and is available only as an sdist. Its own `pyproject.toml` nominates `tracehook_backend` as the build backend. When `pip` resolves the dependency, it executes that backend, which creates files that were not present in the original sdist. Those generated files then become part of the installed application and affect runtime behaviour.
 
-The tracers are:
+The tracked components are:
 
 - `reportkit==1.0.0` — the dependency explicitly named by the application.
 - `tracehook-demo==1.0.0` — a transitive dependency discovered from wheel metadata.
@@ -92,7 +90,7 @@ A clean start ensures the virtual environment and pip evidence we inspect belong
 
 ## Run
 
-```bash
+```command
 ./scripts/clean.sh
 ```
 
@@ -130,7 +128,7 @@ Read `requirements.txt`.
 
 ## Run
 
-```bash
+```command
 cat requirements.txt
 ```
 
@@ -156,7 +154,7 @@ Read the metadata inside the `reportkit` wheel.
 
 ## Run
 
-```bash
+```command
 unzip -p python-repo/reportkit-1.0.0-py3-none-any.whl \
   reportkit-1.0.0.dist-info/METADATA
 ```
@@ -188,7 +186,7 @@ Inspect the transitive package archive.
 
 ## Run
 
-```bash
+```command
 tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz
 ```
 
@@ -213,7 +211,7 @@ Search the sdist for the importable package and generated marker.
 
 ## Run
 
-```bash
+```command
 tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz \
   | grep -E 'tracehook_demo/__init__.py|build-hook.json' || true
 ```
@@ -242,7 +240,7 @@ Read `pyproject.toml` from inside the sdist.
 
 ## Run
 
-```bash
+```command
 tar -xOzf python-repo/tracehook_demo-1.0.0.tar.gz \
   tracehook_demo-1.0.0/pyproject.toml
 ```
@@ -279,7 +277,7 @@ Inspect the relevant part of `tracehook_backend.py`.
 
 ## Run
 
-```bash
+```command
 tar -xOzf python-repo/tracehook_demo-1.0.0.tar.gz \
   tracehook_demo-1.0.0/tracehook_backend.py \
   | grep -nE 'def build_wheel|__init__\.py|build-hook\.json'
@@ -308,7 +306,7 @@ The build disables pip's wheel cache so the transitive sdist is rebuilt for the 
 
 ## Run
 
-```bash
+```command
 ./scripts/build.sh
 ```
 
@@ -316,7 +314,7 @@ The build disables pip's wheel cache so the transitive sdist is rebuilt for the 
 
 The build completed successfully. The relevant pip evidence was:
 
-```text
+```output
 Processing ./python-repo/tracehook_demo-1.0.0.tar.gz (from reportkit==1.0.0->-r requirements.txt (line 1))
   Getting requirements to build wheel: started
   Getting requirements to build wheel: finished with status 'done'
@@ -361,7 +359,7 @@ Ask pip for the installed package set.
 
 ## Run
 
-```bash
+```command
 .venv/bin/python -m pip freeze
 ```
 
@@ -392,7 +390,7 @@ Search `site-packages` inside the virtual environment.
 
 ## Run
 
-```bash
+```command
 find .venv \
   \( -path '*site-packages/tracehook_demo/__init__.py' \
      -o -path '*site-packages/tracehook_demo/build-hook.json' \) \
@@ -432,7 +430,7 @@ Read `build-hook.json` from the installed environment.
 
 ## Run
 
-```bash
+```command
 find .venv \
   -path '*site-packages/tracehook_demo/build-hook.json' \
   -exec cat {} \;
@@ -464,7 +462,7 @@ Import the direct package and call its trace function.
 
 ## Run
 
-```bash
+```command
 .venv/bin/python -c 'import reportkit; print(reportkit.runtime_trace())'
 ```
 
@@ -498,7 +496,7 @@ S03 uses port `8081` by default so it can coexist with S02's Payara service on `
 
 ## Run
 
-```bash
+```command
 ./scripts/run.sh
 ```
 
@@ -526,7 +524,7 @@ Call the local endpoint.
 
 ## Run
 
-```bash
+```command
 curl -sS http://localhost:8081/trace | jq
 ```
 
@@ -582,13 +580,13 @@ Leaving it running also blocks a later re-run: `run.sh` verifies the port before
 
 `clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port. This only works while `.runtime.pid` exists. If you delete the file before stopping the process, neither script can find the runtime and you have to stop it by hand:
 
-```bash
+```command
 lsof -nP -iTCP:8081 -sTCP:LISTEN
 ```
 
 ## Run
 
-```bash
+```command
 ./scripts/stop.sh
 ```
 
@@ -696,7 +694,7 @@ tracehook_demo-1.0.0.tar.gz
 
 If you deliberately change those fixtures, rebuild the local package repository:
 
-```bash
+```command
 python3 scripts/rebuild-python-repo.py
 ```
 
@@ -704,7 +702,7 @@ python3 scripts/rebuild-python-repo.py
 
 # Replay in one pass
 
-```bash
+```command
 ./scripts/trace-python.sh
 ```
 
@@ -716,7 +714,7 @@ It reads the virtual environment created by `./scripts/build.sh`, so run the bui
 
 # Verify the lab still holds
 
-```bash
+```command
 ./scripts/proof-check.sh
 ```
 

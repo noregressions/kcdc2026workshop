@@ -3,7 +3,7 @@
 The main S05 scenario is benign: `prepack` generates the runtime `dist/` and
 the workshop uses it to show that packaging destroys evidence. This directory
 turns that mechanism malicious, so a scanner has something to catch. It exists
-for [`investigations/T08-guarddog`](../../../investigations/T08-guarddog/OVERVIEW.md).
+for [`investigations/T08-guarddog`](../../../investigations/T08-guarddog/LESSON.md).
 
 ## Safety
 
@@ -47,6 +47,6 @@ module. This attacks the consumer and rides inside the tarball.
 
 Produces `out/CASE-A-generator-payload.tgz` and
 `out/CASE-B-generated-payload.tgz`. Scan them with GuardDog from
-[T08](../../../investigations/T08-guarddog/OVERVIEW.md); the point is that
+[T08](../../../investigations/T08-guarddog/LESSON.md); the point is that
 scanning the *published tarball* catches case B and misses case A, because a
 code-reading scanner can only judge what survived into the artefact.

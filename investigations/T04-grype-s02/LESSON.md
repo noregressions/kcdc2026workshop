@@ -6,8 +6,6 @@ track: reference
 
 # T04 — Grype / S02
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use Grype against S02 to separate:
@@ -116,7 +114,7 @@ It does not contain a `lodash-es` package boundary.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s02.sh
 ```
 
@@ -124,7 +122,7 @@ It does not contain a `lodash-es` package boundary.
 
 The final image is:
 
-```text
+```output
 payara-mvnpm-trace-lab:local
 ```
 
@@ -185,7 +183,7 @@ that boundary is represented to Grype changes the answer.
 
 The probes are driven by one harness script:
 
-```bash
+```command
 ./scripts/run-grype-s02.sh
 ```
 
@@ -219,7 +217,7 @@ What does Grype report when it discovers the final image itself?
 Ground truth: the image is the application WAR deployed onto a Payara runtime
 over an Ubuntu base — Syft catalogued 589 packages, most of them runtime and
 OS software the application never declared. The vulnerability answer should
-therefore be dominated by runtime and OS packages, not by the tracers; and
+therefore be dominated by runtime and OS packages, not by the tracked components; and
 `lodash-es` cannot be matched at all, because its identity is absent from the
 image inventory.
 
@@ -227,7 +225,7 @@ image inventory.
 
 Grype reported:
 
-```text
+```output
 169 unique vulnerability matches
 ```
 
@@ -264,18 +262,18 @@ jackson-core 2.15.2
 
 There were also many Ubuntu package findings.
 
-No tracer-related vulnerability match was reported for:
+No vulnerability match against the tracked components was reported for:
 
 ```text
 commons-lang3
 lodash-es
-Payara-named tracer pattern
-Jakarta-named tracer pattern
+Payara-named tracked-component pattern
+Jakarta-named tracked-component pattern
 ```
 
 ## Verdict
 
-**Runtime and OS packages dominate; no tracer match**, as expected. The
+**Runtime and OS packages dominate; no tracked match**, as expected. The
 deployed runtime/base-image software universe, not merely the application WAR,
 dominates the final-image vulnerability answer.
 
@@ -301,7 +299,7 @@ identical to Probe 1's.
 
 Grype emitted:
 
-```text
+```output
 document has schema version 16.1.10,
 but parser has older schema version 16.1.5
 ```
@@ -340,7 +338,7 @@ Grype matches against them, the answer should grow.
 
 Grype consumed the CycloneDX SBOM generated from the same image and again produced:
 
-```text
+```output
 169 unique vulnerability matches
 ```
 
@@ -368,7 +366,7 @@ inventory, a set comparison should show no differences in any direction.
 
 ## Run
 
-```bash
+```command
 ./scripts/compare-s02.sh
 ```
 
@@ -376,7 +374,7 @@ inventory, a set comparison should show no differences in any direction.
 
 The final comparison showed:
 
-```text
+```output
 direct image     169 unique vulnerability matches
 Syft JSON        169 unique vulnerability matches
 CycloneDX        169 unique vulnerability matches
@@ -433,7 +431,7 @@ loss.
 
 The final image inventory contains:
 
-```text
+```output
 commons-lang3 3.18.0
 ```
 
@@ -443,7 +441,7 @@ The direct PURL control produced:
 no vulnerability matches
 ```
 
-The image/SBOM scans likewise produced no tracer-related vulnerability match for commons-lang3.
+The image/SBOM scans likewise produced no vulnerability match against the tracked components for commons-lang3.
 
 ## Verdict
 
@@ -475,7 +473,7 @@ here at all?
 
 Maven plugin evidence proves:
 
-```text
+```output
 org.mvnpm:lodash-es:4.17.21
 ```
 
@@ -533,7 +531,7 @@ graph at all.
 
 The application Maven model declares:
 
-```text
+```output
 jakarta.jakartaee-web-api 11.0.0
     scope: provided
 ```
@@ -567,15 +565,15 @@ It does not tell us that all software found in the image came from the applicati
 
 # Scorecard
 
-What survived into the final-image inventory, tracer by tracer — `seen` means
-the package identity was established there; `—` means it was not. No tracer
+What survived into the final-image inventory, tracked component by tracked component — `seen` means
+the package identity was established there; `—` means it was not. No tracked component
 produced a vulnerability match in any of the three Grype runs: for
 commons-lang3 because the database holds no match for that version (Probe 5),
 for lodash-es because its identity never reached the image (Probe 6), and for
-the Jakarta tracer because the WAR never packaged it — the image's Jakarta
+the Jakarta tracked component because the WAR never packaged it — the image's Jakarta
 software is the runtime's own (Probe 7).
 
-| Tracer | final-image inventory | vulnerability match |
+| Tracked component | final-image inventory | vulnerability match |
 | --- | --- | --- |
 | commons-lang3 3.18.0 | seen | — |
 | lodash-es 4.17.21 | — | — |

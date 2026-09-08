@@ -6,11 +6,9 @@ track: core
 
 # S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab
 
-> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
-
 This lab follows runtime capability that enters a Java application through **Maven plugin execution**, rather than through the application's normal dependency graph.
 
-The tracers are:
+The tracked components are:
 
 - `trace-injector-maven-plugin` — executable build-time software attached to the Maven lifecycle.
 - `trace-route-payload` — a transitive dependency of that plugin.
@@ -101,13 +99,13 @@ It deliberately **keeps** `.maven-repo/`, the scenario-local Maven repository. T
 
 If you want a cold dependency-resolution run, remove it as well:
 
-```bash
+```command
 rm -rf .maven-repo
 ```
 
 ## Run
 
-```bash
+```command
 ./scripts/clean.sh
 ```
 
@@ -151,7 +149,7 @@ Using a scenario-local repository matters for the trace: it guarantees the plugi
 
 ## Run
 
-```bash
+```command
 ./scripts/build.sh
 ```
 
@@ -219,7 +217,7 @@ Start with the Maven view most developers use when asking "what does this applic
 
 ## Run
 
-```bash
+```command
 mvn \
   -Dmaven.repo.local="$PWD/.maven-repo" \
   dependency:tree
@@ -255,7 +253,7 @@ The project dependency graph is not Maven's only dependency domain.
 
 ## Run
 
-```bash
+```command
 mvn \
   -Dmaven.repo.local="$PWD/.maven-repo" \
   dependency:resolve-plugins \
@@ -292,7 +290,7 @@ Resolver output tells us what Maven can resolve. Debug output tells us what Mave
 
 ## Run
 
-```bash
+```command
 mvn \
   -Dmaven.repo.local="$PWD/.maven-repo" \
   -X generate-sources 2>&1 \
@@ -326,7 +324,7 @@ Now follow the build-time input across the transformation boundary into applicat
 
 ## Run
 
-```bash
+```command
 find target/generated-sources -type f -print
 ```
 
@@ -336,7 +334,7 @@ target/generated-sources/trace-injector/dev/noregressions/trace/s04/generated/Ge
 
 Then:
 
-```bash
+```command
 sed -n '1,220p' \
   target/generated-sources/trace-injector/dev/noregressions/trace/s04/generated/GeneratedTraceRoute.java
 ```
@@ -380,7 +378,7 @@ Generating a class does not make it execute. We need to see how the build connec
 
 ## Run
 
-```bash
+```command
 find target/generated-resources -type f -print
 ```
 
@@ -391,7 +389,7 @@ target/generated-resources/trace-injector/META-INF/services/dev.noregressions.tr
 
 Inspect the ServiceLoader registration:
 
-```bash
+```command
 cat \
   target/generated-resources/trace-injector/META-INF/services/dev.noregressions.trace.s04.TraceRoute
 ```
@@ -402,7 +400,7 @@ dev.noregressions.trace.s04.generated.GeneratedTraceRoute
 
 Inspect the provenance marker:
 
-```bash
+```command
 cat \
   target/generated-resources/trace-injector/META-INF/trace-lab/plugin-injection.properties
 ```
@@ -430,7 +428,7 @@ Generated build directories are intermediate evidence. The deployable JAR is the
 
 ## Run
 
-```bash
+```command
 unzip -l target/maven-plugin-hidden-content-1.0.0.jar \
   | grep -E 'GeneratedTraceRoute|META-INF/services|plugin-injection'
 ```
@@ -454,7 +452,7 @@ Generated Java source may be deleted after the build. The final JAR still has to
 
 ## Run
 
-```bash
+```command
 javap \
   -classpath target/maven-plugin-hidden-content-1.0.0.jar \
   -c -p \
@@ -496,7 +494,7 @@ Now compare physical runtime capability with a package scanner's inventory.
 
 ## Run
 
-```bash
+```command
 syft target/maven-plugin-hidden-content-1.0.0.jar
 ```
 
@@ -529,7 +527,7 @@ Compare the scanner view with an SBOM generated from Maven's project dependency 
 
 ## Run
 
-```bash
+```command
 mvn \
   -Dmaven.repo.local="$PWD/.maven-repo" \
   org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
@@ -545,7 +543,7 @@ mvn \
 
 Focused check:
 
-```bash
+```command
 jq -r '.components[]? | [.name, .version] | @tsv' target/bom.json \
   | grep -E 'trace-injector|trace-route-payload|maven-plugin-hidden-content' || true
 ```
@@ -584,7 +582,7 @@ Three details of the script matter when reading the output:
 
 ## Run
 
-```bash
+```command
 ./scripts/run.sh
 ```
 
@@ -608,7 +606,7 @@ This is the control endpoint: behaviour deliberately present in the checked-in a
 
 ## Run
 
-```bash
+```command
 curl -sS http://localhost:8082/health | jq
 ```
 
@@ -633,7 +631,7 @@ This closes the chain from plugin dependency to runtime behaviour.
 
 ## Run
 
-```bash
+```command
 curl -sS http://localhost:8082/hidden/build-info | jq
 ```
 
@@ -678,7 +676,7 @@ Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to 
 
 ## Run
 
-```bash
+```command
 ./scripts/stop.sh
 ```
 
@@ -727,7 +725,7 @@ flowchart TD
 
 # Replay in one pass
 
-```bash
+```command
 ./scripts/trace-plugin.sh
 ```
 
@@ -739,7 +737,7 @@ It needs the build output, so run `./scripts/build.sh` first.
 
 # Verify the lab still holds
 
-```bash
+```command
 ./scripts/proof-check.sh
 ```
 

@@ -69,7 +69,8 @@ Evidence Evaluation Model:
 - **NVD (NIST):** Enriches CVE records with CVSS vectors and structured CPE match criteria.
 - **CISA KEV:** Authoritative catalogue of actively exploited vulnerabilities in the wild.
 - **OSV (Open Source Vulnerabilities):** Distributed vulnerability database keyed by ecosystem package coordinates.
-- **Sonatype OSS Index:** Package-coordinate vulnerability database for open-source ecosystems.
+- **deps.dev (Google):** Free package-coordinate index aggregating advisories, licences, dependents and Scorecard results. No account required; web UI and API.
+- **Sonatype OSS Index:** Formerly a free package-coordinate index, used by earlier editions of Part 4. As of 2026-09-08 the site redirects to Sonatype's commercial guide and the API returns 401 unauthenticated. Recorded here because Part 4 uses its disappearance as evidence, not because it is still usable.
 
 ## 5. Maintenance and Lifecycle Assessment
 

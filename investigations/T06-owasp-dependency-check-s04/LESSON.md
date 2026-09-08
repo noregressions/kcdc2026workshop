@@ -6,8 +6,6 @@ track: reference
 
 # T06 — OWASP Dependency-Check / S04
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use OWASP Dependency-Check against S04 to distinguish:
@@ -67,11 +65,7 @@ the complete NVD database.
 
 ## Getting an NVD API key
 
-Go to:
-
-```text
-https://nvd.nist.gov/developers/request-an-api-key
-```
+Go to <https://nvd.nist.gov/developers/request-an-api-key>.
 
 The request form asks for:
 
@@ -106,14 +100,14 @@ Do not commit an NVD API key to this repository.
 
 Export it into the environment:
 
-```bash
+```command
 export NVD_API_KEY='your-key-here'
 ./scripts/run-dependency-check-s04.sh
 ```
 
 Check that it is actually exported:
 
-```bash
+```command
 printenv NVD_API_KEY >/dev/null && echo "NVD_API_KEY is exported"
 ```
 
@@ -133,7 +127,7 @@ evidence, independently of the tool under investigation.
 
 ## Fixture
 
-S04 plants its controlled tracers in the build tooling, not in the
+S04 plants its controlled tracked components in the build tooling, not in the
 application:
 
 ```text
@@ -156,7 +150,7 @@ package boundaries are gone.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s04.sh
 ```
 
@@ -164,11 +158,11 @@ package boundaries are gone.
 
 The application dependency tree contained only the application itself:
 
-```text
+```output
 dev.noregressions.trace:maven-plugin-hidden-content:jar:1.0.0
 ```
 
-Neither controlled build-time tracer appeared as a normal application
+Neither controlled build-time tracked component appeared as a normal application
 dependency.
 
 Maven plugin resolution showed:
@@ -258,7 +252,7 @@ flowchart TD
   c -->|"compile/package"| d["final application JAR"]
 ```
 
-The behaviour survives into the final JAR — the tracer *names* even survive as
+The behaviour survives into the final JAR — the tracked component *names* even survive as
 strings in the generated class — but the original build-time package
 boundaries do not travel with it. The probes below test which of these
 boundaries Dependency-Check can observe.
@@ -270,7 +264,7 @@ boundaries Dependency-Check can observe.
 All four probes are driven by one harness run (with the NVD API key exported,
 as above):
 
-```bash
+```command
 ./scripts/run-dependency-check-s04.sh
 ```
 
@@ -285,18 +279,18 @@ What does the default Dependency-Check Maven scan of S04 see?
 ## Expectation
 
 Ground truth: the application dependency graph contains only the application
-itself, and both controlled tracers live in Maven's build-tooling domain. If
+itself, and both controlled tracked components live in Maven's build-tooling domain. If
 the default scan follows the ordinary application dependency model, neither
-tracer should appear in the inventory.
+tracked component should appear in the inventory.
 
 ## Observed
 
 The default scan produced:
 
-```text
+```output
 Dependencies: 0
 Vulnerability records: 0
-S04 tracers:
+S04 tracked components:
 (none)
 ```
 
@@ -334,19 +328,19 @@ and the vulnerability answer?
 
 Ground truth: Maven resolves the plugin and its payload in the plugin realm,
 alongside the rest of the build tooling. If plugin scanning admits that domain
-to Dependency-Check, both controlled tracers should be identified — and the
+to Dependency-Check, both controlled tracked components should be identified — and the
 build tooling should bring its own vulnerability surface with it.
 
 ## Observed
 
 With Maven plugin scanning enabled, Dependency-Check reported:
 
-```text
+```output
 Dependencies: 167
 Vulnerability records: 78
 ```
 
-It identified both controlled S04 tracers:
+It identified both controlled S04 tracked components:
 
 ```text
 trace-injector-maven-plugin-1.0.0.jar
@@ -356,7 +350,7 @@ trace-route-payload-1.0.0.jar
 pkg:maven/dev.noregressions.trace/trace-route-payload@1.0.0
 ```
 
-Neither tracer had a vulnerability match.
+Neither tracked component had a vulnerability match.
 
 The plugin-aware scan also exposed vulnerabilities in build-time tooling,
 including dependencies such as:
@@ -405,7 +399,7 @@ packages that shaped it?
 ## Expectation
 
 Ground truth: the final JAR carries the generated class, the ServiceLoader
-metadata, and even the tracer names as strings inside
+metadata, and even the tracked names as strings inside
 `GeneratedTraceRoute.class` — but not the original plugin or payload JARs,
 whose package boundaries never entered the artefact. If Dependency-Check
 identifies packages by package evidence rather than by generated content, both
@@ -416,7 +410,7 @@ shipped.
 
 The final JAR scan produced:
 
-```text
+```output
 Dependencies: 1
 Vulnerability records: 0
 ```
@@ -472,7 +466,7 @@ Dependency-Check simply not recognise these packages at all?
 ## Expectation
 
 Ground truth: the original plugin and payload JARs still have intact package
-boundaries. If the scanner is capable of recognising the controlled tracers,
+boundaries. If the scanner is capable of recognising the controlled tracked components,
 scanning those JARs directly should identify both — and a failure here would
 invalidate the interpretation of Probes 1–3.
 
@@ -480,7 +474,7 @@ invalidate the interpretation of Probes 1–3.
 
 Scanning the original build-time JARs directly produced:
 
-```text
+```output
 Dependencies: 2
 Vulnerability records: 0
 ```
@@ -500,7 +494,7 @@ pkg:maven/dev.noregressions.trace/trace-route-payload@1.0.0
 **Both build-time packages: identified**, as expected. This rules out:
 
 ```text
-Dependency-Check cannot recognise the controlled tracer JARs
+Dependency-Check cannot recognise the controlled tracked jars
 ```
 
 The scanner can identify both original packages when the package boundaries
@@ -550,9 +544,9 @@ That failure was not an S04 dependency-analysis result.
 
 # Scorecard
 
-What Dependency-Check identified, tracer by tracer, at each boundary — `seen`
+What Dependency-Check identified, tracked component by tracked component, at each boundary — `seen`
 means the package identity was established; `—` means it was not, although the
-software (or its effect) is part of that boundary; `n/a` means the tracer was
+software (or its effect) is part of that boundary; `n/a` means the tracked component was
 outside what that probe scanned or recorded.
 
 | Boundary | trace-injector-maven-plugin 1.0.0 | trace-route-payload 1.0.0 | maven-plugin-hidden-content 1.0.0 |
@@ -566,7 +560,7 @@ Observed:
 
 ```text
 default Maven
-    no tracers
+    no tracked components
 
 plugin-aware Maven
     trace-injector-maven-plugin

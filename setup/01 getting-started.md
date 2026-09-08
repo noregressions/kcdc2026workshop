@@ -12,9 +12,9 @@ Environment setup can be completed via a preconfigured Docker container environm
 
 Requirements: Docker Desktop or Docker Engine on Linux with at least 20 GB free disk space.
 
-Execute from the repository root. The first run pulls the published image `noregressions/ydnwys-workshop:0.0.1` (about 2.6 GB):
+Execute from the repository root. The first run pulls the published image `noregressions/ydnwys-workshop:0.0.1` (about 2.4 GB):
 
-```bash
+```command
 ./container/run.sh
 ```
 
@@ -22,7 +22,7 @@ To build the image locally instead of pulling it, run `./container/build.sh` and
 
 The container provides preinstalled tools, precompiled scenario targets, and pre-cached vulnerability databases. Validate the environment inside the container:
 
-```bash
+```command
 ./scripts/tools-check.sh
 ```
 
@@ -37,20 +37,20 @@ Complete the following four steps:
 
 ### 1. Clone Repository
 
-```bash
+```command
 git clone https://github.com/noregressions/kcdc2026workshop.git
 cd kcdc2026workshop
 ```
 
 To update an existing checkout:
 
-```bash
+```command
 git pull
 ```
 
 ### 2. Check Tool Prerequisites
 
-```bash
+```command
 ./scripts/tools-check.sh
 ```
 
@@ -62,13 +62,13 @@ Install missing packages using the system package manager or refer to [`setup/IN
 
 Re-run validation:
 
-```bash
+```command
 ./scripts/tools-check.sh
 ```
 
 ### 4. Pre-Warm Caches and Compile Targets
 
-```bash
+```command
 ./scripts/build-all.sh
 ```
 

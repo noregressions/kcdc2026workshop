@@ -44,7 +44,7 @@ do
   echo "-- $f"
   grep -E \
     'reportkit|tracehook|build_wheel|build-hook|pep517-build-backend-executed|Requires-Dist|build-backend' \
-    "$f" || echo "(no matching tracer evidence)"
+    "$f" || echo "(no matching evidence)"
 done
 
 echo
@@ -81,7 +81,7 @@ do
 done
 
 echo
-echo "== Snyk SBOM tracer components =="
+echo "== Snyk SBOM tracked components =="
 if [[ -s "$SNYK/snyk-pip-sbom.json" ]]; then
   jq -r '
     .components[]?
@@ -89,11 +89,11 @@ if [[ -s "$SNYK/snyk-pip-sbom.json" ]]; then
     | @tsv
   ' "$SNYK/snyk-pip-sbom.json" \
     | grep -E 'reportkit|tracehook' \
-    || echo "(no tracer components)"
+    || echo "(no tracked components)"
 fi
 
 echo
-echo "== Snyk SBOM relationships involving tracers =="
+echo "== Snyk SBOM relationships involving tracked components =="
 if [[ -s "$SNYK/snyk-pip-sbom.json" ]]; then
   jq -r '
     .dependencies[]?

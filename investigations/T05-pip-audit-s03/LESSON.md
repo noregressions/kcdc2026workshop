@@ -6,8 +6,6 @@ track: reference
 
 # T05 — pip-audit / S03
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use `pip-audit` against S03 to separate four different facts:
@@ -92,7 +90,7 @@ tracehook_demo/build-hook.json
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s03.sh
 ```
 
@@ -100,7 +98,7 @@ tracehook_demo/build-hook.json
 
 Ordinary pip installation showed:
 
-```text
+```output
 Processing reportkit-1.0.0-py3-none-any.whl
 
 Processing tracehook_demo-1.0.0.tar.gz
@@ -184,7 +182,7 @@ them — what happens then is exactly what this probe observes.
 
 ## Run
 
-```bash
+```command
 ./scripts/run-pip-audit-s03.sh
 ```
 
@@ -194,7 +192,7 @@ The normal requirements audit uses dependency resolution.
 
 `pip-audit` reported:
 
-```text
+```output
 Dry run: would have audited 2 packages
 ```
 
@@ -258,7 +256,7 @@ If the audit is a purely static inspection, no marker should appear.
 
 ## Run
 
-```bash
+```command
 ./scripts/run-pep517-exec-probe.sh
 ```
 
@@ -266,7 +264,7 @@ If the audit is a purely static inspection, no marker should appear.
 
 The audit reported:
 
-```text
+```output
 INFO:pip_audit._audit:Dry run: would have audited 2 packages
 No known vulnerabilities found
 ```
@@ -316,7 +314,7 @@ collection, only `reportkit` should remain in the audit set.
 
 ## Run
 
-```bash
+```command
 pip-audit --no-deps ...
 ```
 
@@ -324,7 +322,7 @@ pip-audit --no-deps ...
 
 The observed audit set still contained:
 
-```text
+```output
 reportkit
 tracehook-demo
 ```
@@ -360,7 +358,7 @@ If pip-assisted collection is what pulls `tracehook-demo` into the audit set
 
 ## Run
 
-```bash
+```command
 pip-audit --no-deps --disable-pip ...
 ```
 
@@ -368,7 +366,7 @@ pip-audit --no-deps --disable-pip ...
 
 The audit set contained only:
 
-```text
+```output
 reportkit
 ```
 
@@ -413,7 +411,7 @@ The harness audits the already-installed `site-packages` directory.
 
 The audit saw:
 
-```text
+```output
 pip 26.1.2
 reportkit 1.0.0
 tracehook-demo 1.0.0
@@ -465,7 +463,7 @@ component list should carry `reportkit` and `tracehook-demo` too.
 
 The observed pip-audit CycloneDX output surfaced:
 
-```text
+```output
 pip 26.1.2
 ```
 

@@ -7,7 +7,7 @@ echo "T01 / S05 comparison"; echo "===================="; echo
 echo "Tracer:"; echo "  trace-route-package 1.0.0"; echo; echo "Lifecycle evidence:"; echo "  prepack"; echo "  scripts/generate-dist.js"; echo "  dist/index.js"; echo "  dist/prepack-evidence.json"
 echo; echo "== Baseline publication evidence =="
 for f in "$BASE/application-package.json" "$BASE/source-package.json" "$BASE/source-package-files.txt" "$BASE/generator-relevant.txt" "$BASE/npm-pack-evidence.txt" "$BASE/tarball-files.txt" "$BASE/tarball-package.json" "$BASE/tarball-boundary.txt" "$BASE/tarball-prepack-evidence.json" "$BASE/npm-ls.txt" "$BASE/installed-package-files.txt" "$BASE/installed-package.json" "$BASE/installed-prepack-evidence.json" "$BASE/runtime-module.json" "$BASE/npm-sbom-tracers.txt"; do
-  echo; echo "-- $f"; grep -E 'trace-route-package|prepack|generate-dist|npm-prepack-generated|prepack-evidence|/hidden/prepack-info|dist/index\.js' "$f" || echo "(no matching tracer evidence)"
+  echo; echo "-- $f"; grep -E 'trace-route-package|prepack|generate-dist|npm-prepack-generated|prepack-evidence|/hidden/prepack-info|dist/index\.js' "$f" || echo "(no matching evidence)"
 done
 echo; echo "== Snyk command exit codes =="
 for f in "$SNYK"/*.exit; do [[ -e "$f" ]] || continue; printf '%-52s %s\n' "$(basename "${f%.exit}")" "$(cat "$f")"; done
@@ -19,9 +19,9 @@ for token in 'prepack' 'scripts/generate-dist.js' 'npm-prepack-generated' 'prepa
   for f in "$SNYK"/*.txt "$SNYK"/*.json; do [[ -s "$f" ]] || continue; [[ "$(basename "$f")" == "evidence-token-search.txt" ]] && continue; if grep -n -F "$token" "$f"; then found=1; fi; done
   [[ "$found" -eq 1 ]] || echo "(no hits)"
 done
-echo; echo "== Snyk SBOM tracer components =="
-if [[ -s "$SNYK/snyk-source-sbom.json" ]]; then jq -r '.components[]? | [.name, .version, (.purl // "")] | @tsv' "$SNYK/snyk-source-sbom.json" | grep -E 'node-prepack-trace-lab|trace-route-package' || echo "(no tracer components)"; fi
-echo; echo "== Snyk SBOM relationships involving tracer =="
+echo; echo "== Snyk SBOM tracked components =="
+if [[ -s "$SNYK/snyk-source-sbom.json" ]]; then jq -r '.components[]? | [.name, .version, (.purl // "")] | @tsv' "$SNYK/snyk-source-sbom.json" | grep -E 'node-prepack-trace-lab|trace-route-package' || echo "(no tracked components)"; fi
+echo; echo "== Snyk SBOM relationships involving tracked components =="
 if [[ -s "$SNYK/snyk-source-sbom.json" ]]; then jq -r '.dependencies[]? | select((.ref // "" | test("trace-route-package|node-prepack-trace-lab"; "i")) or ((.dependsOn // []) | join(" ") | test("trace-route-package"; "i"))) | [.ref, ((.dependsOn // []) | join(","))] | @tsv' "$SNYK/snyk-source-sbom.json" || true; fi
 echo; echo "Interpretation questions:"
 echo "  1. Does Snyk identify trace-route-package from the application npm model?"

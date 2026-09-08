@@ -64,7 +64,7 @@ A clean start ensures every artefact we inspect came from this build:
 
 ## Run
 
-```bash
+```command
 rm -rf trace-output
 mvn clean
 ```
@@ -100,7 +100,7 @@ Inspect the relevant sections of `pom.xml` directly.
 
 ## Run
 
-```bash
+```command
 grep -n -A5 -B2 'commons-lang3' pom.xml
 ```
 ```output
@@ -128,7 +128,7 @@ grep -n -A5 -B2 'commons-lang3' pom.xml
 
 ## Run
 
-```bash
+```command
 grep -n -A5 -B2 'jakarta.jakartaee-web-api' pom.xml
 ```
 ```output
@@ -146,7 +146,7 @@ grep -n -A5 -B2 'jakarta.jakartaee-web-api' pom.xml
 
 ## Run
 
-```bash
+```command
 grep -n -A8 -B4 'lodash-es' pom.xml
 ```
 ```output
@@ -182,7 +182,7 @@ grep -n -A8 -B4 'lodash-es' pom.xml
 
 ## Establish
 
-The source configuration asks Maven to treat the three tracers differently:
+The source configuration asks Maven to treat the three tracked components differently:
 
 ```text
 commons-lang3:3.18.0
@@ -209,13 +209,13 @@ Use the project's normal build wrapper and then verify the generated browser ass
 
 ## Run
 
-```bash
+```command
 ./scripts/build.sh
 ```
 
 Then verify the outputs:
 
-```bash
+```command
 find target/generated-web -maxdepth 2 -type f -print
 ls -lh target/payara-mvnpm-trace-lab-1.0.0.war
 ```
@@ -253,7 +253,7 @@ Ask Maven's Dependency Plugin for the resolved project graph and filter it to `c
 
 ## Run
 
-```bash
+```command
 mvn dependency:tree \
   -Dincludes=org.apache.commons:commons-lang3
 ```
@@ -292,7 +292,7 @@ Run the same project dependency-tree query, filtered to the mvnpm coordinate.
 
 ## Run
 
-```bash
+```command
 mvn dependency:tree \
   -Dincludes=org.mvnpm:lodash-es
 ```
@@ -330,7 +330,7 @@ Ask the Maven Dependency Plugin to resolve the esbuild Maven plugin and its publ
 
 ## Run
 
-```bash
+```command
 mvn dependency:resolve-plugins \
   -DincludeArtifactIds=esbuild-maven-plugin
 ```
@@ -384,7 +384,7 @@ Run the `generate-resources` phase with Maven debug logging enabled and filter t
 
 ## Run
 
-```bash
+```command
 mvn -X generate-resources 2>&1 \
   | grep 'org.mvnpm:lodash-es'
 ```
@@ -428,7 +428,7 @@ The build produced `app.js` and `app.js.map`. The source map records source modu
 
 ## Run
 
-```bash
+```command
 find target/generated-web -maxdepth 2 -type f -print
 ```
 ```output
@@ -459,7 +459,7 @@ Read the source map's `sources` array and filter it to lodash modules.
 
 ## Run
 
-```bash
+```command
 jq -r '.sources[]' target/generated-web/assets/app.js.map \
   | grep 'lodash'
 ```
@@ -526,7 +526,7 @@ Give Syft only `target/generated-web`. It receives no POM, plugin realm, mvnpm c
 
 ## Run
 
-```bash
+```command
 syft target/generated-web
 ```
 ```output
@@ -572,7 +572,7 @@ Inspect the finished WAR directly for the versioned `commons-lang3` JAR and gene
 
 ## Run
 
-```bash
+```command
 unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
   | grep -E 'WEB-INF/lib/commons-lang3|assets/app\.js'
 ```
@@ -613,7 +613,7 @@ Give Syft only the completed WAR.
 
 ## Run
 
-```bash
+```command
 syft target/payara-mvnpm-trace-lab-1.0.0.war
 ```
 ```output
@@ -658,7 +658,7 @@ First inspect the WAR library directory.
 
 ## Run
 
-```bash
+```command
 unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
   | grep 'WEB-INF/lib/'
 ```
@@ -673,7 +673,7 @@ Now ask Maven for the resolved Jakarta dependency.
 
 ## Run
 
-```bash
+```command
 mvn dependency:tree \
   -Dincludes=jakarta.platform:jakarta.jakartaee-web-api
 ```
@@ -730,13 +730,13 @@ Jakarta EE API
 
 So far we have compared Maven resolution with physical artefact inspection.
 
-Now we want to see what a formal SBOM generated from Maven's project model says about those same three tracers.
+Now we want to see what a formal SBOM generated from Maven's project model says about those same three tracked components.
 
 Invoke the CycloneDX Maven Plugin directly and emit JSON.
 
 ## Run
 
-```bash
+```command
 mvn org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
   -DoutputFormat=json
 ```
@@ -751,11 +751,11 @@ mvn org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
 
 The plugin also emitted schema-keyword warnings during validation. They did not prevent BOM generation.
 
-Now inspect the three tracer identities.
+Now inspect the three tracked component identities.
 
 ## Run
 
-```bash
+```command
 jq -r '.components[] | [.name, .version, (.scope // "-")] | @tsv' \
   target/bom.json \
   | grep -E 'commons-lang3|jakarta.jakartaee-web-api|lodash-es'
@@ -843,7 +843,7 @@ Ask Syft to inspect the WAR and emit CycloneDX JSON.
 
 ## Run
 
-```bash
+```command
 mkdir -p trace-output
 
 syft target/payara-mvnpm-trace-lab-1.0.0.war \
@@ -857,11 +857,11 @@ syft target/payara-mvnpm-trace-lab-1.0.0.war \
    └── ✔ Executables [0 executables]
 ```
 
-Now inspect the exact tracer component names rather than grepping the complete JSON.
+Now inspect the exact tracked component names rather than grepping the complete JSON.
 
 ## Run
 
-```bash
+```command
 jq -r '
   .components[]
   | select(
@@ -957,13 +957,13 @@ The container is deliberately named rather than anonymous, so a re-run replaces 
 
 Payara deploys the WAR asynchronously after the container starts, so the application context `/trace` becomes available a few seconds later. Follow the deployment with:
 
-```bash
+```command
 docker logs -f payara-mvnpm-trace-lab
 ```
 
 ## Run
 
-```bash
+```command
 ./scripts/run.sh
 ```
 
@@ -971,7 +971,7 @@ docker logs -f payara-mvnpm-trace-lab
 
 The Docker build used:
 
-```text
+```output
 payara/server-web:7.2026.7
 ```
 
@@ -1013,7 +1013,7 @@ Call the servlet endpoint.
 
 ## Run
 
-```bash
+```command
 curl -sS 'http://localhost:8080/trace/api/info?name=runtime%20trace' | jq
 ```
 
@@ -1061,7 +1061,7 @@ Give Syft the completed local container image.
 
 ## Run
 
-```bash
+```command
 syft payara-mvnpm-trace-lab:local
 ```
 
@@ -1069,7 +1069,7 @@ syft payara-mvnpm-trace-lab:local
 
 Syft catalogued:
 
-```text
+```output
 589 packages
 825 executables
 5,424 file-metadata locations
@@ -1158,13 +1158,13 @@ The container started in step 18 runs detached and keeps holding port `8080` aft
 
 The `payara-mvnpm-trace-lab:local` image is left in place, because rebuilding it is the slowest part of the lab. Remove it explicitly if you want the disk space back:
 
-```bash
+```command
 docker image rm payara-mvnpm-trace-lab:local
 ```
 
 ## Run
 
-```bash
+```command
 ./scripts/stop.sh
 ```
 
@@ -1232,7 +1232,7 @@ Those observations should be compared, not assumed to be interchangeable.
 
 # Replay in one pass
 
-```bash
+```command
 ./scripts/trace-mvnpm.sh
 ./scripts/image-trace.sh
 ```
@@ -1245,7 +1245,7 @@ Those observations should be compared, not assumed to be interchangeable.
 
 # Verify the lab still holds
 
-```bash
+```command
 ./scripts/proof-check.sh
 ```
 

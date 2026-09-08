@@ -20,13 +20,13 @@ grep -E \
   "$SCOUT/quickview.txt" || true
 
 echo
-echo "== Exact application tracer =="
+echo "== Exact application tracked component =="
 grep -E \
   '^[[:space:]]*commons-lang3[[:space:]]+\|' \
   "$SCOUT/sbom-list.txt" || true
 
 echo
-echo "== Bundled plugin tracer =="
+echo "== Bundled plugin tracked component =="
 if grep -Eq '^[[:space:]]*lodash-es[[:space:]]+\|' "$SCOUT/sbom-list.txt"; then
   grep -E '^[[:space:]]*lodash-es[[:space:]]+\|' "$SCOUT/sbom-list.txt"
 else
@@ -65,5 +65,5 @@ echo "  Jakarta APIs: present in final container because Payara supplies them"
 echo "  Scout inventory: 655 packages"
 echo "  Scout base image: payara/server-web:7.2026.7"
 echo "  Provenance attestation: obtained"
-echo "  Filtered tracer/package-name CVE view: no vulnerable packages detected"
+echo "  Filtered tracked/package-name CVE view: no vulnerable packages detected"
 echo "  Base-image recommendations: none"

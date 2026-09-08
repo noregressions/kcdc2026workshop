@@ -6,9 +6,6 @@ track: core
 
 # S07 — Reverse Provenance / S01: Overview
 
-> **Workshop track: CORE** — the Part 5 provenance lab. Reuses S01's artefacts,
-> so there is no new application to learn.
-
 ## The question
 
 Every earlier part asked what is *in* an artefact. This one asks where the

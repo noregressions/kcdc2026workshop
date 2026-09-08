@@ -25,7 +25,7 @@ echo "  commons-codec 1.18.0        ordinary nested JAR in service"
 echo "  lodash 4.17.21               bundled into frontend JavaScript"
 echo
 
-echo "== Baseline tracer hits =="
+echo "== Baseline tracked hits =="
 for f in \
   "$BASE/maven-normalizer-codec.txt" \
   "$BASE/maven-service-codec.txt" \
@@ -51,7 +51,7 @@ for f in "$SNYK"/*.exit; do
 done
 
 echo
-echo "== Snyk textual tracer hits =="
+echo "== Snyk textual tracked hits =="
 for f in "$SNYK"/*.txt; do
   [[ -e "$f" ]] || continue
   echo
@@ -60,7 +60,7 @@ for f in "$SNYK"/*.txt; do
 done
 
 echo
-echo "== Snyk JSON tracer hits =="
+echo "== Snyk JSON tracked hits =="
 for f in "$SNYK"/*.json; do
   [[ -s "$f" ]] || continue
   echo

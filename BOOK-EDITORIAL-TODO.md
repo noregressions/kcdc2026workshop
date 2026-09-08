@@ -5,12 +5,17 @@ stale beat lines, misplaced paragraphs — were applied directly; everything her
 was judged too big for a line edit. Grouped by theme, roughly most-urgent first.
 Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
 
+> **Note 2026-09-08:** several file names in this document predate the
+> OVERVIEW+TRACE merge — those pairs are now a single `LESSON.md` per lab.
+> Read `{OVERVIEW,TRACE}.md` below as `LESSON.md`.
+
 ## Content gaps
 
-- [ ] **Six of seven spine chapters are placeholders.** workshop/01, 02, 03, 05,
-  06, 07 carry `status: placeholder` and a "presentation content to be written"
-  banner; only 04 is drafted. The labs are polished — the narrative a
-  participant reads *between* them is the largest remaining gap in the book.
+- [x] **Six of seven spine chapters are placeholders.** ~~workshop/01, 02, 03,
+  05, 06, 07 carry `status: placeholder`~~ **Done 2026-09-08:** all spine
+  chapters written, absorbing the route narrative that previously lived only
+  in `WORKSHOP.md` (which is now a one-page route card). Part numbering is now
+  1–6 in four acts; the AI part is parked as an appendix.
 - [ ] **`setup/frontpiece.md` is empty** — the first content page after the
   cover is just "# Welcome". Write a short welcome/epigraph, or drop the
   Welcome section from both POM editions.
@@ -18,11 +23,12 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
   see FACILITATOR.md*" in Steps 2 and 3. Capture the `workshop/evidence/`
   responses and delete the notes; verify `evidence/` holds the Scorecard
   capture the intro promises.
-- [ ] **workshop/05 plans around "S06 (to be built)"** — decide: build the
-  integrity lab or cut the reference before writing 05.
-- [ ] **workshop/04's opening assumes 03 delivers the Ghostcat story**
-  ("Part 3 ended with a CVE record that changed its answers over six years") —
-  holds on paper, not yet on the page; keep in mind when writing 03.
+- [x] **workshop/05 plans around "S06 (to be built)"** — **Done 2026-09-08:**
+  cut. Part 5 (now `05-attacks-and-provenance.md`) is built on the ingress
+  mechanisms plus T08 and S07, both of which exist.
+- [x] **workshop/04's opening assumes 03 delivers the Ghostcat story** —
+  **Done 2026-09-08:** 03 now delivers it, and the CVE-tomcat-85 lesson is in
+  both editions behind it.
 
 ## Stale cross-references (mostly fallout from removing CVE-tomcat-85 from the book)
 
@@ -34,15 +40,15 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
   (NVD change history, the four API captures, `evidence/`) plus the
   Ghostcat/KEV example — that chapter is now repo-only. Rephrase as repository
   references or trim.
-- [ ] **workshop/03 (when written)** must point its guided web-investigation
-  segment at the repo copy of `investigations/CVE-tomcat-85` (or the lab gets
-  reinstated in the book).
+- [x] **workshop/03 (when written)** must point its guided web-investigation
+  segment at `investigations/T10-cve-tomcat-85` — **Done 2026-09-08:** the lab was
+  reinstated in both editions rather than referenced as repo-only.
 - [ ] **S01 TRACE closing line** ("A separate reverse-provenance exercise
   should examine…") should point at S07, which now exists and reuses S01's
   image — wording depends on the S07-in-book decision below.
-- [ ] **S03 TRACE step 13** justifies port 8081 by pointing at S02, which
-  core-route readers meet only in the optional appendix. Reword to "alongside
-  the other scenarios' runtimes".
+- [x] **S03 TRACE step 13** justifies port 8081 by pointing at S02 — **Closed
+  2026-09-08:** S02 is core route now and readers meet it in the same part, so
+  the cross-reference is valid as written.
 - [ ] **T01 OVERVIEW**: opens as "an investigation over S04" though the TRACE
   spans all five scenarios (reframe with S04 as the live-demo centrepiece);
   status fence still says `S05 … next` though the S05 section is complete;
@@ -52,11 +58,11 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
 
 ## Open inclusion decisions
 
-- [ ] **T08 (GuardDog) has never been in the book** — the site edition's
-  Reference Investigations appendix lists T02–T07 only; looks like an
-  oversight. One include pair adds it.
-- [ ] **S07 (reverse provenance) is in neither edition.** Decide; the S01
-  closing pointer above depends on it.
+- [x] **T08 (GuardDog) has never been in the book** — **Done 2026-09-08:**
+  T08 is now a core lab inside Part 5, in both editions (so it is deliberately
+  *not* in the Reference Investigations appendix).
+- [x] **S07 (reverse provenance) is in neither edition.** — **Done
+  2026-09-08:** S07 is now a core lab inside Part 5, in both editions.
 - [ ] **setup/VERSIONS.md** — include in the book or stop referencing it
   (see tools.md item).
 
@@ -67,7 +73,7 @@ Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
   put output directly under `Run` with no `Observed output` heading, and
   S02/S03 step 1 use a one-line short form. Either soften the promise
   ("beats appear as needed") or add the missing headings.
-- [ ] **S02 TRACE step 2 has inverted heading hierarchy** (`### tracer` above
+- [ ] **S02 TRACE step 2 has inverted heading hierarchy** (`### tracked component` above
   `## Run`), which the book renderer may group oddly; steps 13/14/16 have two
   `## Run` beats each. Restructure or bless the pattern.
 - [ ] **T05 probes 5–6 have no Run beat** where probes 1–4 do — a one-line

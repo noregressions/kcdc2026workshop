@@ -42,7 +42,7 @@ digests below will differ on your run.
 
 ## Run
 
-```bash
+```command
 ./scripts/build-baseline.sh
 ```
 
@@ -77,7 +77,7 @@ choice to record something the build would otherwise throw away.
 
 ## Run
 
-```bash
+```command
 ./scripts/add-provenance.sh
 ```
 
@@ -134,7 +134,7 @@ SBOM components: 5040
 ```
 
 Five thousand components, because the scan sees the JVM application
-dependencies *and* every OS package in the base image. Our tracers are all in
+dependencies *and* every OS package in the base image. Our tracked components are all in
 there (`evidence/sbom-excerpt.json`): `jackson-databind 2.19.4`, both
 `commons-codec` versions from S01's shading leg, `normalizer 1.0.0`, and
 `spring-boot 3.5.12`, the same EOL framework Part 4 flagged, now itemised in
@@ -146,7 +146,7 @@ sitting next to the image, with nothing tying one to the other.
 This is the rung that changes the kind of evidence. `cosign` signs the image
 **by digest** and attests the SBOM as a predicate bound to that digest:
 
-```bash
+```command
 cosign sign   --key cosign.key <digest>
 cosign attest --key cosign.key --type cyclonedx --predicate sbom.json <digest>
 ```
@@ -211,7 +211,7 @@ same, the key management is the hard part this lab does not solve.
 
 # Run
 
-```bash
+```command
 ./scripts/build-baseline.sh    # build S01, then fail to trace it home
 ./scripts/add-provenance.sh    # git → OCI labels → SBOM → attestation
 ./scripts/proof-check.sh

@@ -32,7 +32,7 @@ cdx_summary "extended " "$OUT/plus.cdx.json"
 report_origins "$OUT/plus.report.json"
 
 echo
-echo "-- The S01 tracers, plus the tooling that shaped them --"
+echo "-- The S01 tracked components, plus the tooling that shaped them --"
 echo "standard SBOM:"
 cdx_rows "$OUT/standard.cdx.json" '^(jackson-databind|commons-codec|normalizer|maven-shade-plugin|spring-boot-dependencies)$' | sed 's/^/   /'
 echo "extended SBOM:"

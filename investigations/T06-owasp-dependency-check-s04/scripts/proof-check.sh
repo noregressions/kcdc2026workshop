@@ -145,7 +145,7 @@ contains results/s04/dependency-check/plugin-payload-controls/result.tracers.tsv
 
 equals results/s04/dependency-check/plugin-payload-controls/result.vulnerability-count.txt \
   '0' \
-  'Controlled tracer packages have no vulnerability matches'
+  'Controlled packages have no vulnerability matches'
 
 echo
 echo "Passed: $pass"

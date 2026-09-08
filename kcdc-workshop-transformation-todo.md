@@ -1,5 +1,22 @@
 # KCDC 2026 Workshop Transformation TODO
 
+> **Status 2026-09-08 — the restructure landed.** The book now follows the
+> six-part / four-act shape this document targets, not the seven-part shape
+> with an AI slot. Concretely: the route narrative moved out of `WORKSHOP.md`
+> and into the `workshop/0X` chapters (which are now the book's spine, not
+> placeholders); `WORKSHOP.md` is a one-page route card; the AI part is parked
+> as `workshop/appendix-ai-dependencies.md`; wrap-up became Part 6, *The
+> Minimum That Keeps You Honest*, with a real drill (`scripts/ship-check.sh`);
+> and the three labs that were in neither book edition — CVE-tomcat-85, S07,
+> T08 — are now included. Items below that this closes are marked inline.
+>
+> Also: the visible "Workshop track:" banner line described under P0 was
+> removed from all 21 cards on 2026-09-08 — the `track:` frontmatter key
+> remains and is the machine-usable form. The Ghostcat investigation was
+> renumbered `investigations/CVE-tomcat-85` → `investigations/T10-cve-tomcat-85`
+> on the same date; references below that predate the rename keep the old name
+> as a record of what was true then.
+
 ## Target workshop shape
 
 The canonical attendee route will be:
@@ -205,7 +222,7 @@ Original checklist kept for the record:
 - [x] Stop treating all of S01 as mandatory. *(track tags + WORKSHOP.md route, 2026-08-24)*
 - [x] Open with `jackson-databind` as the agreement baseline: the control
       formerly assigned to S00. Show it agreeing in POM, tree, JAR and SBOM
-      before breaking the other two tracers. *(resolver + artefact scanner agreement, WORKSHOP.md Step 1)*
+      before breaking the other two tracked components. *(resolver + artefact scanner agreement, WORKSHOP.md Step 1)*
 - [x] Extract one canonical exercise contrasting:
   - normal dependency
   - shaded/relocated dependency
@@ -258,6 +275,13 @@ installed runtime code
 - [x] Explicitly connect npm lifecycle execution to the Maven plugin example. *(step title and 'what this proves')*
 
 ## Reclassify S02 and S03
+
+> **REVERSED for S02, 2026-09-08.** S02 is core route again, as Part 2 Step 6 —
+> the everything-at-once Jakarta EE case. S08 joined it as Part 2 Step 3. The
+> Optional Labs appendix no longer exists in either book edition, and Part 2
+> grew from 60 to 85 minutes to pay for it. S03 remains where the items below
+> put it, except that it too is a timed core stop rather than a pointer.
+
 
 - [x] Make S02 optional/reference material.
 - [x] Make S03 optional/reference material.
@@ -323,7 +347,7 @@ finding
 
 ## Build the Tomcat worked example
 
-- [x] Create `investigations/CVE-tomcat-85`.
+- [x] Create `investigations/T10-cve-tomcat-85`.
 - [x] Select one canonical Tomcat CVE. *(CVE-2020-1938 Ghostcat: 8.5.0–8.5.50, KEV, 57 edits over six years)*
 - [x] Capture:
   - initial disclosure
@@ -426,7 +450,7 @@ What exactly had to be true for this scanner to produce this finding?
 
 ## Project health
 
-- [x] Choose one well-known dependency to investigate throughout this section. **Decided 2026-08-24: lodash** (already Part 2's bundling tracer; ~71M weekly downloads against a 2021 last release).
+- [x] Choose one well-known dependency to investigate throughout this section. **Decided 2026-08-24: lodash** (already Part 2's bundling tracked component; ~71M weekly downloads against a 2021 last release).
 - [x] ~~Open it in Cloudsmith Navigator. Identify the signals Navigator provides.~~ **Dropped 2026-08-24: Cloudsmith removed from the workshop entirely; Scorecard covers the health lens.**
 - [x] Avoid presenting any aggregate score as objective truth. *(Done: the aggregate-7.2-summarises-a-10-and-a-0 beat in the drafted module.)*
 - [x] Follow selected signals back to their underlying evidence.
@@ -795,7 +819,7 @@ scenarios/
   S07-provenance-s01/        (built — reverse provenance on S01)
 
 investigations/
-  CVE-tomcat-85/
+  T10-cve-tomcat-85/
   ...
 
 reference/

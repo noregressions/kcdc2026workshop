@@ -1,15 +1,24 @@
 ---
-id: workshop-06-ai-dependencies
-oneliner: "Impact of AI-generated dependencies on supply chain expansion, package hallucination vectors, and automated code vetting."
-track: core
-status: planned
+id: workshop-appendix-ai-dependencies
+oneliner: "Parked material on AI-generated dependencies: graph expansion, package hallucination, and why none of it changes the boundaries — it only speeds up traffic across them."
+track: reference
+status: parked
 ---
 
-# Part 6: AI Tooling and Automated Dependency Ingress
+# Appendix — AI and the Supply Chain
 
-**Target duration:** 20 minutes (technical presentation and malware analysis)
+Parked, and off the route. This material was written for a place in the
+running order and pulled out again while the topic is out of scope; the notes
+are kept here because the underlying point survives whatever the tooling does
+next.
 
-## Technical Analysis
+That point: AI-assisted development does not create a new supply chain
+boundary. Every dependency an assistant suggests crosses exactly the same
+boundaries as one a human chose, and is subject to exactly the same evidence
+limits proved in Part 2. What changes is throughput — how many dependency
+decisions get made, and who is awake for them.
+
+## Notes
 
 1. **Dependency Profile Shift Under LLM Code Generation:**
    - Expansion of transitive dependency graph depth and package volume.

@@ -511,7 +511,7 @@ if [[ "$SKIP_RUNTIME" -eq 0 ]]; then
       "$RUNTIME_JSON" \
       '.sha256 | test("^[0-9a-f]{64}$")'
     assert_json \
-      "runtime reports all three tracer names" \
+      "runtime reports all three tracked names" \
       "$RUNTIME_JSON" \
       '(.tracers | sort) == ["commons-codec","jackson-databind","lodash"]'
   else

@@ -84,7 +84,7 @@ jq '.components | length' "$OUT/image.cdx.json" \
   | tee "$OUT/cdx-component-count.txt"
 
 echo
-echo "== Syft JSON tracers =="
+echo "== Syft JSON tracked components =="
 jq -r '
   .artifacts[]?
   | select(
@@ -99,7 +99,7 @@ jq -r '
   | tee "$OUT/syft-json-tracers.txt"
 
 echo
-echo "== CycloneDX tracers =="
+echo "== CycloneDX tracked components =="
 jq -r '
   .components[]?
   | select(

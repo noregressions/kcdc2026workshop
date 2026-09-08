@@ -59,6 +59,6 @@ Vulnerability matchers (Trivy, Grype, Snyk, Dependency-Check) query vulnerabilit
 
 Check local database update timestamps:
 
-```bash
+```command
 trivy --version
 ```

@@ -34,12 +34,12 @@ LBL="$(docker image inspect "$IMG:prov" --format '{{json .Config.Labels}}' 2>/de
 echo "$LBL" | grep -q 'opencontainers.image.revision' && pass "prov image has a revision label" || fail "prov image has a revision label"
 echo "$LBL" | grep -q 'opencontainers.image.source'   && pass "prov image has a source label"   || fail "prov image has a source label"
 
-# Layer 3: an SBOM exists and names our tracers.
+# Layer 3: an SBOM exists and names our tracked components.
 if [[ -f "$RESULTS/checkout-service.cdx.json" ]] \
    && grep -q 'jackson-databind' "$RESULTS/checkout-service.cdx.json"; then
-  pass "SBOM lists the jackson-databind tracer"
+  pass "SBOM lists the jackson-databind tracked component"
 else
-  fail "SBOM lists the jackson-databind tracer"
+  fail "SBOM lists the jackson-databind tracked component"
 fi
 
 # Layer 4: signature and attestation verify with the public key alone.

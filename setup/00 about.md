@@ -44,14 +44,16 @@ Build transformations can preserve executable logic while eliminating the metada
 ## Methodology
 
 - **Production Build Tooling:** All builds execute directly against production tools without mocks or stubs: Maven, npm, Vite, esbuild, Maven Shade Plugin, Spring Boot, PEP 517 backends, npm lifecycle hooks, and Docker.
-- **Traced Components:** Each scenario isolates specific tracer components across five to six lifecycle boundaries to evaluate evidence retention.
+- **Traced Components:** Each scenario isolates specific tracked components across five to six lifecycle boundaries to evaluate evidence retention.
 - **Empirical Evidence:** Every step provides explicit CLI commands and verifiable terminal output documenting what the step establishes.
 - **Controlled Differential Testing:** Scenarios apply isolated changes (such as stripping Maven metadata while preserving bytecode) to measure the exact effect on scanner detection.
 
 ## Structure
 
-- **Scenarios (S01–S05):** Build pipelines demonstrating component obscurity across distinct mechanisms: bytecode relocation, Maven plugin execution realms, PEP 517 build backends, npm lifecycle hooks, and frontend bundlers.
-- **Investigations (T01–T07):** Tool evaluations (Snyk, Docker Scout, Trivy, Grype, pip-audit, OWASP Dependency-Check, npm audit) measuring detection capability against the scenario artifacts.
+- **Scenarios (S01–S05):** Build pipelines demonstrating component obscurity across distinct mechanisms: bytecode relocation, Maven plugin execution realms, PEP 517 build backends, npm lifecycle hooks, frontend bundlers, and mvnpm registry translation in a Jakarta EE WAR (S02).
+- **Scenarios (S07, S08):** Reverse provenance from a finished image, and a second SBOM generator that records what *built* an artefact rather than only what ships in it. Every scenario is on the core route.
+- **Investigations (T01–T10):** Tool evaluations (Snyk, Docker Scout, Trivy, Grype, pip-audit, OWASP Dependency-Check, npm audit, GuardDog, and a three-scanner head-to-head) measuring detection capability against the scenario artifacts.
+- **Investigation (T10):** One real vulnerability record read end to end across four public APIs, as the worked example behind Part 3.
 
 Each scenario and investigation is documented in a standalone `LESSON.md` containing requirements, reproduction commands, and annotated walkthroughs.
 
@@ -80,7 +82,7 @@ Observed       Tool output
 Verdict        Detection outcome and underlying boundary limitation
 ```
 
-Each investigation concludes with a scorecard summarizing tracer detection across boundaries. Note that vulnerability database updates may alter exact vulnerability counts over time, but component identification behavior remains consistent.
+Each investigation concludes with a scorecard summarizing tracked-component detection across boundaries. Note that vulnerability database updates may alter exact vulnerability counts over time, but component identification behavior remains consistent.
 
 ## Technical Objectives
 
@@ -97,7 +99,7 @@ The exercises focus on boundaries from source declaration to the container image
 
 Run the environment validation and pre-warm scripts from the repository root:
 
-```bash
+```command
 ./scripts/tools-check.sh    # Verify required tool installations
 ./scripts/build-all.sh      # Download dependencies, pull images, and compile targets
 ```

@@ -6,8 +6,6 @@ track: reference
 
 # T03 — Trivy Across S01 Boundaries
 
-> **Workshop track: REFERENCE** — self-study material, not part of the timed route.
-
 ## The question
 
 Use one vulnerability tool, Trivy, against several evidence boundaries in S01.
@@ -55,7 +53,7 @@ contains, established independently of the tool under investigation.
 
 ## Fixture
 
-S01 contains these tracer states:
+S01 contains these component states:
 
 ```text
 jackson-databind 2.19.4
@@ -90,7 +88,7 @@ The relocated codec bytecode is unchanged.
 
 ## Run
 
-```bash
+```command
 ./scripts/baseline-s01.sh
 ```
 
@@ -98,7 +96,7 @@ The relocated codec bytecode is unchanged.
 
 Maven showed:
 
-```text
+```output
 normalizer
     -> commons-codec 1.17.1
 ```
@@ -178,7 +176,7 @@ observe at each boundary.
 
 All eight probes are driven by three scripts:
 
-```bash
+```command
 ./scripts/run-trivy-nonarchives-s01.sh
 ./scripts/run-trivy-archives-s01.sh
 ./scripts/compare-s01.sh
@@ -186,7 +184,7 @@ All eight probes are driven by three scripts:
 
 You can also run the full clean harness with:
 
-```bash
+```command
 ./scripts/run-trivy-s01.sh
 ```
 
@@ -208,12 +206,12 @@ is plain Maven model evidence — so the codec identity should be recoverable.
 
 Trivy identified:
 
-```text
+```output
 commons-codec 1.17.1
 normalizer    1.0.0
 ```
 
-Trivy reported no tracer vulnerability finding.
+Trivy reported no tracked vulnerability finding.
 
 ## Verdict
 
@@ -239,12 +237,12 @@ scan answers the resolved-graph question, both should appear.
 
 Trivy identified:
 
-```text
+```output
 jackson-databind 2.19.4
 normalizer         1.0.0
 ```
 
-It did not surface codec 1.18.0 in the tracer inventory from this single POM scan.
+It did not surface codec 1.18.0 in the tracked inventory from this single POM scan.
 
 For Jackson 2.19.4 it reported:
 
@@ -280,7 +278,7 @@ identified — and any lodash CVEs should attach to it.
 
 Trivy identified:
 
-```text
+```output
 lodash 4.17.21
 ```
 
@@ -319,12 +317,12 @@ should still be identified here.
 
 Using `trivy rootfs` against an isolated directory containing the shaded JAR, Trivy identified:
 
-```text
+```output
 commons-codec 1.17.1
 normalizer    1.0.0
 ```
 
-Trivy reported no tracer vulnerability finding.
+Trivy reported no tracked vulnerability finding.
 
 ## Verdict
 
@@ -354,7 +352,7 @@ The archive still contains the same relocated codec bytecode.
 
 Trivy identified only:
 
-```text
+```output
 normalizer 1.0.0
 ```
 
@@ -402,7 +400,7 @@ should therefore surface *both* codec versions, where the service POM scan
 
 Trivy identified:
 
-```text
+```output
 jackson-databind 2.19.4
 commons-codec    1.17.1
 commons-codec    1.18.0
@@ -453,11 +451,11 @@ content, lodash should disappear here even though its code ships.
 
 Trivy reported:
 
-```text
+```output
 Number of language-specific files num=0
 ```
 
-Trivy recovered no tracer identities and reported no tracer vulnerability findings.
+Trivy recovered no tracked identities and reported no tracked vulnerability findings.
 
 ## Verdict
 
@@ -498,13 +496,13 @@ stay invisible.
 
 Trivy detected:
 
-```text
+```output
 OS: Ubuntu 22.04
 OS packages analysed: 143
 Java archive files analysed: 1
 ```
 
-Tracer identity:
+Tracked identity:
 
 ```text
 jackson-databind 2.19.4
@@ -536,9 +534,9 @@ not restore npm identity that Vite already destroyed.
 
 # Scorecard
 
-What Trivy identified, tracer by tracer, at each boundary — `seen` means the
+What Trivy identified, tracked component by tracked component, at each boundary — `seen` means the
 package identity was established; `—` means it was not. Every `—` in this
-table is code that shipped anyway, except where the tracer genuinely isn't part
+table is code that shipped anyway, except where the tracked component genuinely isn't part
 of that boundary's evidence.
 
 | Boundary | codec 1.17.1 | codec 1.18.0 | Jackson 2.19.4 | lodash 4.17.21 |
@@ -552,7 +550,7 @@ of that boundary's evidence.
 | frontend/dist | — | — | — | — |
 | final container | seen | seen | seen | — |
 
-For the tracer CVEs observed:
+For the tracked CVEs observed:
 
 ```text
 Jackson 2.19.4

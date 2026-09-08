@@ -12,13 +12,13 @@ Configuration instructions for investigations requiring authenticated API endpoi
 
 T01 requires an authenticated Snyk CLI session (free tier account is sufficient):
 
-```bash
+```command
 snyk auth
 ```
 
 Verify authentication status:
 
-```bash
+```command
 snyk --version
 snyk config get api
 ```
@@ -34,20 +34,20 @@ NVD_API_KEY absent   -> Dependency-Check 12.2.2 (fallback version avoiding key-r
 
 ### Request an NVD API Key
 
-1. Navigate to: `https://nvd.nist.gov/developers/request-an-api-key`
+1. Navigate to <https://nvd.nist.gov/developers/request-an-api-key>.
 2. Complete the registration form and accept the Terms of Use.
 3. Activate the key using the confirmation link sent by NIST (valid for 7 days).
 4. Store the API key in a secure local credentials store.
 
 ### Export Environment Variable
 
-```bash
+```command
 export NVD_API_KEY='your-api-key'
 ```
 
 Verify the variable is set:
 
-```bash
+```command
 printenv NVD_API_KEY >/dev/null && echo "NVD_API_KEY is exported"
 ```
 
@@ -61,7 +61,7 @@ NVD API key: supplied via NVD_API_KEY environment variable
 
 Docker Scout requires an authenticated Docker CLI session:
 
-```bash
+```command
 docker login
 docker scout version
 ```
@@ -70,7 +70,7 @@ docker scout version
 
 T07 requires outbound connectivity to the public npm registry:
 
-```bash
+```command
 npm config get registry
 ```
 

@@ -6,8 +6,6 @@ track: core
 
 # S05 — Node npm `prepack` Supply Chain Trace Lab
 
-> **Workshop track: CORE** — part of the timed workshop route (Part 2: identification).
-
 This lab follows a Node package from source, through an npm lifecycle hook, into a packed tarball, into `node_modules`, and finally into runtime behaviour.
 
 The pattern is:
@@ -134,7 +132,7 @@ Everything under `packages/trace-route-package/` other than `dist/` is checked-i
 
 ## Run
 
-```bash
+```command
 ./scripts/clean.sh
 ```
 
@@ -160,7 +158,7 @@ The first execution boundary is `npm pack`: we want to see whether package-owned
 
 **Pack the package into a local repository:**
 
-```bash
+```command
 npm pack --foreground-scripts --pack-destination ../../npm-repo
 ```
 
@@ -168,7 +166,7 @@ npm pack --foreground-scripts --pack-destination ../../npm-repo
 
 **Install the application's dependencies from that tarball:**
 
-```bash
+```command
 npm install --ignore-scripts
 ```
 
@@ -180,7 +178,7 @@ The build keeps both logs under `trace-output/` (`npm-pack.log` and `npm-install
 
 ## Run
 
-```bash
+```command
 ./scripts/build.sh
 ```
 
@@ -249,7 +247,7 @@ After the lifecycle has run, the source workspace contains both original inputs 
 
 ## Run
 
-```bash
+```command
 find packages/trace-route-package -maxdepth 3 -type f -print | sort
 ```
 
@@ -280,7 +278,7 @@ The distributable tarball is a different evidence view from the package source w
 
 ## Run
 
-```bash
+```command
 tar -tzf npm-repo/trace-route-package-1.0.0.tgz
 ```
 
@@ -307,7 +305,7 @@ Although the actual generator and input are absent, this lab deliberately writes
 
 ## Run
 
-```bash
+```command
 tar -xOzf npm-repo/trace-route-package-1.0.0.tgz \
   package/dist/prepack-evidence.json | jq
 ```
@@ -346,7 +344,7 @@ Installation creates another evidence boundary. We want to see what survives int
 
 ## Run
 
-```bash
+```command
 find node_modules/trace-route-package -maxdepth 3 -type f -print | sort
 ```
 
@@ -366,7 +364,7 @@ The installed package mirrors the packed artefact. It contains generated runtime
 
 ## Run
 
-```bash
+```command
 cat node_modules/trace-route-package/dist/prepack-evidence.json | jq
 ```
 
@@ -394,7 +392,7 @@ The generated provenance marker survives unchanged from tarball to installed pac
 
 ## Run
 
-```bash
+```command
 npm ls --all
 ```
 
@@ -413,13 +411,13 @@ npm identifies the dependency relationship, but package identity alone does not 
 
 ## Run
 
-```bash
+```command
 npm sbom --sbom-format cyclonedx > trace-output/npm-sbom.json
 ```
 
 Then:
 
-```bash
+```command
 jq -r '.components[]? | [.name, .version] | @tsv' trace-output/npm-sbom.json \
   | grep -E 'node-prepack-trace-lab|trace-route-package' || true
 ```
@@ -448,7 +446,7 @@ The SBOM answers **what package is present**. It does not, in this view, answer 
 
 ## Run
 
-```bash
+```command
 syft node_modules/trace-route-package
 ```
 
@@ -474,7 +472,7 @@ When given only the isolated installed package directory, Syft did not identify 
 
 ## Run
 
-```bash
+```command
 syft dir:.
 ```
 
@@ -517,7 +515,7 @@ Three details of the script matter when reading the output:
 
 ## Run
 
-```bash
+```command
 ./scripts/run.sh
 ```
 
@@ -540,7 +538,7 @@ The PID is an observation from this run, not an invariant.
 
 ## Run
 
-```bash
+```command
 curl -sS http://localhost:8083/hidden/prepack-info | jq
 ```
 
@@ -568,7 +566,7 @@ The generated package content does more than sit on disk: it changes runtime beh
 
 ## Run
 
-```bash
+```command
 curl -sS http://localhost:8083/health | jq
 ```
 
@@ -602,7 +600,7 @@ Leaving it running also blocks a later re-run: `run.sh` refuses to start when th
 
 ## Run
 
-```bash
+```command
 ./scripts/stop.sh
 ```
 
@@ -663,7 +661,7 @@ The evidence views are:
 
 # Verify the lab still holds
 
-```bash
+```command
 ./scripts/proof-check.sh
 ```
 

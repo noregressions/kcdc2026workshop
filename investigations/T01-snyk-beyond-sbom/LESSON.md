@@ -6,8 +6,6 @@ track: instructor-demo
 
 # T01 — Snyk Beyond the SBOM
 
-> **Workshop track: INSTRUCTOR DEMO** — shown live during the workshop against S04 ground truth. You don't need to run it yourself; the per-scenario sections are reference material.
-
 ## The question
 
 > What does a commercial SCA tool know that an ordinary SBOM does not, and which supply-chain transformations remain invisible even to it?
@@ -53,7 +51,7 @@ Snyk often provides richer identity, vulnerability and dependency-path informati
 Each scenario's probes are driven by a baseline/run/compare script triplet,
 run from `investigations/T01-snyk-beyond-sbom` with the scenario labs built:
 
-```bash
+```command
 ./scripts/baseline.sh && ./scripts/run-snyk.sh && ./scripts/compare.sh          # S04
 ./scripts/baseline-s01.sh && ./scripts/run-snyk-s01.sh && ./scripts/compare-s01.sh
 ./scripts/baseline-s02.sh && ./scripts/run-snyk-s02.sh && ./scripts/compare-s02.sh
@@ -74,7 +72,7 @@ evidence boundaries.
 
 ## Ground truth
 
-The lab contains four tracer states:
+The lab contains four component states:
 
 - `jackson-databind 2.19.4`
   - ordinary Maven dependency
@@ -139,7 +137,7 @@ ships.
 
 Snyk's Maven aggregate view identifies both codec versions in their respective module contexts:
 
-```text
+```output
 normalizer
     → commons-codec 1.17.1
 
@@ -175,7 +173,7 @@ should be unchanged with stronger identities.
 
 For external Maven artefacts it adds checksum-qualified PURLs such as:
 
-```text
+```output
 pkg:maven/commons-codec/commons-codec@1.17.1?checksum=sha1:...
 pkg:maven/commons-codec/commons-codec@1.18.0?checksum=sha1:...
 pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4?checksum=sha1:...
@@ -210,7 +208,7 @@ lodash; the bundle should offer Snyk no package boundary to anchor on.
 
 From the npm project Snyk identifies:
 
-```text
+```output
 lodash 4.17.21
 ```
 
@@ -249,7 +247,7 @@ the intact nested JARs should be identified once they are reachable.
 
 Direct unmanaged scans of both:
 
-```text
+```output
 normalizer-1.0.0.jar
 normalizer-no-codec-metadata.jar
 ```
@@ -335,7 +333,7 @@ Snyk's Maven project scan identifies the application dependency graph, including
 
 It does not identify:
 
-```text
+```output
 lodash-es 4.17.21
 ```
 
@@ -365,7 +363,7 @@ Normal `snyk test` JSON emitted no PURLs.
 
 With `--include-provenance`, Snyk added PURLs for the same Maven dependency set:
 
-```text
+```output
 root
     → ?type=war
 
@@ -401,7 +399,7 @@ contribution not to be.
 
 Direct unmanaged scan of the whole WAR:
 
-```text
+```output
 unknown custom WAR
 ```
 
@@ -497,7 +495,7 @@ full edge, going beyond the literal `requirements.txt`.
 
 Snyk reconstructs the full installed dependency graph:
 
-```text
+```output
 S03-python-pep517
     → reportkit 1.0.0
         → tracehook-demo 1.0.0
@@ -535,7 +533,7 @@ surface.
 
 The actual Snyk outputs contain no evidence for:
 
-```text
+```output
 tracehook_backend
 build_wheel
 build-hook.json
@@ -651,7 +649,7 @@ Normal Snyk Maven analysis identifies:
 
 It does not identify:
 
-```text
+```output
 trace-injector-maven-plugin
 trace-route-payload
 ```
@@ -703,7 +701,7 @@ custom JAR.
 
 Snyk reports the final custom JAR as:
 
-```text
+```output
 unknown
 ```
 
@@ -820,7 +818,7 @@ Expect the identity recovered.
 
 Snyk identifies:
 
-```text
+```output
 node-prepack-trace-lab 1.0.0
     → trace-route-package 1.0.0
 ```
@@ -881,7 +879,7 @@ generator physically exists.
 
 The real Snyk outputs contain no evidence for:
 
-```text
+```output
 scripts/generate-dist.js
 npm-prepack-generated
 prepack-evidence.json
@@ -913,13 +911,13 @@ Snyk knows what package is present, but the tested dependency views do not expla
 
 # Scorecard
 
-Tracer by tracer, what a tested Snyk view established at each boundary.
+Tracked component by tracked component, what a tested Snyk view established at each boundary.
 `seen` means a tested Snyk view established the identity or fact at that
 boundary; `—` means none did; `n/a` marks boundaries where ground truth says
 there was nothing to find (not shipped, or no standalone artefact tested).
 Every `—` is code that shipped, or an execution that really happened, anyway.
 
-| Scenario | Tracer / fact | Dependency-model boundary | Artefact boundary |
+| Scenario | Tracked component / fact | Dependency-model boundary | Artefact boundary |
 | --- | --- | --- | --- |
 | S01 | jackson-databind 2.19.4 | seen | seen (after unpack) |
 | S01 | commons-codec 1.17.1 (shaded) | seen | — |

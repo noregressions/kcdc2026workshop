@@ -1,6 +1,6 @@
 ---
 id: t01-s01-spring-node
-oneliner: "Snyk against S01's four tracer states, including the shaded JAR and the bundled frontend."
+oneliner: "Snyk against S01's four component states, including the shaded JAR and the bundled frontend."
 track: reference
 ---
 
@@ -8,7 +8,7 @@ track: reference
 
 This is the S01 case inside **T01 — Snyk Beyond the SBOM**.
 
-S01 contains four useful tracer states:
+S01 contains four useful component states:
 
 ```text
 jackson-databind 2.19.4

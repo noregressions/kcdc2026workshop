@@ -10,14 +10,14 @@ Manual execution instructions corresponding to `./scripts/build-all.sh`. Use the
 
 ## 1. Clone or Update Repository
 
-```bash
+```command
 git clone https://github.com/noregressions/kcdc2026workshop.git
 cd kcdc2026workshop
 ```
 
 To update:
 
-```bash
+```command
 git pull
 ```
 
@@ -27,21 +27,21 @@ Base images utilized across scenarios: `eclipse-temurin:21-jre-jammy` (S01) and 
 
 Docker:
 
-```bash
+```command
 docker pull eclipse-temurin:21-jre-jammy
 docker pull payara/server-web:7.2026.7
 ```
 
 Podman:
 
-```bash
+```command
 podman pull docker.io/library/eclipse-temurin:21-jre-jammy
 podman pull docker.io/payara/server-web:7.2026.7
 ```
 
 Verify image presence:
 
-```bash
+```command
 docker image inspect eclipse-temurin:21-jre-jammy >/dev/null && \
 docker image inspect payara/server-web:7.2026.7 >/dev/null && \
 echo "Base images available"
@@ -51,7 +51,7 @@ echo "Base images available"
 
 Compile Java scenario modules to populate the local repository cache (`~/.m2/repository`):
 
-```bash
+```command
 cd scenarios/S01-spring-node && ./scripts/build.sh && cd ../..
 cd scenarios/S02-payara-mvnpm && ./scripts/build.sh && cd ../..
 cd scenarios/S04-maven-plugin-hidden-content && ./scripts/build.sh && cd ../..
@@ -61,7 +61,7 @@ cd scenarios/S04-maven-plugin-hidden-content && ./scripts/build.sh && cd ../..
 
 Install npm dependencies and validate execution of package lifecycle hooks:
 
-```bash
+```command
 cd scenarios/S05-node-prepack && ./scripts/build.sh && cd ../..
 ```
 
@@ -69,13 +69,13 @@ cd scenarios/S05-node-prepack && ./scripts/build.sh && cd ../..
 
 Initialize the Python virtual environment and local package dependencies:
 
-```bash
+```command
 cd scenarios/S03-python-pep517 && ./scripts/build.sh && cd ../..
 ```
 
 ## 6. Initialize Grype Vulnerability Database
 
-```bash
+```command
 grype db update
 grype db status
 ```
@@ -86,27 +86,27 @@ Confirm that `db status` reports an initialized local database.
 
 Execute a filesystem scan against S01 to populate the local Trivy vulnerability database:
 
-```bash
+```command
 trivy fs --scanners vuln --no-progress scenarios/S01-spring-node
 ```
 
 ## 8. Initialize Syft Cache
 
-```bash
+```command
 syft scenarios/S01-spring-node -o table >/dev/null
 syft version
 ```
 
 ## 9. Verify Snyk CLI Authentication
 
-```bash
+```command
 snyk auth
 snyk --version
 ```
 
 Optional baseline execution:
 
-```bash
+```command
 cd investigations/T01-snyk-beyond-sbom
 ./scripts/baseline.sh
 cd ../..
@@ -116,13 +116,13 @@ cd ../..
 
 Export `NVD_API_KEY`:
 
-```bash
+```command
 printenv NVD_API_KEY >/dev/null && echo "NVD_API_KEY is exported"
 ```
 
 Run initialization:
 
-```bash
+```command
 cd investigations/T06-owasp-dependency-check-s04
 ./scripts/baseline-s04.sh
 ./scripts/run-dependency-check-s04.sh
@@ -133,19 +133,19 @@ Local vulnerability data is cached in `~/.cache/kcdc-dependency-check/<version>`
 
 ## 11. Verify Docker Scout Integration
 
-```bash
+```command
 docker scout version
 ```
 
 Verify local scenario images are accessible in the local image registry:
 
-```bash
+```command
 docker images | grep -E 'checkout-service|payara-mvnpm-trace-lab'
 ```
 
 ## 12. Complete Verification Check
 
-```bash
+```command
 ./scripts/tools-check.sh
 printenv NVD_API_KEY >/dev/null && echo "NVD API key: configured" || echo "NVD API key: not configured"
 docker image inspect eclipse-temurin:21-jre-jammy >/dev/null && \

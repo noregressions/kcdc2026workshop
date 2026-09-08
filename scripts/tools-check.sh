@@ -223,6 +223,12 @@ install_help() {
       [[ "$OS" == linux ]] && echo "  Use Aqua Security's package repository for your distribution."
       echo "  Docs: https://trivy.dev/"
       ;;
+    osv-scanner)
+      echo "https://google.github.io/osv-scanner/"
+      [[ "$OS" == macos ]] && echo "  brew install osv-scanner"
+      echo "  go install github.com/google/osv-scanner/v2/cmd/osv-scanner@latest"
+      echo "  Required by T09, the three-scanner comparison."
+      ;;
     snyk)
       echo "https://docs.snyk.io/snyk-cli/install-or-update-the-snyk-cli"
       echo "  npm install -g snyk"
@@ -411,9 +417,10 @@ fi
 
 section "SBOM and vulnerability tooling"
 
-check_optional "syft"      syft      'syft version'      syft      "S01, S02, T03"
-check_optional "grype"     grype     'grype version'     grype     "T04"
-check_optional "trivy"     trivy     'trivy --version'   trivy     "T03"
+check_optional "syft"      syft      'syft version'      syft      "S01, S02, T03, ship-check"
+check_optional "grype"     grype     'grype version'     grype     "T04, T09"
+check_optional "trivy"     trivy     'trivy --version'   trivy     "T03, T09"
+check_optional "osv-scanner" osv-scanner 'osv-scanner --version' osv-scanner "T09"
 check_optional "pip-audit" pip-audit 'pip-audit --version' pip-audit "T05"
 check_optional "cosign"    cosign    'cosign version 2>&1 | grep -i "^GitVersion"' cosign "S07"
 check_optional "guarddog"  guarddog  'guarddog --version'  guarddog  "T08"
@@ -526,7 +533,7 @@ print_help_for() {
 if [[ "$SHOW_ALL_URLS" == 1 ]]; then
   section "Installation instructions (all tools)"
   for k in git java mvn node python3 pipx pip-audit docker docker-scout \
-           syft grype trivy snyk cosign guarddog jq curl zip brew nvd-key snyk-auth; do
+           syft grype trivy osv-scanner snyk cosign guarddog jq curl zip brew nvd-key snyk-auth; do
     printf '\n  %s%s%s\n' "$C_BOLD" "$k" "$C_RESET"
     install_help "$k" | while IFS= read -r line; do
       case "$line" in

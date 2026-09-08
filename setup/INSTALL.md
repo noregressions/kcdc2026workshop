@@ -12,7 +12,7 @@ Detailed installation and environment configuration commands corresponding to [`
 
 ### Core Development and Analysis Tools
 
-```bash
+```command
 brew install \
   openjdk@21 \
   maven \
@@ -28,7 +28,7 @@ brew install \
 
 Verify installations:
 
-```bash
+```command
 java -version
 javac -version
 mvn --version
@@ -42,7 +42,7 @@ python3 -m pip --version
 
 ### pip-audit
 
-```bash
+```command
 pipx ensurepath
 pipx install pip-audit
 pip-audit --version
@@ -50,14 +50,14 @@ pip-audit --version
 
 ### GuardDog
 
-```bash
+```command
 pipx install guarddog
 guarddog --version
 ```
 
 ### Snyk CLI
 
-```bash
+```command
 npm install -g snyk
 snyk --version
 ```
@@ -70,7 +70,7 @@ Install Docker Desktop.
 
 Verify:
 
-```bash
+```command
 docker version
 docker scout version
 ```
@@ -79,7 +79,7 @@ docker scout version
 
 ### Base Utilities
 
-```bash
+```command
 sudo apt-get update
 
 sudo apt-get install -y \
@@ -101,14 +101,14 @@ Install a JDK 21 distribution (such as `temurin-21-jdk` from Adoptium).
 
 Verify:
 
-```bash
+```command
 java -version
 javac -version
 ```
 
 ### Maven
 
-```bash
+```command
 sudo apt-get install -y maven
 mvn --version
 ```
@@ -119,7 +119,7 @@ Maven 3.9+ is required.
 
 Node.js 20+ is required. Installation via `nvm`:
 
-```bash
+```command
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
 . "$HOME/.nvm/nvm.sh"
 
@@ -128,14 +128,14 @@ nvm install 24
 
 Verify:
 
-```bash
+```command
 node --version
 npm --version
 ```
 
 ### pip-audit
 
-```bash
+```command
 pipx ensurepath
 pipx install pip-audit
 pip-audit --version
@@ -143,14 +143,14 @@ pip-audit --version
 
 ### GuardDog
 
-```bash
+```command
 pipx install guarddog
 guarddog --version
 ```
 
 ### Syft
 
-```bash
+```command
 curl -sSfL https://get.anchore.io/syft \
   | sudo sh -s -- -b /usr/local/bin
 
@@ -159,7 +159,7 @@ syft version
 
 ### Grype
 
-```bash
+```command
 curl -sSfL https://get.anchore.io/grype \
   | sudo sh -s -- -b /usr/local/bin
 
@@ -168,7 +168,7 @@ grype version
 
 ### cosign
 
-```bash
+```command
 COSIGN_VERSION=3.1.3
 sudo curl -fsSL -o /usr/local/bin/cosign \
   "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-$(dpkg --print-architecture)"
@@ -183,13 +183,13 @@ Install Trivy from the Aqua Security package repository.
 
 Verify:
 
-```bash
+```command
 trivy --version
 ```
 
 ### Snyk CLI
 
-```bash
+```command
 npm install -g snyk
 snyk --version
 ```
@@ -200,7 +200,7 @@ Install Docker Engine or Docker Desktop for Linux.
 
 Verify:
 
-```bash
+```command
 docker version
 docker scout version
 ```
@@ -211,7 +211,7 @@ Podman compatibility is limited to scenarios S01/S02 container builds. See const
 
 ### macOS
 
-```bash
+```command
 brew install podman
 podman machine init
 podman machine start
@@ -220,7 +220,7 @@ podman info
 
 ### Debian / Ubuntu
 
-```bash
+```command
 sudo apt-get update
 sudo apt-get install -y podman
 podman info
@@ -230,7 +230,7 @@ podman info
 
 Automated verification is provided by `./scripts/tools-check.sh`. Manual validation equivalents:
 
-```bash
+```command
 git --version
 bash --version
 
@@ -264,7 +264,7 @@ guarddog --version
 
 For T06:
 
-```bash
+```command
 printenv NVD_API_KEY >/dev/null && \
   echo "NVD API key: configured" || \
   echo "NVD API key: not configured"

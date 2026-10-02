@@ -8,8 +8,8 @@ for cmd in mvn jq unzip grep find; do
 done
 
 S02="$(resolve_s02)" || {
-  echo "Could not find S02-payara-mvnpm." >&2
-  echo "Set S02_DIR=/path/to/S02-payara-mvnpm" >&2
+  echo "Could not find payara-mvnpm." >&2
+  echo "Set S02_DIR=/path/to/payara-mvnpm" >&2
   exit 1
 }
 

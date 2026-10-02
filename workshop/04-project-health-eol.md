@@ -166,11 +166,11 @@ Run against this repository's own dependencies:
 
 | Component | Where it appears | Lifecycle status |
 |---|---|---|
-| `jackson-databind:2.19.4` | S01 direct dependency | Active upstream maintenance |
-| `commons-codec:1.17.1` | S01 shaded dependency | Active upstream maintenance |
-| `lodash:4.17.21` | S01 bundled dependency | Superseded — 4.17.23, 4.18.0, 4.18.1 shipped; no published policy |
-| `spring-boot:3.5.12` | S01 runtime framework | **OSS support ended 30 June 2026** |
-| `apache-tomcat:8.5` | S02 / the Part 3 investigation | **EOL 31 March 2024** |
+| `jackson-databind:2.19.4` | [](card:spring-node) direct dependency | Active upstream maintenance |
+| `commons-codec:1.17.1` | [](card:spring-node) shaded dependency | Active upstream maintenance |
+| `lodash:4.17.21` | [](card:spring-node) bundled dependency | Superseded — 4.17.23, 4.18.0, 4.18.1 shipped; no published policy |
+| `spring-boot:3.5.12` | [](card:spring-node) runtime framework | **OSS support ended 30 June 2026** |
+| `apache-tomcat:8.5` | [](card:payara-mvnpm) / the Part 3 investigation | **EOL 31 March 2024** |
 
 Three distinct states, and most tooling collapses them into two:
 

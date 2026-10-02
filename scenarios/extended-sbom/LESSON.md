@@ -1,15 +1,15 @@
 ---
-id: s08-extended-sbom
+id: extended-sbom
 oneliner: "Two SBOMs from the same POMs: the standard CycloneDX plugin describes what ships, SBOM+ also records the build tooling and BOM imports that shaped it, and marks them so a consumer can tell the two apart."
 track: core
 ---
 
-# S08 — Extended SBOM: What Built This, Not Just What Ships
+# S{!number} — Extended SBOM: What Built This, Not Just What Ships
 
 Every SBOM so far in this workshop was generated from one of two places: the
 resolver's view of the **application dependency graph** (the CycloneDX Maven
-plugin in S01 and S04) or the **bytes of the final artefact** (Syft in S01,
-S04, S07). S04 showed the gap between them: a Maven plugin and its transitive
+plugin in [](card:spring-node) and [](card:maven-plugin-hidden-content)) or the **bytes of the final artefact** (Syft in [](card:spring-node),
+[](card:maven-plugin-hidden-content), [](card:provenance-s01)). [](card:maven-plugin-hidden-content) showed the gap between them: a Maven plugin and its transitive
 payload generated runtime code, and the Maven-model SBOM listed **zero
 components**, because plugins are not application dependencies.
 
@@ -17,17 +17,13 @@ This lab asks whether a Maven-model SBOM *has* to stop there. It runs a second
 generator, [SBOM+](https://noregressions.github.io/sbom-plus-maven-plugin/),
 against the same POMs, with no changes to them, and compares.
 
-The tracked components are S04's and S01's, unchanged:
+The tracked components are [](card:maven-plugin-hidden-content)'s and [](card:spring-node)'s, unchanged:
 
-- `trace-injector-maven-plugin` and `trace-route-payload` — S04's build-time
+- `trace-injector-maven-plugin` and `trace-route-payload` — [](card:maven-plugin-hidden-content)'s build-time
   software that never appears in `dependency:tree`.
-- `maven-shade-plugin` — the S01 tooling that relocated `commons-codec`.
-- `spring-boot-dependencies` — the BOM import that decided S01's versions.
-- `jackson-databind` and `commons-codec` — the S01 control and shading legs.
-
-The pattern is:
-
-**Why → Approach → Run → Observed output → Establish**
+- `maven-shade-plugin` — the [](card:spring-node) tooling that relocated `commons-codec`.
+- `spring-boot-dependencies` — the BOM import that decided [](card:spring-node)'s versions.
+- `jackson-databind` and `commons-codec` — the [](card:spring-node) control and shading legs.
 
 ## The two generators
 
@@ -57,37 +53,30 @@ this" has the answer in the same file.
 
 ## Requirements
 
-- S04 built (`scenarios/S04-maven-plugin-hidden-content/scripts/build.sh`)
-- S01 checked out; it does not need to be built
+- [](card:maven-plugin-hidden-content) built (`scenarios/maven-plugin-hidden-content/scripts/build.sh`)
+- [](card:spring-node) checked out; it does not need to be built
 - JDK 21+, Maven 3.9+, `jq`
 
+# {!step} S2: a build with an empty dependency graph
 
----
-
-# 1. S04: a build with an empty dependency graph
-
-## Why
-
-S04 is the sharpest possible test. Its application POM declares **no
+[](card:maven-plugin-hidden-content) is the sharpest possible test. Its application POM declares **no
 dependencies** and one build plugin. Everything interesting about the build
 lives in the plugin realm, which is exactly the domain the standard SBOM does
 not model.
 
-## Run
+From the S{!number} scenario directory, generate both SBOMs for [](card:maven-plugin-hidden-content) and compare them. {.instructions}
 
 ```command
-cd scenarios/S08-extended-sbom
+cd scenarios/extended-sbom
 ./scripts/scan-s04.sh
 ```
 
-The script runs, in S04's own scenario-local repository:
+The script runs, in [](card:maven-plugin-hidden-content)'s own scenario-local repository:
 
-```command
+```command {.essence}
 mvn -Dmaven.repo.local=.maven-repo org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom -DoutputFormat=json
 mvn -Dmaven.repo.local=.maven-repo dev.noregressions:sbom-plus-maven-plugin:1.0.0:scan
 ```
-
-## Observed output
 
 ```output
 ===== S04: what each SBOM says =====
@@ -111,42 +100,36 @@ dependencies: `maven-compiler-plugin 3.14.1` and the `asm 9.8` it compiles
 with, `maven-jar-plugin`, `maven-surefire-plugin`, `plexus-archiver`, and so
 on. The full list is in `results/s04/plus.report.json`.
 
-## Establish
+## Evidence
 
 Same POM, same local repository, same moment. The standard SBOM is a
 truthful, empty statement about the application graph. The extended SBOM
-records the two components S04 spent fourteen steps proving were causally
+records the two components [](card:maven-plugin-hidden-content) spent fourteen steps proving were causally
 responsible for `/hidden/build-info`, and it records **how** the payload got
-there: `via trace-injector-maven-plugin`, the same path S04's step 4 had to
+there: `via trace-injector-maven-plugin`, the same path [](card:maven-plugin-hidden-content)'s step 4 had to
 recover by hand with `dependency:resolve-plugins`.
 
 Notice that every one of the 171 components is `excluded`. That is correct.
 None of them ship in the JAR. What ships is *generated code*, and neither
 SBOM can name generated code as a component, because it has no coordinates.
 SBOM+ names the **cause**; it still cannot name the **effect**. Only the
-byte-level evidence in S04 steps 8 and 9 does that.
+byte-level evidence in [](card:maven-plugin-hidden-content) steps 8 and 9 does that.
 
----
+# {!step} S1: a real reactor with a BOM and a shading plugin
 
-# 2. S01: a real reactor with a BOM and a shading plugin
-
-## Why
-
-S04 is a constructed extreme. S01 is an ordinary Spring Boot multi-module
+[](card:maven-plugin-hidden-content) is a constructed extreme. [](card:spring-node) is an ordinary Spring Boot multi-module
 build, so the question becomes: on a normal project, what does the extended
 view add, and where does it disagree with the standard one?
 
-## Run
+Generate both SBOMs across [](card:spring-node)'s whole reactor and compare them. {.instructions}
 
 ```command
 ./scripts/scan-s01.sh
 ```
 
-This runs `makeAggregateBom` and `scan-aggregate` from S01's root POM, so
+This runs `makeAggregateBom` and `scan-aggregate` from [](card:spring-node)'s root POM, so
 both generators cover the whole reactor (`normalizer` and `service`; the
 frontend is an npm build outside Maven's model).
-
-## Observed output
 
 On a fresh checkout that has been packaged but not installed:
 
@@ -162,7 +145,7 @@ SBOM+ report: 642 rows across 3 module(s)  BOM=1  BUILD_TOOLING=569  MAIN_BUILD=
 
 The tracked components:
 
-```text
+```output
 standard SBOM:
    commons-codec     1.17.1  required
    commons-codec     1.18.0  required
@@ -180,7 +163,7 @@ extended SBOM:
 
 And the report rows that explain them:
 
-```text
+```output
 normalizer  BUILD_TOOLING  plugin             maven-shade-plugin:3.6.2       (declared directly)
 normalizer  BUILD_TOOLING  plugin-transitive  commons-codec:1.11             via maven-site-plugin > doxia-core > httpclient
 normalizer  BUILD_TOOLING  plugin-transitive  commons-codec:1.19.0           via maven-jar-plugin > plexus-archiver > commons-compress
@@ -192,20 +175,20 @@ service     MAIN_BUILD     compile            jackson-databind:2.19.4        (de
 (root)      BOM            import             spring-boot-dependencies:3.5.12
 ```
 
-## Establish
+## Evidence
 
-Four things are visible here that no earlier S01 step could show from a
+Four things are visible here that no earlier [](card:spring-node) step could show from a
 single document.
 
 **The shading plugin is on the record.** `maven-shade-plugin 3.6.2` is the
 tool that relocated `commons-codec` into `com.acme.internal.codec` and made
-S01's shading leg so hard to identify from the bytes. The standard SBOM does
+[](card:spring-node)'s shading leg so hard to identify from the bytes. The standard SBOM does
 not know it exists. The extended SBOM lists it as `excluded`, with the
 `?type=maven-plugin` qualifier, so a reader of the SBOM knows a relocation
 tool was in the build without opening the POM.
 
 **The BOM that chose the versions is on the record.** `spring-boot-dependencies
-3.5.12` appears as a component with `?type=pom`. S01's control leg established
+3.5.12` appears as a component with `?type=pom`. [](card:spring-node)'s control leg established
 that `jackson-databind 2.19.4` was *selected by dependency management*, not
 declared. This is the artefact that did the selecting, and Part 4 flagged this
 exact Spring Boot line as past its open-source support date.
@@ -234,8 +217,10 @@ down.
 
 ## Go deeper: close the gap and re-scan
 
+Install [](card:spring-node) so `normalizer` resolves from a repository, then re-run the [](card:spring-node) scan. {.instructions}
+
 ```command
-(cd ../S01-spring-node && mvn -q install -DskipTests) && ./scripts/scan-s01.sh
+(cd ../spring-node && mvn -q install -DskipTests) && ./scripts/scan-s01.sh
 ```
 
 ```output
@@ -256,9 +241,7 @@ which the standard aggregate lists as a component and SBOM+ treats as the
 document's subject. Everything else the extended SBOM adds, all 230
 components, is build tooling and the BOM.
 
----
-
-# 3. What kind of evidence is this?
+# {!step} What kind of evidence is this?
 
 Both documents are **claims from the resolver**, not observations of bytes.
 Place them on the workshop's boundary map:
@@ -272,8 +255,8 @@ declared model     ->  resolved graph      ->  build execution   ->  artefact by
 
 The extended SBOM moves one boundary to the right: it covers software that
 *executes during the build* and can therefore change what ships. It does not
-cross into the artefact. S04's `GeneratedTraceRoute.class` is in the JAR and
-in no SBOM here, because it was never a coordinate. S07's Syft SBOM, taken
+cross into the artefact. [](card:maven-plugin-hidden-content)'s `GeneratedTraceRoute.class` is in the JAR and
+in no SBOM here, because it was never a coordinate. [](card:provenance-s01)'s Syft SBOM, taken
 from the image digest, is the document that describes bytes; this one
 describes intent and process.
 
@@ -288,16 +271,22 @@ Which plugin brought in this unexplained artefact?    trace-route-payload via tr
 Is anything in this record known to be missing?       the unresolved list
 ```
 
----
+# {!step} Verify the lab still holds
+
+Re-run the lab from a clean start and check that every claim this walkthrough makes still holds. {.instructions}
+
+```command
+./scripts/proof-check.sh
+```
 
 # What this lab establishes
 
 1. **A Maven-model SBOM is not obliged to stop at the application graph.**
-   The same resolver that produces an empty SBOM for S04 can, asked
+   The same resolver that produces an empty SBOM for [](card:maven-plugin-hidden-content) can, asked
    differently, produce 171 components of build tooling from the same POM.
 
 2. **Listing build tooling and marking it `excluded` are both necessary.**
-   Listing it makes S04's plugin and payload visible in the SBOM for the first
+   Listing it makes [](card:maven-plugin-hidden-content)'s plugin and payload visible in the SBOM for the first
    time. Marking it `excluded` keeps a shipped-components consumer honest: none
    of it is in the JAR.
 
@@ -315,15 +304,13 @@ Is anything in this record known to be missing?       the unresolved list
 
 6. **Neither document describes bytes.** Generated code, relocated classes and
    the contents of the final JAR remain the province of artefact-level tools.
-   The extended SBOM names what *caused* those bytes; S04 and S07 show how to
+   The extended SBOM names what *caused* those bytes; [](card:maven-plugin-hidden-content) and [](card:provenance-s01) show how to
    inspect and attest to the bytes themselves.
-
----
 
 # Run
 
 ```command
-cd scenarios/S08-extended-sbom
+cd scenarios/extended-sbom
 ./scripts/scan-s04.sh        # S04: 0 components versus 171 build-tooling components
 ./scripts/scan-s01.sh        # S01: the shade plugin, the BOM, and the sibling-module gap
 ./scripts/proof-check.sh     # assert the claims above still hold

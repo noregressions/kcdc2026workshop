@@ -8,7 +8,7 @@ for cmd in trivy jq; do
 done
 
 S01="$(resolve_s01)" || {
-  echo "Could not find S01-spring-node. Set S01_DIR=/path/to/S01-spring-node" >&2
+  echo "Could not find spring-node. Set S01_DIR=/path/to/spring-node" >&2
   exit 1
 }
 

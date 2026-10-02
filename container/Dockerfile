@@ -42,9 +42,9 @@ RUN chmod +x scripts/*.sh scenarios/*/scripts/*.sh \
 # repo, so both versions its scripts can select are resolved there. The NVD
 # dataset itself is not baked in: it is large, changes daily, and 13.0.0
 # needs NVD_API_KEY, which is only passed at run time.
-RUN cd scenarios/S02-payara-mvnpm \
+RUN cd scenarios/payara-mvnpm \
     && mvn -q org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom -Dcyclonedx.skip=true \
-    && cd ../S04-maven-plugin-hidden-content \
+    && cd ../maven-plugin-hidden-content \
     && mvn -q -Dmaven.repo.local="$PWD/.maven-repo" \
          org.owasp:dependency-check-maven:12.2.2:help -Ddetail=false \
     && mvn -q -Dmaven.repo.local="$PWD/.maven-repo" \
@@ -56,11 +56,11 @@ RUN cd scenarios/S02-payara-mvnpm \
 # scenario, so seed it into both local repositories it is run from, then run
 # the two scans once so the plugin's own dependencies are resolved, and
 # discard the results.
-RUN scenarios/S08-extended-sbom/scripts/seed-plugin.sh \
-    && scenarios/S08-extended-sbom/scripts/seed-plugin.sh "$PWD/scenarios/S04-maven-plugin-hidden-content/.maven-repo" \
-    && scenarios/S08-extended-sbom/scripts/scan-s04.sh >/dev/null \
-    && scenarios/S08-extended-sbom/scripts/scan-s01.sh >/dev/null \
-    && scenarios/S08-extended-sbom/scripts/clean.sh
+RUN scenarios/extended-sbom/scripts/seed-plugin.sh \
+    && scenarios/extended-sbom/scripts/seed-plugin.sh "$PWD/scenarios/maven-plugin-hidden-content/.maven-repo" \
+    && scenarios/extended-sbom/scripts/scan-s04.sh >/dev/null \
+    && scenarios/extended-sbom/scripts/scan-s01.sh >/dev/null \
+    && scenarios/extended-sbom/scripts/clean.sh
 
 # --- final: the whole repository on top of the prewarmed tree -----------------
 FROM build

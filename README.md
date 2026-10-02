@@ -70,13 +70,13 @@ Append `--with-investigations` to execute baseline scans across T01–T08.
 
 | Lab | Identifier | Tracked Transformations |
 |---|---|---|
-| [`Spring + Node`](./scenarios/S01-spring-node) | **S01** | Standard dependency resolution, shaded bytecode relocation, and bundled frontend JavaScript. |
-| [`Payara + mvnpm`](./scenarios/S02-payara-mvnpm) | **S02** | WAR packaging, mvnpm client dependencies, and Maven plugin execution realms. |
-| [`Python PEP 517`](./scenarios/S03-python-pep517) | **S03** | Source distribution build backends generating runtime modules during `pip install`. |
-| [`Maven plugin hidden content`](./scenarios/S04-maven-plugin-hidden-content) | **S04** | Runtime code generation via Maven plugin execution where the application dependency graph is empty. |
-| [`Node npm prepack`](./scenarios/S05-node-prepack) | **S05** | Dynamic artifact generation during npm `prepack` lifecycle hook execution. |
-| [`Reverse provenance`](./scenarios/S07-provenance-s01) | **S07** | Layered provenance verification (Git commit properties, OCI labels, CycloneDX SBOM, Cosign attestations). |
-| [`Extended SBOM`](./scenarios/S08-extended-sbom) | **S08** | CycloneDX vs SBOM+ over one POM: what shipped against what built it. |
+| [`Spring + Node`](./scenarios/spring-node) | **S1** | Standard dependency resolution, shaded bytecode relocation, and bundled frontend JavaScript. |
+| [`Payara + mvnpm`](./scenarios/payara-mvnpm) | **S6** | WAR packaging, mvnpm client dependencies, and Maven plugin execution realms. |
+| [`Python PEP 517`](./scenarios/python-pep517) | **S5** | Source distribution build backends generating runtime modules during `pip install`. |
+| [`Maven plugin hidden content`](./scenarios/maven-plugin-hidden-content) | **S2** | Runtime code generation via Maven plugin execution where the application dependency graph is empty. |
+| [`Node npm prepack`](./scenarios/node-prepack) | **S4** | Dynamic artifact generation during npm `prepack` lifecycle hook execution. |
+| [`Reverse provenance`](./scenarios/provenance-s01) | **S7** | Layered provenance verification (Git commit properties, OCI labels, CycloneDX SBOM, Cosign attestations). |
+| [`Extended SBOM`](./scenarios/extended-sbom) | **S3** | CycloneDX vs SBOM+ over one POM: what shipped against what built it. |
 
 ## Investigations Reference
 
@@ -141,7 +141,7 @@ mvn package
 ```
 
 The cheat-sheet edition is the one to print and keep beside the keyboard: it
-follows the route stop by stop — S01, S04, S08, S05, S03, S02, T01, then
+follows the route stop by stop — S1, S2, S3, S4, S5, S6, T01, then
 Ghostcat and T09, and so on — rather than cataloguing the labs by identifier.
 The manual is what explains why each command is there.
 

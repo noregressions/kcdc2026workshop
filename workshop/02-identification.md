@@ -1,6 +1,6 @@
 ---
 id: workshop-02-identification
-oneliner: "The hands-on route through S01, S04, S08, S05, S03 and S02, and the T01 scanner test: six ways a component stops being identifiable, one evidence source that recovers some of it, and the table that results."
+oneliner: "The hands-on route through S1, S2, S3, S4, S5 and S6, and the T01 scanner test: six ways a component stops being identifiable, one evidence source that recovers some of it, and the table that results."
 track: core
 status: draft
 ---
@@ -19,15 +19,15 @@ you should see, and what it proves.
 If you fall behind, keep moving. Every lab has captured output in its lesson,
 and the point of each is visible in one command.
 
-## Step 1 — Build transformations (S01)
+## Step 1 — Build transformations (S1)
 
-Lab: *S01 — Spring + Node*.
+Lab: *[](card:spring-node) — Spring + Node*.
 
 Three tracked components in one Spring Boot application, chosen because they fail
 differently.
 
 ```command
-cd scenarios/S01-spring-node
+cd scenarios/spring-node
 ./scripts/build.sh
 ```
 
@@ -74,15 +74,15 @@ package metadata, not from code. Where a build omits, strips or dissolves
 that metadata, presence and identifiability come apart — and two of the three
 cases above are ordinary, sanctioned build behaviour.
 
-## Step 2 — Plugin execution realms (S04)
+## Step 2 — Plugin execution realms (S2)
 
-Lab: *S04 — Maven plugin hidden content*.
+Lab: *[](card:maven-plugin-hidden-content) — Maven plugin hidden content*.
 
-S01 broke identity for dependencies you declared. S04 asks a harder question:
+[](card:spring-node) broke identity for dependencies you declared. [](card:maven-plugin-hidden-content) asks a harder question:
 what about code you never declared at all?
 
 ```command
-cd scenarios/S04-maven-plugin-hidden-content
+cd scenarios/maven-plugin-hidden-content
 ./scripts/build.sh
 mvn -Dmaven.repo.local="$PWD/.maven-repo" dependency:tree
 ```
@@ -106,23 +106,23 @@ dependency graph. Plugins execute in their own ClassRealms with their own
 transitive dependencies, and that graph is not in the report — even though
 its code ends up in your artefact.
 
-## Step 3 — An SBOM that does see it (S08)
+## Step 3 — An SBOM that does see it (S3)
 
-Lab: *S08 — Extended SBOM*.
+Lab: *[](card:extended-sbom) — Extended SBOM*.
 
-S04 ends on a genuinely uncomfortable note: the code is in the artefact and no
+[](card:maven-plugin-hidden-content) ends on a genuinely uncomfortable note: the code is in the artefact and no
 inventory names it. Before accepting that as inevitable, it is worth asking
 whether the inventory was the wrong *kind*, rather than simply wrong.
 
 Point two SBOM generators at the same POMs and compare.
 
 ```command
-cd scenarios/S08-extended-sbom
+cd scenarios/extended-sbom
 ./scripts/seed-plugin.sh    # offline machines only: puts SBOM+ in ~/.m2
 ./scripts/scan-s04.sh
 ```
 
-The standard CycloneDX Maven plugin, run against S04, produces an SBOM with
+The standard CycloneDX Maven plugin, run against [](card:maven-plugin-hidden-content), produces an SBOM with
 **zero components** — which is a truthful answer to the question it was asked.
 It describes the application dependency graph, and that graph is empty.
 
@@ -137,7 +137,7 @@ trace-route-payload          1.0.0  excluded  plugin-transitive
                                               via trace-injector-maven-plugin
 ```
 
-Then do the same across S01, where there is a real dependency graph to
+Then do the same across [](card:spring-node), where there is a real dependency graph to
 compare against rather than an empty one:
 
 ```command
@@ -151,7 +151,7 @@ itself absent from the inventory, unless you ask a generator that looks at the
 build.
 
 **What this proves, and it is the first good news in the workshop:** the gap in
-S04 is a gap in the *evidence source*, not a law of physics. The information
+[](card:maven-plugin-hidden-content) is a gap in the *evidence source*, not a law of physics. The information
 existed at build time. Nothing had been recording it. That distinction — the
 data was never captured, versus the data cannot be captured — is what Part 6
 is built on.
@@ -162,21 +162,21 @@ inventory that cannot tell you which boundary each component came from has
 traded one problem for another.
 
 One wrinkle you will hit, and it recurs in Part 6: on a checkout that has been
-packaged but not installed, SBOM+ cannot resolve S01's sibling `normalizer`
-module and says so. `(cd ../S01-spring-node && mvn -q install -DskipTests)`
+packaged but not installed, SBOM+ cannot resolve [](card:spring-node)'s sibling `normalizer`
+module and says so. `(cd ../spring-node && mvn -q install -DskipTests)`
 then re-run, and the two `required` sets agree exactly. Worth seeing, because
 "the tool could not resolve it" and "the component is not there" print very
 differently and mean completely different things.
 
-## Step 4 — Package lifecycle hooks (S05)
+## Step 4 — Package lifecycle hooks (S4)
 
-Lab: *S05 — Node prepack*.
+Lab: *[](card:node-prepack) — Node prepack*.
 
 Same mechanism, different ecosystem — which matters, because it means this is
 not a Maven problem.
 
 ```command
-cd scenarios/S05-node-prepack
+cd scenarios/node-prepack
 ./scripts/build.sh
 tar -tzf npm-repo/trace-route-package-1.0.0.tgz
 ./scripts/run.sh
@@ -193,12 +193,12 @@ package gets another.
 the published artefact can differ from the published source by design, with
 no warning to either side.
 
-## Step 5 — Python build backends (S03)
+## Step 5 — Python build backends (S5)
 
-Lab: *S03 — Python PEP 517*.
+Lab: *[](card:python-pep517) — Python PEP 517*.
 
 ```command
-cd scenarios/S03-python-pep517
+cd scenarios/python-pep517
 ./scripts/build.sh
 tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz
 ls .venv/lib/python*/site-packages/tracehook_demo/
@@ -215,19 +215,19 @@ runs and constructs the importable package that ends up in `site-packages`.
 is not the software — it is a program that produces the software, on the
 installing machine.
 
-## Step 6 — All of it at once, in Jakarta EE (S02)
+## Step 6 — All of it at once, in Jakarta EE (S6)
 
-Lab: *S02 — Payara + mvnpm*.
+Lab: *[](card:payara-mvnpm) — Payara + mvnpm*.
 
 Each lab so far isolated one mechanism, which is how you prove a mechanism and
-not how software actually arrives. S02 is the realistic case: a Jakarta EE
+not how software actually arrives. [](card:payara-mvnpm) is the realistic case: a Jakarta EE
 application, packaged as a WAR, deployed to Payara, with front-end
 dependencies delivered through **mvnpm** — npm packages republished as Maven
 artefacts — that reach the browser bundle only by way of a plugin execution
 realm.
 
 ```command
-cd scenarios/S02-payara-mvnpm
+cd scenarios/payara-mvnpm
 ./scripts/build.sh
 ```
 
@@ -285,10 +285,10 @@ different tools make of the same WAR later.
 Investigation: *T01 — Snyk beyond the SBOM*.
 
 By now the obvious objection is that these are toy failures and a serious
-commercial tool would do better. S04 is the fair test: we know exactly what
+commercial tool would do better. [](card:maven-plugin-hidden-content) is the fair test: we know exactly what
 is in that artefact, and the evidence for it was never written down.
 
-Snyk is pointed at the S04 project across five views — Maven test, test with
+Snyk is pointed at the [](card:maven-plugin-hidden-content) project across five views — Maven test, test with
 provenance, CycloneDX SBOM, SBOM with provenance, and an unmanaged JAR scan.
 None of them recovers the plugin or its payload.
 
@@ -316,7 +316,7 @@ Every inventory you will ever read was produced by one of these rows.
 | SBOM | Whatever its producer inspected | Everything outside that producer's evidence domain |
 | Artefact scanner | Archives, files, embedded metadata | Shaded or relocated code whose metadata is gone |
 | Image scanner | Layers, OS packages, installed files | How any of it was built, and from what source |
-| Build-aware SBOM (S08) | Plugins, backends, BOM imports, and their paths | Anything the build did not resolve through Maven at all |
+| Build-aware SBOM ([](card:extended-sbom)) | Plugins, backends, BOM imports, and their paths | Anything the build did not resolve through Maven at all |
 
 Read left to right and the columns look like coverage. Read the third column
 on its own and you have the attack surface the rest of the workshop is about.
@@ -332,7 +332,7 @@ whole of the good news, and the whole of Part 6.
   across four ecosystems, and say why in each case.
 - Explain why an empty dependency tree is not evidence of an empty artefact.
 - Distinguish a gap that is inherent from a gap that is merely unrecorded —
-  S08 is the difference, and Part 6 is what you do about it.
+  [](card:extended-sbom) is the difference, and Part 6 is what you do about it.
 - Say what a scanner would have needed, and when, to catch what it missed.
 
 **Next:** every inventory you have produced so far is incomplete in a way you

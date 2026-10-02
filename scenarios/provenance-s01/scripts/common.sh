@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_DEFAULT="$(cd "$ROOT/../.." 2>/dev/null && pwd || true)"
-S01="${S01:-${REPO_DEFAULT}/scenarios/S01-spring-node}"
+S01="${S01:-${REPO_DEFAULT}/scenarios/spring-node}"
 
 WORK="$ROOT/work"          # a throwaway copy of S01 we are allowed to modify
 SRC="$WORK/s01"

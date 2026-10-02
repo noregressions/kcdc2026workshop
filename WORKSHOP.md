@@ -29,11 +29,11 @@ If the machine will not cooperate, `./container/run.sh` has all of it inside.
 | | Part | Chapter | Labs |
 |---|---|---|---|
 | 1 | What is actually in our software? | [`workshop/01-supply-chain.md`](./workshop/01-supply-chain.md) | — |
-| 2 | Can we identify what we ship? | [`workshop/02-identification.md`](./workshop/02-identification.md) | S01, S04, S08, S05, S03, S02, T01 |
+| 2 | Can we identify what we ship? | [`workshop/02-identification.md`](./workshop/02-identification.md) | S1, S2, S3, S4, S5, S6, T01 |
 | 3 | What does a CVE finding actually mean? | [`workshop/03-vulnerabilities.md`](./workshop/03-vulnerabilities.md) | T10, T09 |
 | — | **Break** | | |
 | 4 | CVEs aren't enough | [`workshop/04-project-health-eol.md`](./workshop/04-project-health-eol.md) | Scorecard, deps.dev, EOL scan |
-| 5 | Someone is counting on that | [`workshop/05-attacks-and-provenance.md`](./workshop/05-attacks-and-provenance.md) | T08, S07 |
+| 5 | Someone is counting on that | [`workshop/05-attacks-and-provenance.md`](./workshop/05-attacks-and-provenance.md) | T08, S7 |
 | 6 | The minimum that keeps you honest | [`workshop/06-minimum-practice.md`](./workshop/06-minimum-practice.md) | `ship-check.sh` |
 
 Part 2 is six labs. If one misbehaves, move on rather than debug it.
@@ -60,7 +60,7 @@ and keep beside the keyboard.
 
 ```bash
 # Part 2 — Step 1: build transformations (S01)
-cd scenarios/S01-spring-node && ./scripts/build.sh
+cd scenarios/spring-node && ./scripts/build.sh
 mvn -pl service dependency:tree -Dincludes=com.fasterxml.jackson.core:jackson-databind
 syft service/target/service-1.0.0.jar | grep -i jackson
 syft normalizer/target/normalizer-1.0.0.jar
@@ -69,27 +69,27 @@ npm --prefix frontend ls lodash
 syft frontend/dist
 
 # Part 2 — Step 2: plugin execution realms (S04)
-cd scenarios/S04-maven-plugin-hidden-content && ./scripts/build.sh
+cd scenarios/maven-plugin-hidden-content && ./scripts/build.sh
 mvn -Dmaven.repo.local="$PWD/.maven-repo" dependency:tree
 ./scripts/run.sh && curl -sS http://localhost:8082/hidden/build-info | jq && ./scripts/stop.sh
 
 # Part 2 — Step 3: an SBOM that does see it (S08)
-cd scenarios/S08-extended-sbom
+cd scenarios/extended-sbom
 ./scripts/seed-plugin.sh          # offline machines only
 ./scripts/scan-s04.sh && ./scripts/scan-s01.sh
 
 # Part 2 — Step 4: lifecycle hooks (S05)
-cd scenarios/S05-node-prepack && ./scripts/build.sh
+cd scenarios/node-prepack && ./scripts/build.sh
 tar -tzf npm-repo/trace-route-package-1.0.0.tgz
 ./scripts/run.sh && curl -sS http://localhost:8083/hidden/prepack-info | jq && ./scripts/stop.sh
 
 # Part 2 — Step 5: build backends (S03)
-cd scenarios/S03-python-pep517 && ./scripts/build.sh
+cd scenarios/python-pep517 && ./scripts/build.sh
 tar -tzf python-repo/tracehook_demo-1.0.0.tar.gz
 ./scripts/run.sh && curl -sS http://localhost:8081/trace | jq && ./scripts/stop.sh
 
 # Part 2 — Step 6: all of it at once, Jakarta EE (S02)
-cd scenarios/S02-payara-mvnpm && ./scripts/build.sh
+cd scenarios/payara-mvnpm && ./scripts/build.sh
 mvn dependency:tree -Dincludes=org.apache.commons:commons-lang3
 mvn dependency:tree -Dincludes=org.mvnpm:lodash-es                 # nothing
 mvn -X generate-resources 2>&1 | grep 'org.mvnpm:lodash-es'        # there it is
@@ -106,10 +106,10 @@ cd investigations/T09-three-scanners-s01
 npx @herodevs/cli scan eol --dir .
 
 # Part 5 — provenance, layer by layer (S07)
-cd scenarios/S07-provenance-s01 && ./scripts/build-baseline.sh && ./scripts/add-provenance.sh
+cd scenarios/provenance-s01 && ./scripts/build-baseline.sh && ./scripts/add-provenance.sh
 
 # Part 6 — the drill
-./scripts/ship-check.sh scenarios/S01-spring-node
+./scripts/ship-check.sh scenarios/spring-node
 ```
 
 Ports: S01 8080, S02 8080, S03 8081, S04 8082, S05 8083.

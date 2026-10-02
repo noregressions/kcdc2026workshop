@@ -11,9 +11,9 @@
 KCDC 2026 workshop, 240-minute slot. Built from two sources:
 
 - **`WORKSHOP.md` and the book** (`target/book.pdf`) — the 7-part timed route, 205 minutes, and the labs that already exist and have verified output.
-- **`outline.txt`** — the loose planning notes, which carry an A–E structure, several demos, and a whole regulation strand that the book has no material for.
+- **`OBSOLETE-outline.txt`** — the loose planning notes, which carry an A–E structure, several demos, and a whole regulation strand that the book has no material for.
 
-Where the two disagree, this outline follows the book's Part 1–7 numbering, because that is what the manual, the cheat sheets and the labs are all built around. Everything `outline.txt` asks for that the book cannot supply is carried below as an explicit `[PLACEHOLDER]`. See [Conflicts to resolve](#conflicts-to-resolve) and [Placeholder inventory](#placeholder-inventory) at the end.
+Where the two disagree, this outline follows the book's Part 1–7 numbering, because that is what the manual, the cheat sheets and the labs are all built around. Everything `OBSOLETE-outline.txt` asks for that the book cannot supply is carried below as an explicit `[PLACEHOLDER]`. See [Conflicts to resolve](#conflicts-to-resolve) and [Placeholder inventory](#placeholder-inventory) at the end.
 
 **Slide count: 113, of which 30 carry a placeholder.**
 
@@ -50,7 +50,7 @@ Notation:
 9. **[SLIDE] What you will leave with.** Six outcomes, each one "you will have done this, not watched it": traced components across build boundaries; compared resolver against artefact; read a real CVE end to end; measured health beyond CVEs; seen where build-time execution lets an attacker in; looked at what AI does to a tree.
    Source: `setup/frontpiece.md:61`.
 10. **[SLIDE] Objectives.** Explain why discovery is hard and how attackers exploit the gaps; read scanner output critically; run the minimum practice every release; explain why AI-speed discovery and incoming regulation make this urgent now.
-    Source: `outline.txt`. Note the fourth objective is the regulation strand, which currently has no slides — see 87–89.
+    Source: `OBSOLETE-outline.txt`. Note the fourth objective is the regulation strand, which currently has no slides — see 87–89.
 11. **[SLIDE] How the morning runs.** The timing table. 240-minute slot, 205-minute route, and say out loud that the slack is deliberate.
     Source: `setup/frontpiece.md:94`, `WORKSHOP.md:39`.
 
@@ -83,7 +83,7 @@ Notation:
 ### S01 — Build transformations and metadata stripping (15 min)
 
 20. **[SLIDE] S01: three tracked components, three fates.** `jackson-databind` the control, `commons-codec` shaded and relocated, `lodash` bundled by Vite. Say up front which one survives.
-    Source: `scenarios/S01-spring-node/LESSON.md:42`.
+    Source: `scenarios/spring-node/LESSON.md:42`.
 21. **[DRIVER] Control baseline.** `mvn dependency:tree -Dincludes=...jackson-databind`, then `syft service/target/service-1.0.0.jar | grep -i jackson`. Both say `2.19.4`. Establishes that the method works before it is used to show a failure.
     Source: `WORKSHOP.md:82`.
 22. **[DRIVER] Shading and relocation.** `syft normalizer/target/normalizer-1.0.0.jar`, then `./scripts/strip-codec-metadata.sh` and scan again. `commons-codec:1.17.1` → nothing. Bytecode untouched.
@@ -93,31 +93,31 @@ Notation:
 24. **[DRIVER] Frontend bundling.** `npm ls lodash` says `4.17.21`; grep finds `__lodash_hash_undefined__` and the version string in the minified bundle; `syft frontend/dist` returns *No packages discovered*.
     Source: `WORKSHOP.md:102`.
 25. **[SLIDE] Two versions of commons-codec, and why.** The one the resolver names and the one physically present, in the same JAR, for a reason the build explains.
-    Source: `scenarios/S01-spring-node/LESSON.md:706`.
-26. **[DRIVER] SBOM from the manifest vs SBOM from the binary.** Maven CycloneDX against the POM, Syft against the finished JAR, diffed side by side. `outline.txt` calls for this explicitly and S01 steps 19–22 already produce it.
-    Source: `scenarios/S01-spring-node/LESSON.md:775`–`955`.
+    Source: `scenarios/spring-node/LESSON.md:706`.
+26. **[DRIVER] SBOM from the manifest vs SBOM from the binary.** Maven CycloneDX against the POM, Syft against the finished JAR, diffed side by side. `OBSOLETE-outline.txt` calls for this explicitly and S01 steps 19–22 already produce it.
+    Source: `scenarios/spring-node/LESSON.md:775`–`955`.
 27. **[DRIVER] Into the container.** S01 step 23: the image scan, and what a container scanner adds and drops relative to the JAR scan.
-    Source: `scenarios/S01-spring-node/LESSON.md:990`.
+    Source: `scenarios/spring-node/LESSON.md:990`.
 
 ### S04 — Build plugin execution realms (15 min)
 
 28. **[SLIDE] S04: an empty dependency graph that ships a live endpoint.** The setup in one picture: `trace-injector-maven-plugin` generates code at build time, `trace-route-payload` rides in through the plugin's realm.
-    Source: `scenarios/S04-maven-plugin-hidden-content/LESSON.md:25`.
+    Source: `scenarios/maven-plugin-hidden-content/LESSON.md:25`.
 29. **[DRIVER] Ask the resolver.** `mvn dependency:tree` reports only the root artifact. Then `mvn dependency:resolve-plugins`, then the actual plugin ClassRealm — three questions, three different answers.
-    Source: `WORKSHOP.md:116`, `scenarios/S04-maven-plugin-hidden-content/LESSON.md:216`–`314`.
+    Source: `WORKSHOP.md:116`, `scenarios/maven-plugin-hidden-content/LESSON.md:216`–`314`.
 30. **[DRIVER] Then ask the artefact.** `unzip -l ... | grep -E 'Generated|services'`, `./scripts/run.sh`, `curl /hidden/build-info`. Generated class in the JAR, live route in the running app, nothing in the graph.
     Source: `WORKSHOP.md:116`.
 31. **[DRIVER] Then ask the scanners.** Syft on the final JAR, Maven CycloneDX on the model. Both clean.
-    Source: `scenarios/S04-maven-plugin-hidden-content/LESSON.md:493`–`558`.
+    Source: `scenarios/maven-plugin-hidden-content/LESSON.md:493`–`558`.
 32. **[SLIDE] What just happened.** Resolvers evaluate the *application* graph. Build plugins execute in their own realm, and that realm is not indexed by anything the room was using.
     Source: `WORKSHOP.md:136`.
 33. **[SLIDE] Optional: a second SBOM generator sees it.** S08's SBOM+ lists the plugin and its payload as `excluded` build tooling, with the path that brought them in — 0 components becomes a named path. Show the diff only; the lab is go-deeper material.
-    Source: `WORKSHOP.md:138`, `scenarios/S08-extended-sbom/LESSON.md`.
+    Source: `WORKSHOP.md:138`, `scenarios/extended-sbom/LESSON.md`.
 
 ### S05 — Package lifecycle hooks (8 min)
 
 34. **[SLIDE] S05: the package generates itself while packing.** `prepack` runs `generate-dist.js` before the tarball exists.
-    Source: `scenarios/S05-node-prepack/LESSON.md:17`.
+    Source: `scenarios/node-prepack/LESSON.md:17`.
 35. **[DRIVER] Source vs tarball vs installed.** `tar -tzf` the tgz, then `curl /hidden/prepack-info`. `dist/` files in the artefact are absent from the repository source.
     Source: `WORKSHOP.md:140`.
 36. **[SLIDE] What just happened.** Package code executes before the distributable exists, so the thing you audit and the thing you publish are different things. Hold this thought — Part 5 turns exactly this mechanism malicious.
@@ -126,11 +126,11 @@ Notation:
 ### S03 — Python PEP 517 build backends (8 min)
 
 37. **[SLIDE] S03: the build backend writes the package.** The sdist ships `pyproject.toml` and `tracehook_backend.py`. That is all.
-    Source: `scenarios/S03-python-pep517/LESSON.md:13`.
+    Source: `scenarios/python-pep517/LESSON.md:13`.
 38. **[DRIVER] sdist vs site-packages.** `tar -tzf` the sdist, then `ls .venv/lib/python*/site-packages/tracehook_demo/`, then `curl /trace`. The imported package was manufactured during `pip install`.
     Source: `WORKSHOP.md:161`.
 39. **[SLIDE] What just happened.** Installing an sdist executes dependency-supplied code, and that code can create software that was never in source.
-    Source: `WORKSHOP.md:179`, `scenarios/S03-python-pep517/LESSON.md:625`.
+    Source: `WORKSHOP.md:179`, `scenarios/python-pep517/LESSON.md:625`.
 
 ### T01 — Commercial SCA, and where it stops (5 min)
 
@@ -148,7 +148,7 @@ Notation:
 44. **[SLIDE] The evidence boundary matrix.** Five evidence sources — manifest, resolver, SBOM, artefact scanner, image scanner — each with what it observes and its systematic blind spot.
     Source: `WORKSHOP.md:193`, `workshop/02-identification.md`.
 45. **[SLIDE] How code hides.** Renamed and relocated classes, payloads in resources, build-time injection, generated content with no history of its own. Names the mechanisms the four labs just demonstrated, plus the ones they did not.
-    Source: `outline.txt` Part A; partly covered by S01/S04. `[PLACEHOLDER: "payloads in resources" has no lab behind it — either cite published research or drop the bullet.]`
+    Source: `OBSOLETE-outline.txt` Part A; partly covered by S01/S04. `[PLACEHOLDER: "payloads in resources" has no lab behind it — either cite published research or drop the bullet.]`
 46. **[SLIDE] Dissect a real malicious package.** Manifest says one thing, binary does another, from published research rather than a fixture.
     `[PLACEHOLDER: outline.txt Part A asks for this. Nothing in the repo. T08 has synthetic malicious fixtures (good ones) but they are ours, not a real published case. Needs a case picked and sourced — and a decision on whether it lives here or in Part 5 next to T08, where it fits better.]`
 47. **[SLIDE] Scanner comparison visualiser.** One project, several tools, the disagreement shown rather than described.
@@ -184,7 +184,7 @@ Notation:
     `[PLACEHOLDER: content-todo.md notes "talk about KEV, gold eagle where CVE process is going". KEV is covered at 55; the forward-looking half is not written. Needs a decision on scope — CVE Program funding turbulence, CNA growth, EUVD, CVE 5.x records?]`
 60. **[SLIDE] Chat app demo: how long until it gets fixed?** An app on old dependencies, and the clock from advisory to available fix to deployed fix.
     `[PLACEHOLDER: outline.txt B2. No repo material at all. Needs the app, the dependency set, and the timeline. Largest single build in this deck — consider cutting to a slide of published data instead.]`
-61. **[SLIDE] Q&A.** `outline.txt` puts a Q&A slot around here; the book route does not. Ten minutes before the break is the natural home.
+61. **[SLIDE] Q&A.** `OBSOLETE-outline.txt` puts a Q&A slot around here; the book route does not. Ten minutes before the break is the natural home.
 
 ---
 
@@ -221,7 +221,7 @@ Notation:
 74. **[SLIDE] Machine-readable lifecycle data.** OASIS OpenEoX: why lifecycle facts currently live in blog posts and mailing lists, and what a schema changes.
     Source: `workshop/04-project-health-eol.md:95`.
 75. **[SLIDE] Quick lookups you will actually use.** endoflife.date, deps.dev, OSV, Scorecard — the four-tab habit. *(OSS Index removed 2026-09-08; retired.)*
-    Source: `outline.txt` Part C. `[PLACEHOLDER: deps.dev and endoflife.date appear only in outline.txt, with no walkthrough anywhere in the repo. One live lookup each would do it.]`
+    Source: `OBSOLETE-outline.txt` Part C. `[PLACEHOLDER: deps.dev and endoflife.date appear only in outline.txt, with no walkthrough anywhere in the repo. One live lookup each would do it.]`
 76. **[SLIDE] Three scanners, one project, different answers.** Snyk free tier, OSV-Scanner, Grype on the same target, and why they disagree.
     `[PLACEHOLDER: outline.txt Part B. The repo has T03 (Trivy on S01) and T04 (Grype on S02) — different tools on different scenarios, so this comparison does not exist yet. Also note OSV-Scanner and osv.dev appear nowhere in the repo (content-todo.md flags osv.dev as still to cover).]`
 
@@ -248,22 +248,22 @@ Notation:
 85. **[SLIDE] Defence 2 — cache and artefact integrity.** Digests against published checksums, immutable signature chains, tamper detection in local and remote caches.
     Source: `workshop/05-integrity-provenance.md:27`.
 86. **[SLIDE] Defence 3 — layered reverse provenance.** The four-layer stack, each layer labelled with what it actually proves: embedded `git.properties` (unsigned internal claim) → OCI annotations (unsigned image claim) → Syft CycloneDX keyed to digest (unsigned content claim) → Cosign + in-toto (cryptographically verifiable).
-    Source: `workshop/05-integrity-provenance.md:35`, `scenarios/S07-provenance-s01/LESSON.md:86`–`144`.
+    Source: `workshop/05-integrity-provenance.md:35`, `scenarios/provenance-s01/LESSON.md:86`–`144`.
 87. **[DRIVER] S07: from anonymous image to signed attestation.** `./scripts/build-baseline.sh` — an image that cannot name its origin — then `./scripts/add-provenance.sh` and the reverse audit, second time.
-    Source: `WORKSHOP.md:292`, `scenarios/S07-provenance-s01/LESSON.md:41`, `:172`.
+    Source: `WORKSHOP.md:292`, `scenarios/provenance-s01/LESSON.md:41`, `:172`.
 88. **[SLIDE] Digests, not tags.** And what S07 explicitly does *not* prove.
-    Source: `scenarios/S07-provenance-s01/LESSON.md:201`.
+    Source: `scenarios/provenance-s01/LESSON.md:201`.
 89. **[SLIDE] Basic defences, on one slide.** The checklist form of 84–88, for photographing.
-    Source: `outline.txt` Part 2D.
+    Source: `OBSOLETE-outline.txt` Part 2D.
 
 ---
 
 ## Part 6 — AI and the Supply Chain (20 min)
 
-`outline.txt` says "Do AI as a separate part" and lists four topics the book's Part 6 does not cover at all (MCPs, AIBOMs, model versions and agent guards, prompts-as-shippable-code). This section is where the deck is thinnest relative to ambition: 20 minutes of route against roughly 35 minutes of listed material.
+`OBSOLETE-outline.txt` says "Do AI as a separate part" and lists four topics the book's Part 6 does not cover at all (MCPs, AIBOMs, model versions and agent guards, prompts-as-shippable-code). This section is where the deck is thinnest relative to ambition: 20 minutes of route against roughly 35 minutes of listed material.
 
 90. **[SLIDE] Machine-speed vulnerabilities, human-speed fixes.** The framing for the whole part.
-    Source: `outline.txt` Part D.
+    Source: `OBSOLETE-outline.txt` Part D.
 91. **[SLIDE] What LLM codegen does to a dependency tree.** Depth and volume up; selection biased toward training-set frequency rather than health, maintenance or minimal surface area.
     Source: `workshop/06-ai-dependencies.md:12`.
 92. **[SLIDE] Hallucinated packages.** The mechanism: models predict plausible names across npm and PyPI namespaces; automated tooling runs `npm install` on the result.
@@ -275,7 +275,7 @@ Notation:
 95. **[SLIDE] AI-generated malware, dissected.** Generation patterns, evasion, execution triggers.
     `[PLACEHOLDER: workshop/06-ai-dependencies.md:12 describes this as a module and frontpiece.md promises the room will see it, but there are no AI malware fixtures in the repo. T08's fixtures are hand-written, not AI-generated. Needs sourcing plus the non-networked sandbox the outline requires.]`
 96. **[SLIDE] EOL as the undefended backlog.** AI-speed discovery aimed at code nobody is triaging any more. Joins Part 4 to Part 6 and is the strongest argument in the deck.
-    Source: `outline.txt` Part D. `[PLACEHOLDER: the join is asserted in outline.txt but not written up anywhere.]`
+    Source: `OBSOLETE-outline.txt` Part D. `[PLACEHOLDER: the join is asserted in outline.txt but not written up anywhere.]`
 97. **[SLIDE] MCP servers as a new ingress surface.** Another install-and-execute channel, with weaker convention around pinning and review than npm had.
     `[PLACEHOLDER: outline.txt "Essential". Nothing in the repo.]`
 98. **[SLIDE] AIBOMs.** What they are, what they would have to record (model, weights, version, training provenance, prompts), and how far the CycloneDX/SPDX work has got.
@@ -291,7 +291,7 @@ Notation:
 
 ## Section 7 — Regulation (5 min; not in the book route)
 
-`outline.txt` makes regulation the fourth objective and asks for "one slide each, primary sources only". The book has no regulation content whatsoever. Budget is not allocated for it in the 205-minute route — it fits in the 35 minutes of slack, or Part 7 absorbs it.
+`OBSOLETE-outline.txt` makes regulation the fourth objective and asks for "one slide each, primary sources only". The book has no regulation content whatsoever. Budget is not allocated for it in the 205-minute route — it fits in the 35 minutes of slack, or Part 7 absorbs it.
 
 102. **[SLIDE] The bar has been raised.** Why a compliance slide belongs in a technical workshop: the evidence these regulations want is exactly the evidence Parts 2–5 showed you cannot currently produce.
      `[PLACEHOLDER: framing to be written.]`
@@ -309,13 +309,13 @@ Notation:
 106. **[SLIDE] The data overlay.** CVE/NVD/OSV as point-in-time defect records; CISA KEV as exploitation status; Scorecard as observable practice; OpenEoX and support datasets as maintenance horizon. Four datasets, four different questions.
      Source: `workshop/07-wrap-up.md:30`.
 107. **[SLIDE] The minimum that keeps you informed.** Inventory the artefact and not just the manifest, every build. More than one scanner, plus a lifecycle check. Keep current deliberately. Judge before adopting.
-     Source: `outline.txt` Part C, `workshop/07-wrap-up.md:37`.
+     Source: `OBSOLETE-outline.txt` Part C, `workshop/07-wrap-up.md:37`.
 108. **[SLIDE] The five-item checklist.** Differential SBOM generation and diff; CPE matching audit; lifecycle horizon audit; Scorecard on direct dependencies; lockfile integrity verification.
      Source: `workshop/07-wrap-up.md:37`, `WORKSHOP.md:350`.
 109. **[SLIDE] Decision path for a finding.** upgrade → patch in-house → accept → buy support. A flow, not a list, and honest about what each costs.
-     Source: `outline.txt` Part C. `[PLACEHOLDER: the four options are named in outline.txt but the decision criteria between them are not written anywhere.]`
+     Source: `OBSOLETE-outline.txt` Part C. `[PLACEHOLDER: the four options are named in outline.txt but the decision criteria between them are not written anywhere.]`
 110. **[SLIDE] When the answer is "buy support".** HeroDevs Never-Ending Support as the drop-in option for the EOL components Part 4 found.
-     Source: `outline.txt` ("Closing decision path names HeroDevs NES as the drop-in option"). Placed here, after the decision path, so it reads as one branch of four rather than a pitch.
+     Source: `OBSOLETE-outline.txt` ("Closing decision path names HeroDevs NES as the drop-in option"). Placed here, after the decision path, so it reads as one branch of four rather than a pitch.
 111. **[SLIDE] Remediation tooling.** Auto-PR bots and remediation tools: what they buy and where they bite.
      `[PLACEHOLDER: content-todo.md asks for this ("need to show remediation tools, including evergreen", osv.dev remediation tools, "auto PR stuff? any good or dangerous?"). Nothing in the repo. Cut if Part 7 is tight.]`
 112. **[SLIDE] Take it home.** The cheat-sheet PDF, the repo, the manual, and the one command to re-run any lab (`./scripts/proof-check.sh`).
@@ -327,14 +327,14 @@ Notation:
 
 ## Conflicts to resolve
 
-These are places where `outline.txt` and the book do not agree. Each needs a decision before the deck is built, because they change the running order.
+These are places where `OBSOLETE-outline.txt` and the book do not agree. Each needs a decision before the deck is built, because they change the running order.
 
 1. ~~**Structure.**~~ **CLOSED 2026-09-08.** The book was re-cut to six parts in four acts, mapped to the three surviving objectives: Act 1 (Parts 1–2) discovery is hard; Act 2 (Parts 3–4) reading scanner output critically; Act 3 (Part 5) how attackers exploit the gaps; Act 4 (Part 6) the minimum practice. This is the plan. The deck needs re-cutting against it.
-2. **Where provenance and attestations live.** *Still open, but narrowed.* `outline.txt` Part 1B puts provenance immediately after the build-transformation labs; the book keeps S07 in Part 5. Part 5 is now attack-first, which strengthens the book's placement — S07 reads as the answer to "how would you even know", rather than as a defences miscellany. Decide before the deck.
+2. **Where provenance and attestations live.** *Still open, but narrowed.* `OBSOLETE-outline.txt` Part 1B puts provenance immediately after the build-transformation labs; the book keeps S07 in Part 5. Part 5 is now attack-first, which strengthens the book's placement — S07 reads as the answer to "how would you even know", rather than as a defences miscellany. Decide before the deck.
 3. ~~**Part 6 is oversubscribed.**~~ **CLOSED 2026-09-08 — by descoping.** The AI strand is off the route; the material is parked as `workshop/appendix-ai-dependencies.md`. Its 20 minutes went to Part 5 (+10) and Part 6, the minimum-practice drill (+10).
 4. **Regulation has no budget.** *Still open, and now also off-objective* — the CRA/US strand was objective four, which is descoped alongside AI. Drop the slides or reinstate the objective; do not leave them unbudgeted.
-5. **Q&A placement.** `outline.txt` schedules a Q&A block; the book route does not. Slide 61, before the break, is the natural slot but it is unbudgeted.
-6. ~~**Three labs are in neither book edition.**~~ **CLOSED 2026-09-08.** `investigations/T10-cve-tomcat-85` is now in Part 3, and `investigations/T08-guarddog` and `scenarios/S07-provenance-s01` are in Part 5 — both editions. T08 was deliberately removed from the Reference Investigations appendix so it is not duplicated.
+5. **Q&A placement.** `OBSOLETE-outline.txt` schedules a Q&A block; the book route does not. Slide 61, before the break, is the natural slot but it is unbudgeted.
+6. ~~**Three labs are in neither book edition.**~~ **CLOSED 2026-09-08.** `investigations/T10-cve-tomcat-85` is now in Part 3, and `investigations/T08-guarddog` and `scenarios/provenance-s01` are in Part 5 — both editions. T08 was deliberately removed from the Reference Investigations appendix so it is not duplicated.
 
 ## Placeholder inventory
 

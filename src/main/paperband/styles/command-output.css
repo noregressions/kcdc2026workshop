@@ -13,6 +13,13 @@
  * differences collapse.
  * ===========================================================================*/
 
+
+section.cheatsheet-step {
+  background: var(--nr-surface-strong);
+  border-color: var(--nr-line);
+  border-left: 3px solid var(--nr-line-strong);
+  color: var(--nr-text);
+}
 pre.command {
   background: var(--nr-brand-soft);
   border-color: #cddffb;

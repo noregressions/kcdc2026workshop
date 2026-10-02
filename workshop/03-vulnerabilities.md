@@ -103,7 +103,7 @@ report does not tell you which.
 
 Investigation: *T09 — Three Scanners, One Target*.
 
-Ghostcat shows the record failing. T09 shows the consequence, on S01, with
+Ghostcat shows the record failing. T09 shows the consequence, on [](card:spring-node), with
 three tools running at once:
 
 ```command

@@ -1,10 +1,10 @@
 ---
-id: s04-maven-plugin-hidden-content
+id: maven-plugin-hidden-content
 oneliner: "Traces runtime capability that enters through Maven plugin execution rather than the dependency graph, and survives as compiled bytecode."
 track: core
 ---
 
-# S04 — Maven Plugin Hidden-Content Supply Chain Trace Lab
+# S{!number} — Maven Plugin Hidden-Content Supply Chain Trace Lab
 
 This lab follows runtime capability that enters a Java application through **Maven plugin execution**, rather than through the application's normal dependency graph.
 
@@ -15,10 +15,6 @@ The tracked components are:
 - `/hidden/build-info` — a route definition carried by the plugin dependency.
 - `GeneratedTraceRoute` — Java source generated during the build.
 - `META-INF/services/...TraceRoute` — generated ServiceLoader metadata that activates the class at runtime.
-
-The pattern is:
-
-**Why → Approach → Run → Observed output → Establish**
 
 ## What Maven plugins mean in this lab
 
@@ -56,7 +52,7 @@ The first build needs normal Maven Central access for Maven's own plugin/API dep
 
 ---
 
-## The scenario
+## Scenario
 
 The application is two source files and — deliberately — zero declared
 dependencies:
@@ -78,9 +74,13 @@ Maven then compiles and packages as ordinary application code.
 The result: a runtime endpoint (`/hidden/build-info`) that no application
 source file defines and no application dependency supplies.
 
----
+# {!step} Start clean
 
-# 1. Start clean
+From the repository root:
+
+```command
+cd scenarios/maven-plugin-hidden-content
+```
 
 Separate source-controlled content from previous generated build output.
 
@@ -99,11 +99,11 @@ It deliberately **keeps** `.maven-repo/`, the scenario-local Maven repository. T
 
 If you want a cold dependency-resolution run, remove it as well:
 
-```command
+```command {.essence}
 rm -rf .maven-repo
 ```
 
-## Run
+Remove generated output from the application and both tooling modules; keeps `.maven-repo/`. {.instructions}
 
 ```command
 ./scripts/clean.sh
@@ -119,13 +119,11 @@ Remove it too if you want a cold Maven dependency-resolution run:
   rm -rf .maven-repo
 ```
 
-## Establish
+## Evidence
 
 The application can be rebuilt from the checked-in scenario sources and local Maven fixture repository.
 
----
-
-# 2. Build the plugin, the payload, and the application
+# {!step} Build the plugin, the payload, and the application
 
 Everything after this step inspects build output, so we have to produce it first.
 
@@ -147,13 +145,11 @@ The application build cannot resolve the plugin until it exists in a repository,
 
 Using a scenario-local repository matters for the trace: it guarantees the plugin being executed is the fixture in `tooling/`, not a same-named artefact cached from somewhere else.
 
-## Run
+Install the payload and plugin into `.maven-repo/`, then build the application with them. {.instructions}
 
 ```command
 ./scripts/build.sh
 ```
-
-## Observed output
 
 The tooling phase installs both fixtures:
 
@@ -170,7 +166,7 @@ The tooling phase installs both fixtures:
 
 The application phase shows the plugin executing inside the normal lifecycle:
 
-```text
+```output
 == Build the application ==
 
 [INFO] --------< dev.noregressions.trace:maven-plugin-hidden-content >---------
@@ -193,7 +189,7 @@ The application phase shows the plugin executing inside the normal lifecycle:
 
 Note the compiler line: javac compiled three source files, but only two exist in `src/`. The plugin generated the third moments earlier.
 
-## Establish
+## Evidence
 
 Both fixtures are installed in `.maven-repo/`, and `target/maven-plugin-hidden-content-1.0.0.jar` exists.
 
@@ -209,13 +205,11 @@ generated Java + ServiceLoader metadata
 compiled and packaged as ordinary application content
 ```
 
----
-
-# 3. Look at the application dependency graph
+# {!step} Look at the application dependency graph
 
 Start with the Maven view most developers use when asking "what does this application depend on?"
 
-## Run
+Ask Maven for the application's dependency tree. {.instructions}
 
 ```command
 mvn \
@@ -235,7 +229,7 @@ mvn \
 [INFO] BUILD SUCCESS
 ```
 
-## Establish
+## Evidence
 
 The application's normal Maven dependency graph is empty:
 
@@ -245,13 +239,11 @@ maven-plugin-hidden-content:1.0.0
 
 Neither `trace-injector-maven-plugin` nor `trace-route-payload` appears as an application dependency.
 
----
-
-# 4. Ask Maven about plugin dependencies instead
+# {!step} Ask Maven about plugin dependencies instead
 
 The project dependency graph is not Maven's only dependency domain.
 
-## Run
+Ask Maven which dependencies the plugin itself resolves. {.instructions}
 
 ```command
 mvn \
@@ -270,7 +262,7 @@ mvn \
 [INFO] BUILD SUCCESS
 ```
 
-## Establish
+## Evidence
 
 When we ask Maven about the **plugin** dependency domain, a second graph appears:
 
@@ -282,13 +274,11 @@ trace-route-payload:1.0.0
 
 Maven knows about the payload, but not as an application dependency.
 
----
-
-# 5. Inspect the actual plugin execution realm
+# {!step} Inspect the actual plugin execution realm
 
 Resolver output tells us what Maven can resolve. Debug output tells us what Maven actually loads to execute the plugin.
 
-## Run
+Run the build with debug output and keep only the lines naming the plugin or its payload. {.instructions}
 
 ```command
 mvn \
@@ -309,20 +299,18 @@ mvn \
 [DEBUG] Loading mojo dev.noregressions.trace:trace-injector-maven-plugin:1.0.0:inject-route from plugin realm ClassRealm[plugin>dev.noregressions.trace:trace-injector-maven-plugin:1.0.0, ...]
 ```
 
-## Establish
+## Evidence
 
 `trace-route-payload` is actually present in the Maven **plugin ClassRealm** used to execute `inject-route`, not merely resolvable.
 
 - application dependency graph — no payload
 - plugin execution realm — plugin + payload
 
----
-
-# 6. Inspect the generated Java source
+# {!step} Inspect the generated Java source
 
 Now follow the build-time input across the transformation boundary into application source.
 
-## Run
+List what the plugin generated under `target/generated-sources`. {.instructions}
 
 ```command
 find target/generated-sources -type f -print
@@ -332,16 +320,14 @@ find target/generated-sources -type f -print
 target/generated-sources/trace-injector/dev/noregressions/trace/s04/generated/GeneratedTraceRoute.java
 ```
 
-Then:
+Print the generated class. {.instructions}
 
 ```command
 sed -n '1,220p' \
   target/generated-sources/trace-injector/dev/noregressions/trace/s04/generated/GeneratedTraceRoute.java
 ```
 
-## Observed output
-
-```java
+```output
 package dev.noregressions.trace.s04.generated;
 
 import dev.noregressions.trace.s04.TraceRoute;
@@ -360,7 +346,7 @@ public final class GeneratedTraceRoute implements TraceRoute {
 }
 ```
 
-## Establish
+## Evidence
 
 The runtime route now exists as Java application source even though it did not originate in the application's checked-in Java source.
 
@@ -370,13 +356,11 @@ Its provenance is explicit:
 - `introducedBy` = `trace-injector-maven-plugin`
 - `route` = `/hidden/build-info`
 
----
-
-# 7. Inspect the generated activation metadata
+# {!step} Inspect the generated activation metadata
 
 Generating a class does not make it execute. We need to see how the build connects it to the application.
 
-## Run
+List what the plugin generated under `target/generated-resources`. {.instructions}
 
 ```command
 find target/generated-resources -type f -print
@@ -387,7 +371,7 @@ target/generated-resources/trace-injector/META-INF/trace-lab/plugin-injection.pr
 target/generated-resources/trace-injector/META-INF/services/dev.noregressions.trace.s04.TraceRoute
 ```
 
-Inspect the ServiceLoader registration:
+Read the ServiceLoader registration that activates it. {.instructions}
 
 ```command
 cat \
@@ -398,7 +382,7 @@ cat \
 dev.noregressions.trace.s04.generated.GeneratedTraceRoute
 ```
 
-Inspect the provenance marker:
+Read the provenance marker the plugin left beside it. {.instructions}
 
 ```command
 cat \
@@ -411,7 +395,7 @@ payload=trace-route-payload
 route=/hidden/build-info
 ```
 
-## Establish
+## Evidence
 
 The build generated both:
 
@@ -420,13 +404,11 @@ The build generated both:
 
 The ServiceLoader descriptor makes the generated implementation discoverable by the source-defined application at runtime.
 
----
-
-# 8. Prove the generated content entered the final JAR
+# {!step} Prove the generated content entered the final JAR
 
 Generated build directories are intermediate evidence. The deployable JAR is the shipped artefact.
 
-## Run
+Look for the generated class, its ServiceLoader file and the provenance marker inside the final JAR. {.instructions}
 
 ```command
 unzip -l target/maven-plugin-hidden-content-1.0.0.jar \
@@ -440,17 +422,15 @@ unzip -l target/maven-plugin-hidden-content-1.0.0.jar \
       803  08-22-2026 11:58   dev/noregressions/trace/s04/generated/GeneratedTraceRoute.class
 ```
 
-## Establish
+## Evidence
 
 The generated implementation, activation metadata and provenance marker are all bytes in the final application JAR.
 
----
-
-# 9. Inspect the shipped bytecode
+# {!step} Inspect the shipped bytecode
 
 Generated Java source may be deleted after the build. The final JAR still has to carry the behaviour.
 
-## Run
+Disassemble the generated class from the shipped JAR. {.instructions}
 
 ```command
 javap \
@@ -476,7 +456,7 @@ public final class dev.noregressions.trace.s04.generated.GeneratedTraceRoute imp
 }
 ```
 
-## Establish
+## Evidence
 
 The final application bytecode contains:
 
@@ -486,13 +466,11 @@ The final application bytecode contains:
 
 The runtime behaviour survived the transformation even though the build-time package boundary did not.
 
----
-
-# 10. Scan the final JAR with Syft
+# {!step} Scan the final JAR with Syft
 
 Now compare physical runtime capability with a package scanner's inventory.
 
-## Run
+Scan the final JAR with Syft. {.instructions}
 
 ```command
 syft target/maven-plugin-hidden-content-1.0.0.jar
@@ -510,7 +488,7 @@ NAME                         VERSION  TYPE
 maven-plugin-hidden-content  1.0.0    java-archive
 ```
 
-## Establish
+## Evidence
 
 Syft sees the application archive, but does not identify either of the build-time components responsible for the generated behaviour:
 
@@ -519,13 +497,11 @@ Syft sees the application archive, but does not identify either of the build-tim
 
 The bytes are present. Syft does not recover their build provenance as package identity.
 
----
-
-# 11. Generate a Maven-model CycloneDX SBOM
+# {!step} Generate a Maven-model CycloneDX SBOM
 
 Compare the scanner view with an SBOM generated from Maven's project dependency model.
 
-## Run
+Generate a CycloneDX SBOM from Maven's project dependency model. {.instructions}
 
 ```command
 mvn \
@@ -541,7 +517,7 @@ mvn \
 [INFO] BUILD SUCCESS
 ```
 
-Focused check:
+Search the SBOM for the plugin, the payload or the application. {.instructions}
 
 ```command
 jq -r '.components[]? | [.name, .version] | @tsv' target/bom.json \
@@ -549,11 +525,10 @@ jq -r '.components[]? | [.name, .version] | @tsv' target/bom.json \
 ```
 
 ```output
+(no output)
 ```
 
-No matching output.
-
-## Establish
+## Evidence
 
 The Maven-model CycloneDX SBOM contains **zero dependency components**. It does not identify the build plugin or its transitive payload.
 
@@ -566,9 +541,7 @@ At this point the evidence views are:
 - final JAR — generated runtime behaviour present
 - Syft JAR scan — application archive only
 
----
-
-# 12. Run the application
+# {!step} Run the application
 
 The final test is whether the generated, packaged bytes actually change runtime capability.
 
@@ -580,7 +553,7 @@ Three details of the script matter when reading the output:
 - It starts the JVM detached and records the process id in `.runtime.pid`, with output captured to `.runtime.log`. The JVM needs `--add-modules jdk.httpserver`, which the script supplies.
 - It then polls `/health` for up to 30 seconds and only reports success once that endpoint identifies itself as this application. This is why the reported PID is trustworthy evidence: the script refuses to start if the port is already serving HTTP, so we cannot accidentally interrogate an unrelated service.
 
-## Run
+Start the packaged JAR on port 8082. {.instructions}
 
 ```command
 ./scripts/run.sh
@@ -592,52 +565,44 @@ Open:   http://localhost:8082/
 Health: http://localhost:8082/health
 ```
 
-## Establish
+## Evidence
 
 The application starts successfully from the final JAR on port `8082`.
 
 The PID is an observation from this run, not an invariant.
 
----
-
-# 13. Verify the source-defined application endpoint
+# {!step} Verify the source-defined application endpoint
 
 This is the control endpoint: behaviour deliberately present in the checked-in application source.
 
-## Run
+Call the health endpoint the checked-in source defines. {.instructions}
 
 ```command
 curl -sS http://localhost:8082/health | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "application": "maven-plugin-hidden-content",
   "status": "UP"
 }
 ```
 
-## Establish
+## Evidence
 
 The source-defined application is running normally.
 
----
-
-# 14. Request the build-supplied endpoint
+# {!step} Request the build-supplied endpoint
 
 This closes the chain from plugin dependency to runtime behaviour.
 
-## Run
+Call the endpoint no source file defines. {.instructions}
 
 ```command
 curl -sS http://localhost:8082/hidden/build-info | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "message": "This runtime endpoint came from a transitive Maven plugin dependency.",
   "origin": "trace-route-payload",
@@ -646,7 +611,7 @@ curl -sS http://localhost:8082/hidden/build-info | jq
 }
 ```
 
-## Establish
+## Evidence
 
 The endpoint exists at runtime and explicitly ties itself back to:
 
@@ -662,9 +627,7 @@ application JAR
 /hidden/build-info
 ```
 
----
-
-# 15. Stop the runtime
+# {!step} Stop the runtime
 
 The runtime started in step 12 is detached and will keep holding port `8082` after the walkthrough ends.
 
@@ -674,7 +637,7 @@ Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to 
 
 `clean.sh` calls it too, so a later `./scripts/clean.sh` also releases the port.
 
-## Run
+Stop the runtime and release port 8082. {.instructions}
 
 ```command
 ./scripts/stop.sh
@@ -684,11 +647,9 @@ Leaving it running also blocks a later re-run: `run.sh` deliberately refuses to 
 Stopped runtime PID 69945
 ```
 
-## Establish
+## Evidence
 
 Port `8082` is released and no scenario process remains from this walkthrough.
-
----
 
 # What this lab establishes
 
@@ -721,8 +682,6 @@ flowchart TD
   g --> h["GET /hidden/build-info"]
 ```
 
----
-
 # Replay in one pass
 
 ```command
@@ -733,9 +692,9 @@ flowchart TD
 
 It needs the build output, so run `./scripts/build.sh` first.
 
----
+# {!step} Verify the lab still holds
 
-# Verify the lab still holds
+Re-run the lab from a clean start and check that every claim this walkthrough makes still holds. {.instructions}
 
 ```command
 ./scripts/proof-check.sh

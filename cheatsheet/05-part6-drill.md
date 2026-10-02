@@ -16,9 +16,9 @@ The minimum practice, run against any project. Two inventories of the same
 build, the difference between them, a lifecycle check, and whatever
 provenance the artefact can produce.
 
-From the repo root. Defaults to S01 if you give it no argument.
+From the repo root. Defaults to S1 if you give it no argument.
 ```command
-./scripts/ship-check.sh scenarios/S01-spring-node
+./scripts/ship-check.sh scenarios/spring-node
 ```
 
 Build the project first — the declared inventory needs a resolvable reactor
@@ -34,9 +34,9 @@ rather than failing when a tool is missing.
 ```
 
 Section 3 is the point. The first list — declared but not identifiable — is
-where S01's shading and bundling appear. The second — in the artefact but not
-declared — is where S04's plugin payload appears; point it at
-`scenarios/S04-maven-plugin-hidden-content` to see that half.
+where S1's shading and bundling appear. The second — in the artefact but not
+declared — is where S2's plugin payload appears; point it at
+`scenarios/maven-plugin-hidden-content` to see that half.
 
 Both inventories are written to `<project>/ship-check/`, so you can diff this
 release against the last one.

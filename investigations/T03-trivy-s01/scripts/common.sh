@@ -17,9 +17,9 @@ resolve_s01() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S01-spring-node"
-    "$ROOT/../S01-spring-node"
-    "$ROOT/../../S01-spring-node"
+    "$ROOT/../../scenarios/spring-node"
+    "$ROOT/../spring-node"
+    "$ROOT/../../spring-node"
   )
 
   local candidate

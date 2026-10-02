@@ -19,25 +19,25 @@ Evidence Evaluation Model:
 
 - **Apache Maven:** Resolves declared Java dependencies into concrete versions, generating `dependency:tree` and effective POM models.
   - *Evidence boundary:* Declared project dependency graph and configured build plugins.
-  - *Visibility limitation:* Does not record transitive dependencies inside plugin execution realms as application dependencies (S04).
+  - *Visibility limitation:* Does not record transitive dependencies inside plugin execution realms as application dependencies ([](card:maven-plugin-hidden-content)).
 - **npm:** Resolves Node.js package trees, generating `package-lock.json`.
   - *Evidence boundary:* Declared package manifest and locked dependency tree.
-  - *Visibility limitation:* Executes lifecycle scripts (`prepack`, `postinstall`) that can generate or modify artifacts without altering the dependency graph (S05).
+  - *Visibility limitation:* Executes lifecycle scripts (`prepack`, `postinstall`) that can generate or modify artifacts without altering the dependency graph ([](card:node-prepack)).
 - **pip:** Resolves Python packages according to PEP 517 build-backend specifications.
   - *Evidence boundary:* Source distributions and requirement manifests.
-  - *Visibility limitation:* Delegates artifact generation to arbitrary build backend code during package installation (S03).
+  - *Visibility limitation:* Delegates artifact generation to arbitrary build backend code during package installation ([](card:python-pep517)).
 
 ## 2. Inventory / SBOM Generators
 
 - **Syft (Anchore):** Generates Software Bills of Materials (CycloneDX / SPDX) from static file inspection of archives, directories, and container images.
   - *Evidence boundary:* Physical artifact metadata (`pom.properties`, package manifests, file paths).
-  - *Visibility limitation:* Misses shaded/relocated bytecode when Maven metadata is omitted, and does not reconstruct individual package boundaries from bundled JavaScript (S01).
+  - *Visibility limitation:* Misses shaded/relocated bytecode when Maven metadata is omitted, and does not reconstruct individual package boundaries from bundled JavaScript ([](card:spring-node)).
 - **CycloneDX Maven Plugin:** Generates CycloneDX SBOMs from Maven's in-memory project object model.
   - *Evidence boundary:* Maven resolver data.
-  - *Visibility limitation:* Omits code introduced dynamically via build plugin executions or compiler source generation (S04).
+  - *Visibility limitation:* Omits code introduced dynamically via build plugin executions or compiler source generation ([](card:maven-plugin-hidden-content)).
 - **SBOM+ Maven Plugin (`dev.noregressions:sbom-plus-maven-plugin`):** Generates a CycloneDX SBOM from the project graph plus every plugin's dependency graph and imported BOMs, with a companion scan report recording `origin` and the `broughtInBy` path per row.
   - *Evidence boundary:* Maven resolver data, extended to build tooling (marked `excluded`) and BOM imports (`?type=pom`).
-  - *Visibility limitation:* Still a resolver-level claim: names the plugin that generated code, not the generated code; resolves from repositories, so uninstalled sibling modules land in `unresolved` (S08).
+  - *Visibility limitation:* Still a resolver-level claim: names the plugin that generated code, not the generated code; resolves from repositories, so uninstalled sibling modules land in `unresolved` ([](card:extended-sbom)).
 
 ## 3. Vulnerability Scanners
 

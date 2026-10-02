@@ -59,20 +59,20 @@ Part 6   The minimum that keeps you honest            4
 ```
 
 The AI strand is parked: the notes survive as
-`workshop/appendix-ai-dependencies.md` and are not on the route. S02 and S08
+`workshop/appendix-ai-dependencies.md` and are not on the route. S6 and S3
 became core route on 2026-09-08; nothing in Parts 1 to 6 is optional.
 
 ### Progress Checkpoints
 
 Points where you should confirm the room is with you before moving on.
 
-- **After S01 and S04:** everyone has seen a named dependency vanish from its own SBOM, and an endpoint that no source file defines. If either did not land, re-run it; everything after this is built on those two.
-- **After S08:** the 0-versus-171 contrast. Short, and the only good news in Part 2 — never cut it.
-- **After S02:** the composite case. Longest single lab; the `mvn -X | grep lodash-es` reveal is the part that must happen.
-- **End of Part 2:** the Evidence Boundary Taxonomy table, including the S08 row. Every later part refers back to it.
+- **After S1 and S2:** everyone has seen a named dependency vanish from its own SBOM, and an endpoint that no source file defines. If either did not land, re-run it; everything after this is built on those two.
+- **After S3:** the 0-versus-171 contrast. Short, and the only good news in Part 2 — never cut it.
+- **After S6:** the composite case. Longest single lab; the `mvn -X | grep lodash-es` reveal is the part that must happen.
+- **End of Part 2:** the Evidence Boundary Taxonomy table, including the S3 row. Every later part refers back to it.
 - **Part 3:** Tomcat investigation steps 1–6 before moving on to steps 7–8 (the EOL comparisons).
 - **End of Part 4:** the three-failure-modes synthesis (tool gap / CVE process / EOL, all on Tomcat 8.5). This is the hinge into Act 3 — never cut it.
-- **After S07:** provenance complete, and Part 6 still ahead of you. Part 6 is the only part attendees run against their own work afterwards; protect it.
+- **After S7:** provenance complete, and Part 6 still ahead of you. Part 6 is the only part attendees run against their own work afterwards; protect it.
 
 ---
 
@@ -93,10 +93,10 @@ Key concept: The distinction between declared dependency manifests and actual de
 
 # Part 2: Can We Identify What We Ship?
 
-Seven stops, six of them hands-on. S08 and S02 joined the core route on
+Seven stops, six of them hands-on. S3 and S6 joined the core route on
 2026-09-08; nothing in this part is optional.
 
-## Step 1: S01 Transformation
+## Step 1: S1 Transformation
 
 | Command | Expected Verification Output |
 |---|---|
@@ -110,7 +110,7 @@ Seven stops, six of them hands-on. S08 and S02 joined the core route on
 
 Technical conclusion: Static scanners rely on metadata rather than code syntax. Build transformations can destroy identity evidence while preserving executable logic.
 
-## Step 2: S04 Hidden Build Content
+## Step 2: S2 Hidden Build Content
 
 | Command | Expected Verification Output |
 |---|---|
@@ -122,9 +122,9 @@ Technical conclusion: Static scanners rely on metadata rather than code syntax. 
 
 Technical conclusion: Dependency resolvers evaluate the application dependency tree, omitting transitive dependencies inside build plugin execution realms.
 
-## Step 3: S08 Extended SBOM
+## Step 3: S3 Extended SBOM
 
-Lab reference: [`scenarios/S08-extended-sbom/LESSON.md`](./scenarios/S08-extended-sbom/LESSON.md)
+Lab reference: [`scenarios/extended-sbom/LESSON.md`](./scenarios/extended-sbom/LESSON.md)
 
 | Command | Expected Verification Output |
 |---|---|
@@ -132,25 +132,25 @@ Lab reference: [`scenarios/S08-extended-sbom/LESSON.md`](./scenarios/S08-extende
 | `./scripts/scan-s04.sh` | standard: 0 components. extended: 171, all `excluded`, including `trace-injector-maven-plugin` and `trace-route-payload` |
 | `./scripts/scan-s01.sh` | standard: 38. extended: 265 (230 `excluded`), including `maven-shade-plugin` |
 
-Technical conclusion: the S04 gap is a property of the evidence source, not of the artefact. The information existed at build time; nothing recorded it. This is the setup for Part 6.
+Technical conclusion: the S2 gap is a property of the evidence source, not of the artefact. The information existed at build time; nothing recorded it. This is the setup for Part 6.
 
-Presenter note: on a packaged-but-not-installed checkout, SBOM+ warns that it cannot resolve S01's `normalizer` sibling. Show the warning, then `(cd ../S01-spring-node && mvn -q install -DskipTests)` and re-run — "could not resolve" and "not present" look different and mean different things.
+Presenter note: on a packaged-but-not-installed checkout, SBOM+ warns that it cannot resolve S1's `normalizer` sibling. Show the warning, then `(cd ../spring-node && mvn -q install -DskipTests)` and re-run — "could not resolve" and "not present" look different and mean different things.
 
-## Step 4: S05 npm Lifecycle Hooks
+## Step 4: S4 npm Lifecycle Hooks
 
 - Verify execution of `npm notice run ... prepack`.
 - Confirm tarball contains generated `dist/` files absent from repository source.
 - Port: 8083.
 
-## Step 5: S03 Python PEP 517 Build Backends
+## Step 5: S5 Python PEP 517 Build Backends
 
 - Tarball contains only `pyproject.toml` and `tracehook_backend.py`.
 - Verify `site-packages` receives generated `__init__.py` created during `pip install`.
 - Port: 8081.
 
-## Step 6: S02 Payara + mvnpm
+## Step 6: S6 Payara + mvnpm
 
-Lab reference: [`scenarios/S02-payara-mvnpm/LESSON.md`](./scenarios/S02-payara-mvnpm/LESSON.md)
+Lab reference: [`scenarios/payara-mvnpm/LESSON.md`](./scenarios/payara-mvnpm/LESSON.md)
 
 The realistic composite: WAR packaging, mvnpm registry translation, and a plugin execution realm in one Jakarta EE build. Longest lab on the route.
 
@@ -222,10 +222,10 @@ Note: the Scorecard capture in the repository is `workshop/evidence/openssf-scor
 
 Chapter: [`workshop/05-attacks-and-provenance.md`](./workshop/05-attacks-and-provenance.md)
 
-Open with the ingress mechanisms — dependency confusion, typosquatting, maintainer compromise — and land the xz-utils point: the backdoor was in the release tarball and not in the git repository, which is the mechanism attendees built themselves in S05. That callback is the spine of the part.
+Open with the ingress mechanisms — dependency confusion, typosquatting, maintainer compromise — and land the xz-utils point: the backdoor was in the release tarball and not in the git repository, which is the mechanism attendees built themselves in S4. That callback is the spine of the part.
 
 1. **Static AST Analysis (T08 / GuardDog):** AST code inspection across package archives vs metadata analysis. Probes 3 and 4 (the malicious variant) are the ones to run live; 1 and 2 can be summarised.
-2. **Layered Reverse Provenance (S07):**
+2. **Layered Reverse Provenance (S7):**
    - Layer 1: Embedded build metadata (`git.properties`).
    - Layer 2: OCI image annotations.
    - Layer 3: Cryptographic CycloneDX SBOM.
@@ -242,10 +242,10 @@ Chapter: [`workshop/06-minimum-practice.md`](./workshop/06-minimum-practice.md)
 Hands-on, and the only part attendees will use on Monday. Give it the full budget.
 
 ```bash
-./scripts/ship-check.sh scenarios/S01-spring-node
+./scripts/ship-check.sh scenarios/spring-node
 ```
 
-- Section 3 of the output is the whole point: declared-but-not-identifiable (S01's shading and bundling) and in-artefact-but-not-declared (point it at S04 to show this half).
+- Section 3 of the output is the whole point: declared-but-not-identifiable (S1's shading and bundling) and in-artefact-but-not-declared (point it at S2 to show this half).
 - The script skips loudly when a tool is missing. If `syft` is absent on attendee machines, the second inventory is empty and the diff cannot run — flag this during the Part 1 tools check, not here.
 - Close on the four decisions (upgrade / patch in-house / accept with a date / buy support) and the take-home card.
 
@@ -256,19 +256,19 @@ Hands-on, and the only part attendees will use on Monday. Give it the full budge
 If you need to move faster, give ground in this order — roughly most room recovered first, and each one keeps the finding while dropping the walkthrough.
 
 1. **S02:** run the four `mvn` lines as a demo; skip the WAR, exploded-deployment and image steps.
-2. **S07:** present layers 1–3 from the chapter table; run only layer 4.
-3. **S05** and **S03**: instructor demonstration rather than hands-on. They repeat S04's mechanism in other ecosystems, so the room has already met the idea.
-4. **S08:** run `scan-s04.sh` only; skip the S01 comparison.
+2. **S7:** present layers 1–3 from the chapter table; run only layer 4.
+3. **S4** and **S5**: instructor demonstration rather than hands-on. They repeat S2's mechanism in other ecosystems, so the room has already met the idea.
+4. **S3:** run `scan-s04.sh` only; skip the S1 comparison.
 5. **T08:** run the malicious-payload probe only; summarise the other three.
 6. **Part 3 steps 5–6:** summarise via the timeline comparison table.
 7. **Part 4 Scorecard:** restrict inspection to the Maintained and Vulnerabilities checks.
-8. **S01 lodash step:** limit inspection to `syft frontend/dist`.
+8. **S1 lodash step:** limit inspection to `syft frontend/dist`.
 
 Never omitted, whatever else goes:
 - Part 1 environment validation.
-- S01 metadata stripping experiment.
-- S04 hidden build content demonstration.
-- S08 `scan-s04.sh` — the 0-vs-171 contrast is what makes Part 6 land.
+- S1 metadata stripping experiment.
+- S2 hidden build content demonstration.
+- S3 `scan-s04.sh` — the 0-vs-171 contrast is what makes Part 6 land.
 - Part 3 EOL comparison steps (Tomcat 6.x vs 8.5).
 - Part 4 lifecycle EOL distinction, and the Act 2 synthesis that closes it.
 - Part 5 ingress mechanisms (they carry objective 1's second half; the labs do not).

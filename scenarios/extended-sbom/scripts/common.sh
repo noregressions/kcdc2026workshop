@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 REPO_DEFAULT=$(cd "$ROOT/../.." && pwd)
-S01="${S01:-$REPO_DEFAULT/scenarios/S01-spring-node}"
-S04="${S04:-$REPO_DEFAULT/scenarios/S04-maven-plugin-hidden-content}"
+S01="${S01:-$REPO_DEFAULT/scenarios/spring-node}"
+S04="${S04:-$REPO_DEFAULT/scenarios/maven-plugin-hidden-content}"
 RESULTS="$ROOT/results"
 
 # The two SBOM generators under comparison. Both are Maven plugins invoked

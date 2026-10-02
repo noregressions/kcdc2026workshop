@@ -40,13 +40,13 @@ These dependencies and plugins are pinned in POM and configuration files and res
 
 | Component | Version | Target Module |
 |---|---|---|
-| Spring Boot | 3.5.12 | S01 |
-| Maven Shade Plugin | 3.6.2 | S01 |
-| CycloneDX Maven Plugin | 2.9.3 | S01 |
-| SBOM+ Maven Plugin | 1.0.0 (vendored) | S08 |
-| esbuild Maven Plugin | 2.0.0 | S02 |
-| Jakarta EE API | 11.0.0 | S02 |
-| maven-plugin-tools | 3.15.1 | S04 tooling |
+| Spring Boot | 3.5.12 | S1 |
+| Maven Shade Plugin | 3.6.2 | S1 |
+| CycloneDX Maven Plugin | 2.9.3 | S1 |
+| SBOM+ Maven Plugin | 1.0.0 (vendored) | S3 |
+| esbuild Maven Plugin | 2.0.0 | S6 |
+| Jakarta EE API | 11.0.0 | S6 |
+| maven-plugin-tools | 3.15.1 | S2 tooling |
 
 ## Dynamic Runtime Scanner Configurations
 

@@ -41,12 +41,12 @@ The script evaluates each phase independently and returns a non-zero exit status
 | Step | Target Resource | Direct CLI Command |
 |---|---|---|
 | Container Base Images | `eclipse-temurin:21-jre-jammy`, `payara/server-web:7.2026.7` | `docker pull eclipse-temurin:21-jre-jammy && docker pull payara/server-web:7.2026.7` |
-| Maven Scenarios (S01, S02, S04) | Plugins and dependencies in `~/.m2/repository` | `./scripts/build.sh` within each scenario directory |
-| npm Scenario (S05) | Node packages and lifecycle script validation | `scenarios/S05-node-prepack/scripts/build.sh` |
-| Python Scenario (S03) | Virtual environment and package dependencies | `scenarios/S03-python-pep517/scripts/build.sh` |
+| Maven Scenarios ([](card:spring-node), [](card:payara-mvnpm), [](card:maven-plugin-hidden-content)) | Plugins and dependencies in `~/.m2/repository` | `./scripts/build.sh` within each scenario directory |
+| npm Scenario ([](card:node-prepack)) | Node packages and lifecycle script validation | `scenarios/node-prepack/scripts/build.sh` |
+| Python Scenario ([](card:python-pep517)) | Virtual environment and package dependencies | `scenarios/python-pep517/scripts/build.sh` |
 | Grype Database | Local vulnerability database cache | `grype db update && grype db status` |
-| Trivy Database | Local vulnerability database cache | `trivy fs --scanners vuln --no-progress scenarios/S01-spring-node` |
-| Syft Cache | Asset index and binary dependencies | `syft scenarios/S01-spring-node -o table >/dev/null` |
+| Trivy Database | Local vulnerability database cache | `trivy fs --scanners vuln --no-progress scenarios/spring-node` |
+| Syft Cache | Asset index and binary dependencies | `syft scenarios/spring-node -o table >/dev/null` |
 
 For step-by-step manual execution procedures, see [`setup/PREWARM-MANUAL.md`](./PREWARM-MANUAL.md).
 

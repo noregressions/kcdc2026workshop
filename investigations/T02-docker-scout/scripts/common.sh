@@ -17,9 +17,9 @@ resolve_s01() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S01-spring-node"
-    "$ROOT/../S01-spring-node"
-    "$ROOT/../../S01-spring-node"
+    "$ROOT/../../scenarios/spring-node"
+    "$ROOT/../spring-node"
+    "$ROOT/../../spring-node"
   )
 
   local candidate
@@ -40,9 +40,9 @@ resolve_s02() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S02-payara-mvnpm"
-    "$ROOT/../S02-payara-mvnpm"
-    "$ROOT/../../S02-payara-mvnpm"
+    "$ROOT/../../scenarios/payara-mvnpm"
+    "$ROOT/../payara-mvnpm"
+    "$ROOT/../../payara-mvnpm"
   )
 
   local candidate

@@ -17,9 +17,9 @@ resolve_s03() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S03-python-pep517"
-    "$ROOT/../S03-python-pep517"
-    "$ROOT/../../S03-python-pep517"
+    "$ROOT/../../scenarios/python-pep517"
+    "$ROOT/../python-pep517"
+    "$ROOT/../../python-pep517"
   )
 
   local candidate

@@ -7,8 +7,8 @@ require_command snyk
 require_command jq
 
 S04="$(resolve_s04)" || {
-  echo "Could not find S04-maven-plugin-hidden-content." >&2
-  echo "Set S04_DIR=/path/to/S04-maven-plugin-hidden-content" >&2
+  echo "Could not find maven-plugin-hidden-content." >&2
+  echo "Set S04_DIR=/path/to/maven-plugin-hidden-content" >&2
   exit 1
 }
 

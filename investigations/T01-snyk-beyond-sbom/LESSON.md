@@ -60,7 +60,7 @@ run from `investigations/T01-snyk-beyond-sbom` with the scenario labs built:
 ```
 
 The scripts expect the scenarios at `../../scenarios/`; override with, for
-example, `S04_DIR=/path/to/S04-maven-plugin-hidden-content ./scripts/baseline.sh`.
+example, `S04_DIR=/path/to/maven-plugin-hidden-content ./scripts/baseline.sh`.
 Requirements beyond the scenarios themselves: Maven 3.9+, JDK 21+, an
 authenticated Snyk CLI, `jq`, and Syft for the baseline scanner comparisons.
 `./scripts/proof-check.sh` reruns the investigation and asserts the observed
@@ -496,7 +496,7 @@ full edge, going beyond the literal `requirements.txt`.
 Snyk reconstructs the full installed dependency graph:
 
 ```output
-S03-python-pep517
+python-pep517
     → reportkit 1.0.0
         → tracehook-demo 1.0.0
 ```

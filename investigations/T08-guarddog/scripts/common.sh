@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_DEFAULT="$(cd "$ROOT/../.." 2>/dev/null && pwd || true)"
-S05="${S05:-${REPO_DEFAULT}/scenarios/S05-node-prepack}"
-S03="${S03:-${REPO_DEFAULT}/scenarios/S03-python-pep517}"
+S05="${S05:-${REPO_DEFAULT}/scenarios/node-prepack}"
+S03="${S03:-${REPO_DEFAULT}/scenarios/python-pep517}"
 
 RESULTS="$ROOT/results"
 

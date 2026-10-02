@@ -32,6 +32,7 @@
         <java.version>21</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <paperband.version>0.1.4</paperband.version>
 
     </properties>
 
@@ -42,7 +43,7 @@
             <plugin>
                 <groupId>dev.noregressions.paperband</groupId>
                 <artifactId>paperband-maven-plugin</artifactId>
-                <version>0.1.1</version>
+                <version>${paperband.version}</version>
 
                 <!--
                     Shared by every goal: what the book is, and how it renders.
@@ -75,6 +76,8 @@
                         <stylesheet>src/main/paperband/styles/fences.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/command-output.css</stylesheet>
                         <stylesheet>src/main/paperband/styles/screen.css</stylesheet>
+                        <!-- The scenario cheat sheet's layout (cheatsheet view classes only). -->
+                        <stylesheet>src/main/paperband/styles/cheatsheet-view.css</stylesheet>
                     </stylesheets>
                     <!--
                         US Letter, with real margins: Chromium draws the
@@ -234,12 +237,12 @@
                                 -->
                                 <includes>
                                     <include>workshop/02-identification.md</include>
-                                    <include>scenarios/S01-spring-node/LESSON.md</include>
-                                    <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
-                                    <include>scenarios/S08-extended-sbom/LESSON.md</include>
-                                    <include>scenarios/S05-node-prepack/LESSON.md</include>
-                                    <include>scenarios/S03-python-pep517/LESSON.md</include>
-                                    <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                    <include>scenarios/spring-node/LESSON.md</include>
+                                    <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                    <include>scenarios/extended-sbom/LESSON.md</include>
+                                    <include>scenarios/node-prepack/LESSON.md</include>
+                                    <include>scenarios/python-pep517/LESSON.md</include>
+                                    <include>scenarios/payara-mvnpm/LESSON.md</include>
                                     <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                 </includes>
                             </section>
@@ -277,7 +280,7 @@
                                 <includes>
                                     <include>workshop/05-attacks-and-provenance.md</include>
                                     <include>investigations/T08-guarddog/LESSON.md</include>
-                                    <include>scenarios/S07-provenance-s01/LESSON.md</include>
+                                    <include>scenarios/provenance-s01/LESSON.md</include>
                                 </includes>
                             </section>
                             <section>
@@ -445,12 +448,12 @@
                                         -->
                                         <includes>
                                             <include>workshop/02-identification.md</include>
-                                            <include>scenarios/S01-spring-node/LESSON.md</include>
-                                            <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
-                                            <include>scenarios/S08-extended-sbom/LESSON.md</include>
-                                            <include>scenarios/S05-node-prepack/LESSON.md</include>
-                                            <include>scenarios/S03-python-pep517/LESSON.md</include>
-                                            <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
                                             <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
                                         </includes>
                                     </section>
@@ -488,7 +491,7 @@
                                         <includes>
                                             <include>workshop/05-attacks-and-provenance.md</include>
                                             <include>investigations/T08-guarddog/LESSON.md</include>
-                                            <include>scenarios/S07-provenance-s01/LESSON.md</include>
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
                                         </includes>
                                     </section>
                                     <section>
@@ -545,6 +548,8 @@
                             <goal>build</goal>
                         </goals>
                         <configuration>
+                            <!-- The scenario lessons render as step sheets; the hand-written sheets as written. -->
+                            <view>cheatsheet</view>
                             <output>${project.build.directory}/cheatsheets.pdf</output>
                             <emitHtml>${project.build.directory}/cheatsheets.html</emitHtml>
                             <book combine.self="override">
@@ -605,11 +610,116 @@
                                         <includes>
                                             <include>cheatsheet/00-setup.md</include>
                                             <include>cheatsheet/01-part2-identify.md</include>
+                                            <!-- The Part 2 scenarios, from their lessons. -->
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
+                                            <include>cheatsheet/01b-part2-t01.md</include>
                                             <include>cheatsheet/02-part3-cve.md</include>
                                             <include>cheatsheet/03-part4-health.md</include>
                                             <include>cheatsheet/04-part5-attacks.md</include>
+                                            <!-- The Part 5 scenario, from its lesson. -->
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
                                             <include>cheatsheet/05-part6-drill.md</include>
                                             <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!--
+                        The scenario cheat sheet, generated rather than written:
+                        paperband's cheatsheet view reads the scenario LESSON.md
+                        cards themselves and keeps, per {!step}, the heading, the
+                        paragraph marked {.instructions}, and its ```command and
+                        ```output blocks (the selector is set in
+                        scenarios/paperband.yaml). A lesson with no {!step} yet
+                        is left out, and the build log names it, so lessons can
+                        be converted one at a time.
+                        https://noregressions.github.io/paperband/cards/make-a-cheat-sheet.html
+                    -->
+                    <execution>
+                        <id>scenario-cheatsheet-pdf</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <view>cheatsheet</view>
+                            <output>${project.build.directory}/scenario-cheatsheet.pdf</output>
+                            <!-- The same pages as one HTML file, with a contents sidebar on screen. -->
+                            <emitHtml>${project.build.directory}/scenario-cheatsheet.html</emitHtml>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <title>You Don't Know What You're Shipping — Scenario Cheat Sheet</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Scenario Steps</subtitle>
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <!-- Its cover lists the scenarios, and it has no divider pages (layouts/cheatsheet/). -->
+                                    <scenarioIndex>true</scenarioIndex>
+                                </vars>
+                                <sections>
+                                    <section>
+                                        <title>Scenarios</title>
+                                        <includes>
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!-- The scenario cheat sheet as a site: one page per scenario, copy buttons on every command. -->
+                    <execution>
+                        <id>scenario-cheatsheet-site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <view>cheatsheet</view>
+                            <outputDirectory>${project.build.directory}/scenario-cheatsheet-site</outputDirectory>
+                            <clean>true</clean>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <title>You Don't Know What You're Shipping — Scenario Cheat Sheet</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Scenario Steps</subtitle>
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <!-- Its cover lists the scenarios, and it has no divider pages (layouts/cheatsheet/). -->
+                                    <scenarioIndex>true</scenarioIndex>
+                                </vars>
+                                <sections>
+                                    <section>
+                                        <title>Scenarios</title>
+                                        <includes>
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
                                         </includes>
                                     </section>
                                 </sections>
@@ -622,6 +732,8 @@
                             <goal>site</goal>
                         </goals>
                         <configuration>
+                            <!-- The scenario lessons render as step sheets; the hand-written sheets as written. -->
+                            <view>cheatsheet</view>
                             <!-- Its own tree, not a subdirectory of the manual's
                                  site: <clean>true</clean> on either build would
                                  otherwise sweep the other's card pages. -->
@@ -672,9 +784,19 @@
                                         <includes>
                                             <include>cheatsheet/00-setup.md</include>
                                             <include>cheatsheet/01-part2-identify.md</include>
+                                            <!-- The Part 2 scenarios, from their lessons. -->
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
+                                            <include>cheatsheet/01b-part2-t01.md</include>
                                             <include>cheatsheet/02-part3-cve.md</include>
                                             <include>cheatsheet/03-part4-health.md</include>
                                             <include>cheatsheet/04-part5-attacks.md</include>
+                                            <!-- The Part 5 scenario, from its lesson. -->
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
                                             <include>cheatsheet/05-part6-drill.md</include>
                                             <include>cheatsheet/06-off-route.md</include>
                                         </includes>
@@ -696,6 +818,8 @@
                             <goal>site</goal>
                         </goals>
                         <configuration>
+                            <!-- The scenario lessons render as step sheets; the hand-written sheets as written. -->
+                            <view>cheatsheet</view>
                             <outputDirectory>${project.build.directory}/cheatsheets-site</outputDirectory>
                             <clean>true</clean>
                             <book combine.self="override">
@@ -743,9 +867,19 @@
                                         <includes>
                                             <include>cheatsheet/00-setup.md</include>
                                             <include>cheatsheet/01-part2-identify.md</include>
+                                            <!-- The Part 2 scenarios, from their lessons. -->
+                                            <include>scenarios/spring-node/LESSON.md</include>
+                                            <include>scenarios/maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/extended-sbom/LESSON.md</include>
+                                            <include>scenarios/node-prepack/LESSON.md</include>
+                                            <include>scenarios/python-pep517/LESSON.md</include>
+                                            <include>scenarios/payara-mvnpm/LESSON.md</include>
+                                            <include>cheatsheet/01b-part2-t01.md</include>
                                             <include>cheatsheet/02-part3-cve.md</include>
                                             <include>cheatsheet/03-part4-health.md</include>
                                             <include>cheatsheet/04-part5-attacks.md</include>
+                                            <!-- The Part 5 scenario, from its lesson. -->
+                                            <include>scenarios/provenance-s01/LESSON.md</include>
                                             <include>cheatsheet/05-part6-drill.md</include>
                                             <include>cheatsheet/06-off-route.md</include>
                                         </includes>

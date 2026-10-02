@@ -4,3 +4,11 @@
 # kind stylesheet (src/main/paperband/styles/kind.css) styles from it.
 vars:
   kind: scenario
+  # Every card under scenarios/ is numbered S1, S2, ... in book order, across
+  # the parts it sits in; a lesson's title prints it with S{!number}.
+  numberAs: "S{n}"
+  # What the scenario cheat sheet keeps from each {!step}; only paperband's
+  # cheatsheet view reads it. The lessons fence output as ```output, not
+  # paperband's ```console, and an "In essence" illustration is marked
+  # {.essence} so the sheet shows only the command the reader runs.
+  cheatsheetSelect: ".instructions, pre.command:not(.essence), pre.output"

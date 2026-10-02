@@ -1,0 +1,4 @@
+{# The scenario cheat sheet (vars.scenarioIndex) has no divider pages: it has
+   one section, and its cover lists every scenario. The cheatsheets book shares
+   this view and keeps the default dividers. #}
+{% if not vars.scenarioIndex %}{% include "default:dividers" %}{% endif %}

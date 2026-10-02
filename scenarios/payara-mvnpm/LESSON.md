@@ -1,10 +1,10 @@
 ---
-id: s02-payara-mvnpm
+id: payara-mvnpm
 oneliner: "Traces an ordinary Maven dependency alongside an mvnpm package that reaches the browser bundle only through a plugin execution realm."
 track: core
 ---
 
-# S02 — Payara + mvnpm Supply Chain Trace Lab
+# S{!number} — Payara + mvnpm Supply Chain Trace Lab
 
 
 This lab follows four different kinds of software through one build and into one running container:
@@ -15,10 +15,6 @@ This lab follows four different kinds of software through one build and into one
 - Payara, Jakarta runtime libraries, the JDK, and operating-system packages: software supplied by the final container image.
 
 Rather than teaching Maven, mvnpm, Payara, Docker, or SBOM basics, the point is to see **what evidence exists at each stage, which dependency domain a component belongs to, what survives transformation, and what different inventory tools can legitimately know**.
-
-The pattern throughout is:
-
-**Why → Approach → Run → Observed output → Establish**
 
 The exercise ends at the container-image boundary.
 
@@ -31,7 +27,7 @@ The exercise ends at the container-image boundary.
 
 ---
 
-## The scenario
+## Scenario
 
 The application is a single-page "info" app packaged as a WAR and deployed
 to a Payara application server:
@@ -56,26 +52,28 @@ content. The Jakarta APIs are `provided` — supplied at runtime by Payara.
 At runtime the WAR deploys as `/trace` inside the `payara/server-web`
 container on port 8080.
 
----
+# {!step} Start clean
 
-# 1. Start clean
+From the repository root:
 
-A clean start ensures every artefact we inspect came from this build:
+```command
+cd scenarios/payara-mvnpm
+```
 
-## Run
+A clean start ensures every artefact we inspect came from this build.
+
+Remove earlier trace output and Maven build output. {.instructions}
 
 ```command
 rm -rf trace-output
 mvn clean
 ```
 
-## Establish
+## Evidence
 
 This removes generated Maven, frontend, WAR, and SBOM output from earlier runs. Source configuration remains unchanged.
 
----
-
-# 2. Inspect the source declarations
+# {!step} Inspect the source declarations
 
 Before asking Maven, Syft, or an SBOM producer what exists, we need the literal declarations the developer gave the build.
 
@@ -98,7 +96,7 @@ Inspect the relevant sections of `pom.xml` directly.
 
 ### commons-lang3
 
-## Run
+Show the commons-lang3 declaration and its version property in `pom.xml`. {.instructions}
 
 ```command
 grep -n -A5 -B2 'commons-lang3' pom.xml
@@ -126,7 +124,7 @@ grep -n -A5 -B2 'commons-lang3' pom.xml
 
 ### Jakarta EE Web API
 
-## Run
+Show the Jakarta EE Web API declaration and its `provided` scope. {.instructions}
 
 ```command
 grep -n -A5 -B2 'jakarta.jakartaee-web-api' pom.xml
@@ -144,7 +142,7 @@ grep -n -A5 -B2 'jakarta.jakartaee-web-api' pom.xml
 
 ### lodash-es
 
-## Run
+Show the lodash-es declaration under the esbuild-maven-plugin `<dependencies>`. {.instructions}
 
 ```command
 grep -n -A8 -B4 'lodash-es' pom.xml
@@ -180,7 +178,7 @@ grep -n -A8 -B4 'lodash-es' pom.xml
 80-            <version>3.4.0</version>
 ```
 
-## Establish
+## Evidence
 
 The source configuration asks Maven to treat the three tracked components differently:
 
@@ -199,21 +197,19 @@ lodash-es:4.17.21
 
 These are declarations. We have not yet proved how Maven resolves them or what reaches the finished artefact.
 
----
-
-# 3. Build the WAR
+# {!step} Build the WAR
 
 The source configuration only describes intent. The interesting evidence appears after Maven resolves dependencies, constructs the plugin execution realm, runs esbuild, and packages the generated output into the WAR.
 
 Use the project's normal build wrapper and then verify the generated browser assets and WAR directly.
 
-## Run
+Build the WAR with the project's build wrapper. {.instructions}
 
 ```command
 ./scripts/build.sh
 ```
 
-Then verify the outputs:
+Then verify the outputs. {.instructions}
 
 ```command
 find target/generated-web -maxdepth 2 -type f -print
@@ -224,11 +220,11 @@ target/generated-web/assets/app.js.map
 target/generated-web/assets/app.js
 ```
 
-```text
+```output
 -rw-r--r--@ 1 spoole  staff   638K 22 Aug 09:44 target/payara-mvnpm-trace-lab-1.0.0.war
 ```
 
-## Establish
+## Evidence
 
 The normal build produced:
 
@@ -243,15 +239,11 @@ deployable application
 
 We still need to determine which dependency evidence belongs to the application graph and which belongs to the build itself.
 
----
-
-# 4. Resolve the ordinary application dependency
+# {!step} Resolve the ordinary application dependency
 
 `commons-lang3` is our control case. It is declared as an ordinary project dependency, so it should appear in Maven's normal project dependency graph.
 
-Ask Maven's Dependency Plugin for the resolved project graph and filter it to `commons-lang3`.
-
-## Run
+Ask Maven's Dependency Plugin for the resolved project graph and filter it to `commons-lang3`. {.instructions}
 
 ```command
 mvn dependency:tree \
@@ -265,7 +257,7 @@ mvn dependency:tree \
 [INFO] BUILD SUCCESS
 ```
 
-## Establish
+## Evidence
 
 ```text
 pom.xml
@@ -280,17 +272,13 @@ project dependency graph
 
 Maven sees `commons-lang3:3.18.0` as normal application software.
 
----
-
-# 5. Show that lodash-es is absent from the project dependency graph
+# {!step} Show that lodash-es is absent from the project dependency graph
 
 `lodash-es` is declared under `esbuild-maven-plugin`, not under the project's ordinary `<dependencies>` section.
 
 We want to prove that Maven's normal project dependency graph does not treat it like `commons-lang3`.
 
-Run the same project dependency-tree query, filtered to the mvnpm coordinate.
-
-## Run
+Run the same project dependency-tree query, filtered to the mvnpm coordinate. {.instructions}
 
 ```command
 mvn dependency:tree \
@@ -304,7 +292,7 @@ mvn dependency:tree \
 
 No `lodash-es` dependency appears beneath the project.
 
-## Establish
+## Evidence
 
 ```text
 pom.xml
@@ -320,22 +308,16 @@ A normal `dependency:tree` for the WAR does not contain `lodash-es`.
 
 This does not mean the build did not use it. Maven maintains different dependency domains for the project being built and the plugins that perform the build.
 
----
-
-# 6. Inspect what resolve-plugins reports
+# {!step} Inspect what resolve-plugins reports
 
 The project dependency graph does not contain `lodash-es`. The next question is whether Maven's plugin dependency reporting exposes it.
 
-Ask the Maven Dependency Plugin to resolve the esbuild Maven plugin and its published dependency set.
-
-## Run
+Ask the Maven Dependency Plugin to resolve the esbuild Maven plugin and its published dependency set. {.instructions}
 
 ```command
 mvn dependency:resolve-plugins \
   -DincludeArtifactIds=esbuild-maven-plugin
 ```
-
-## Observed output
 
 Representative excerpt:
 
@@ -354,7 +336,7 @@ Representative excerpt:
 
 `org.mvnpm:lodash-es:4.17.21` was **not** listed.
 
-## Establish
+## Evidence
 
 ```text
 project dependency tree
@@ -372,17 +354,13 @@ POM
 
 `resolve-plugins` is not sufficient evidence for this project-specific plugin dependency. We need to inspect the actual execution realm Maven constructs for the plugin.
 
----
-
-# 7. Inspect the actual plugin execution realm
+# {!step} Inspect the actual plugin execution realm
 
 A project can add dependencies to a Maven plugin. Maven resolves those dependencies for the plugin's isolated execution realm rather than for the application's normal dependency graph.
 
 That means build-time software can affect the bytes we ship while remaining absent from `dependency:tree`.
 
-Run the `generate-resources` phase with Maven debug logging enabled and filter the plugin-realm construction to `lodash-es`.
-
-## Run
+Run the `generate-resources` phase with Maven debug logging enabled and filter the plugin-realm construction to `lodash-es`. {.instructions}
 
 ```command
 mvn -X generate-resources 2>&1 \
@@ -393,7 +371,7 @@ mvn -X generate-resources 2>&1 \
 [DEBUG]   Included: org.mvnpm:lodash-es:jar:4.17.21
 ```
 
-## Establish
+## Evidence
 
 ```text
 project dependency graph
@@ -416,9 +394,7 @@ application dependency graph
 complete set of software that can influence the build
 ```
 
----
-
-# 8. Inspect the generated browser bundle
+# {!step} Inspect the generated browser bundle
 
 Finding `lodash-es` in the plugin execution realm only proves that the package was available to esbuild. It does not prove that lodash code contributed to the application output.
 
@@ -426,7 +402,7 @@ We need evidence from the generated artefact.
 
 The build produced `app.js` and `app.js.map`. The source map records source modules represented in the generated JavaScript.
 
-## Run
+List the files esbuild generated under `target/generated-web`. {.instructions}
 
 ```command
 find target/generated-web -maxdepth 2 -type f -print
@@ -436,7 +412,7 @@ target/generated-web/assets/app.js.map
 target/generated-web/assets/app.js
 ```
 
-## Establish
+## Evidence
 
 The esbuild execution produced browser-facing application code and a source map.
 
@@ -449,15 +425,11 @@ target/generated-web/assets/app.js.map
 
 We still need to prove that lodash contributed to those bytes.
 
----
-
-# 9. Prove that lodash-es contributed to the generated bundle
+# {!step} Prove that lodash-es contributed to the generated bundle
 
 The plugin execution realm tells us `lodash-es:4.17.21` was available. The source map lets us independently establish whether lodash modules contributed to the output.
 
-Read the source map's `sources` array and filter it to lodash modules.
-
-## Run
+Read the source map's `sources` array and filter it to lodash modules. {.instructions}
 
 ```command
 jq -r '.sources[]' target/generated-web/assets/app.js.map \
@@ -498,7 +470,7 @@ jq -r '.sources[]' target/generated-web/assets/app.js.map \
 ../../../../node_modules/lodash-es/startCase.js
 ```
 
-## Establish
+## Evidence
 
 ```text
 plugin execution evidence
@@ -514,9 +486,7 @@ The source-map paths establish the package identity `lodash-es`; the version com
 
 We have now proved that lodash did more than merely exist in Maven's build environment: its code contributed to the generated application JavaScript.
 
----
-
-# 10. Scan the generated frontend as an artefact
+# {!step} Scan the generated frontend as an artefact
 
 Now deliberately throw away the Maven build context.
 
@@ -524,7 +494,7 @@ We know `lodash-es` contributed code. The question is whether an artefact scanne
 
 Give Syft only `target/generated-web`. It receives no POM, plugin realm, mvnpm coordinate, or original package tree.
 
-## Run
+Scan the generated frontend with Syft. {.instructions}
 
 ```command
 syft target/generated-web
@@ -540,7 +510,7 @@ WARN no explicit name and version provided for directory source, deriving artifa
 No packages discovered
 ```
 
-## Establish
+## Evidence
 
 ```text
 build/plugin evidence
@@ -560,17 +530,13 @@ Rather than proving that lodash code is absent, this demonstrates:
 software contribution != package identifiability
 ```
 
----
-
-# 11. Follow both dependency paths into the WAR
+# {!step} Follow both dependency paths into the WAR
 
 The generated browser bundle exists, but that does not yet prove it reached the deployable application.
 
 At the same boundary we can compare the ordinary Java dependency with the transformed npm-origin dependency.
 
-Inspect the finished WAR directly for the versioned `commons-lang3` JAR and generated browser assets.
-
-## Run
+Inspect the finished WAR directly for the versioned `commons-lang3` JAR and generated browser assets. {.instructions}
 
 ```command
 unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
@@ -582,7 +548,7 @@ unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
 8110    08-22-2026 09:44   assets/app.js
 ```
 
-## Establish
+## Evidence
 
 Both paths reached the same deployable WAR:
 
@@ -601,17 +567,13 @@ assets/app.js + assets/app.js.map
 
 The WAR therefore contains third-party software from both ecosystems, but only one still looks like an ordinary package.
 
----
-
-# 12. Scan the finished WAR
+# {!step} Scan the finished WAR
 
 We have manually proved that the WAR contains both the conventional Java library and lodash-derived JavaScript.
 
 Now ask an independent artefact scanner what package identities it can recover from the finished WAR alone.
 
-Give Syft only the completed WAR.
-
-## Run
+Give Syft only the completed WAR. {.instructions}
 
 ```command
 syft target/payara-mvnpm-trace-lab-1.0.0.war
@@ -624,7 +586,7 @@ commons-lang3             3.18.0   java-archive
 payara-mvnpm-trace-lab    1.0.0    java-archive
 ```
 
-## Establish
+## Evidence
 
 ```text
 WAR physically contains
@@ -646,17 +608,13 @@ code can be present in a deployable artefact
 without the originating package remaining identifiable
 ```
 
----
-
-# 13. Confirm what the WAR deliberately does not contain
+# {!step} Confirm what the WAR deliberately does not contain
 
 The Jakarta EE Web API follows a third path.
 
 It is a project dependency, but Maven scope `provided` tells the build that the runtime environment is expected to supply it. We should therefore find it in Maven's dependency model but not packaged into `WEB-INF/lib`.
 
-First inspect the WAR library directory.
-
-## Run
+First inspect the WAR library directory. {.instructions}
 
 ```command
 unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
@@ -669,9 +627,7 @@ unzip -l target/payara-mvnpm-trace-lab-1.0.0.war \
 
 No Jakarta EE API JAR is packaged.
 
-Now ask Maven for the resolved Jakarta dependency.
-
-## Run
+Now ask Maven for the resolved Jakarta dependency. {.instructions}
 
 ```command
 mvn dependency:tree \
@@ -685,7 +641,7 @@ mvn dependency:tree \
 [INFO] BUILD SUCCESS
 ```
 
-## Establish
+## Evidence
 
 ```text
 Maven dependency model
@@ -724,17 +680,13 @@ Jakarta EE API
     -> absent from WAR
 ```
 
----
-
-# 14. Generate the Maven-model CycloneDX SBOM
+# {!step} Generate the Maven-model CycloneDX SBOM
 
 So far we have compared Maven resolution with physical artefact inspection.
 
 Now we want to see what a formal SBOM generated from Maven's project model says about those same three tracked components.
 
-Invoke the CycloneDX Maven Plugin directly and emit JSON.
-
-## Run
+Invoke the CycloneDX Maven Plugin directly and emit JSON. {.instructions}
 
 ```command
 mvn org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
@@ -751,9 +703,7 @@ mvn org.cyclonedx:cyclonedx-maven-plugin:2.9.3:makeBom \
 
 The plugin also emitted schema-keyword warnings during validation. They did not prevent BOM generation.
 
-Now inspect the three tracked component identities.
-
-## Run
+Now inspect the three tracked component identities. {.instructions}
 
 ```command
 jq -r '.components[] | [.name, .version, (.scope // "-")] | @tsv' \
@@ -767,7 +717,7 @@ commons-lang3                3.18.0    required
 
 `lodash-es` is absent.
 
-## Establish
+## Evidence
 
 The Maven-generated CycloneDX SBOM contains:
 
@@ -779,9 +729,7 @@ lodash-es:4.17.21                 absent
 
 This is a model-derived inventory. It follows Maven's application dependency model, not a literal inventory of the files physically contained in the WAR.
 
----
-
-# 15. Understand Maven `provided` versus CycloneDX `required`
+# {!step} Understand Maven `provided` versus CycloneDX `required`
 
 The previous result looks surprising:
 
@@ -807,7 +755,7 @@ CycloneDX's component scope is a different model. `required` means the component
 
 The CycloneDX Maven Plugin includes Maven `provided` dependencies by default and does not preserve Maven's `provided` label as a CycloneDX scope value.
 
-## Establish
+## Evidence
 
 ```text
 Maven "provided"
@@ -821,9 +769,7 @@ The Maven-generated SBOM is therefore not evidence that `jakarta.jakartaee-web-a
 
 This becomes important when we compare it with an SBOM generated from the physical artefact.
 
----
-
-# 16. Generate an artefact-derived CycloneDX SBOM from the WAR
+# {!step} Generate an artefact-derived CycloneDX SBOM from the WAR
 
 We now have one CycloneDX SBOM generated from Maven's dependency model.
 
@@ -839,9 +785,7 @@ Maven model -> SBOM
 WAR bytes   -> SBOM
 ```
 
-Ask Syft to inspect the WAR and emit CycloneDX JSON.
-
-## Run
+Ask Syft to inspect the WAR and emit CycloneDX JSON. {.instructions}
 
 ```command
 mkdir -p trace-output
@@ -857,9 +801,7 @@ syft target/payara-mvnpm-trace-lab-1.0.0.war \
    └── ✔ Executables [0 executables]
 ```
 
-Now inspect the exact tracked component names rather than grepping the complete JSON.
-
-## Run
+Now inspect the exact tracked component names rather than grepping the complete JSON. {.instructions}
 
 ```command
 jq -r '
@@ -879,7 +821,7 @@ commons-lang3            3.18.0    -
 payara-mvnpm-trace-lab   1.0.0     -
 ```
 
-## Establish
+## Evidence
 
 The WAR-derived CycloneDX inventory contains only the identities Syft can recover from the physical WAR:
 
@@ -890,15 +832,13 @@ jakarta.jakartaee-web-api         absent
 lodash-es                         absent
 ```
 
----
-
-# 17. Compare the two CycloneDX SBOMs
+# {!step} Compare the two CycloneDX SBOMs
 
 This is the key SBOM comparison in the lab.
 
 Both documents use CycloneDX. Both describe the same application. The difference is where their inventory evidence came from.
 
-## Establish
+## Evidence
 
 ```text
 Maven-generated CycloneDX
@@ -939,9 +879,7 @@ Where and how the SBOM is generated matters.
 
 A model-derived SBOM can include software that is required but not packaged in the artefact. An artefact-derived SBOM can identify what survives as package evidence but cannot necessarily reconstruct transformed build inputs.
 
----
-
-# 18. Move the WAR into the Payara runtime
+# {!step} Move the WAR into the Payara runtime
 
 The WAR is not the complete runtime product.
 
@@ -957,17 +895,15 @@ The container is deliberately named rather than anonymous, so a re-run replaces 
 
 Payara deploys the WAR asynchronously after the container starts, so the application context `/trace` becomes available a few seconds later. Follow the deployment with:
 
-```command
+```command {.essence}
 docker logs -f payara-mvnpm-trace-lab
 ```
 
-## Run
+Build the Payara image and start the container with port 8080 published. {.instructions}
 
 ```command
 ./scripts/run.sh
 ```
-
-## Observed output
 
 The Docker build used:
 
@@ -977,23 +913,23 @@ payara/server-web:7.2026.7
 
 For this walkthrough, Docker resolved that base image to:
 
-```text
+```output
 payara/server-web:7.2026.7@sha256:989bde76edb44118bad9dba6d2d7ce93b7f0c0aab3577773f8d89a74257d90e7
 ```
 
 The build copied the application WAR to:
 
-```text
+```output
 /opt/payara/deployments/trace.war
 ```
 
 and named the local image:
 
-```text
+```output
 payara-mvnpm-trace-lab:local
 ```
 
-## Establish
+## Evidence
 
 The WAR has crossed into a concrete Payara runtime image.
 
@@ -1001,25 +937,19 @@ The base-image digest is build-time evidence for this walkthrough, not a value t
 
 Starting the container does not by itself prove that Payara successfully deployed the application. We verify that next.
 
----
-
-# 19. Verify the running application
+# {!step} Verify the running application
 
 We need runtime evidence, not merely image-construction evidence.
 
 A successful request proves that Payara deployed the WAR and that code relying on both the packaged Java dependency and server-provided Jakarta functionality can execute.
 
-Call the servlet endpoint.
-
-## Run
+Call the servlet endpoint. {.instructions}
 
 ```command
 curl -sS 'http://localhost:8080/trace/api/info?name=runtime%20trace' | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "message": "Hello Runtime trace",
   "application": "payara-mvnpm-trace-lab",
@@ -1028,7 +958,7 @@ curl -sS 'http://localhost:8080/trace/api/info?name=runtime%20trace' | jq
 }
 ```
 
-## Establish
+## Evidence
 
 ```text
 WAR
@@ -1047,9 +977,7 @@ The application is more than merely present in the image: Payara successfully de
 
 The runtime supplies Jakarta capability that was deliberately absent from the WAR.
 
----
-
-# 20. Inspect the complete container image
+# {!step} Inspect the complete container image
 
 The running product contains much more software than the WAR.
 
@@ -1057,15 +985,11 @@ The final image adds Payara itself, concrete Jakarta runtime libraries, a JDK, U
 
 This is the outermost software boundary in the exercise.
 
-Give Syft the completed local container image.
-
-## Run
+Give Syft the completed local container image. {.instructions}
 
 ```command
 syft payara-mvnpm-trace-lab:local
 ```
-
-## Observed output
 
 Syft catalogued:
 
@@ -1077,7 +1001,7 @@ Syft catalogued:
 
 Representative entries relevant to this trace included:
 
-```text
+```output
 commons-lang3                  3.18.0       java-archive
 payara-mvnpm-trace-lab        1.0.0        java-archive
 jakarta.json-api              2.1.0        java-archive
@@ -1090,7 +1014,7 @@ The image also contains a large set of Payara `7.2026.7` modules, Jakarta APIs a
 
 Syft still did not identify `lodash-es` as a package.
 
-## Establish
+## Evidence
 
 Crossing from WAR to container dramatically changes the visible software universe:
 
@@ -1148,9 +1072,7 @@ The application artefact is therefore not the whole deployed software inventory:
 application SBOM != container/product SBOM
 ```
 
----
-
-# 21. Stop the container
+# {!step} Stop the container
 
 The container started in step 18 runs detached and keeps holding port `8080` after the walkthrough ends.
 
@@ -1158,21 +1080,19 @@ The container started in step 18 runs detached and keeps holding port `8080` aft
 
 The `payara-mvnpm-trace-lab:local` image is left in place, because rebuilding it is the slowest part of the lab. Remove it explicitly if you want the disk space back:
 
-```command
+```command {.essence}
 docker image rm payara-mvnpm-trace-lab:local
 ```
 
-## Run
+Stop and remove the container to release port 8080. {.instructions}
 
 ```command
 ./scripts/stop.sh
 ```
 
-## Establish
+## Evidence
 
 Port `8080` is released and no scenario container remains from this walkthrough.
-
----
 
 # What this lab establishes
 
@@ -1228,8 +1148,6 @@ The central lesson is the same as the first trace lab:
 
 Those observations should be compared, not assumed to be interchangeable.
 
----
-
 # Replay in one pass
 
 ```command
@@ -1241,9 +1159,9 @@ Those observations should be compared, not assumed to be interchangeable.
 
 `image-trace.sh` builds the project image, prints its identity, and writes a Syft CycloneDX image SBOM to `trace-output/image.cdx.json`.
 
----
+# {!step} Verify the lab still holds
 
-# Verify the lab still holds
+Re-run the lab from a clean start and check that every claim this walkthrough makes still holds. {.instructions}
 
 ```command
 ./scripts/proof-check.sh

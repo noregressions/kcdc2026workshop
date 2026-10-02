@@ -224,7 +224,7 @@ mechanism malicious with the payload in the *generator*: does the scanner
 catch an attack whose code never reaches the artefact?
 
 The variant lives beside the scenario, in
-[`scenarios/S05-node-prepack/malicious-variant`](../../scenarios/S05-node-prepack/malicious-variant/README.md).
+[`scenarios/node-prepack/malicious-variant`](../../scenarios/node-prepack/malicious-variant/README.md).
 Its payload is a harmless stand-in: an async `curl | sh` to a reserved
 `.invalid` host that can never resolve. Nothing here is installed, run, or
 published; it is packed and scanned, nothing more.

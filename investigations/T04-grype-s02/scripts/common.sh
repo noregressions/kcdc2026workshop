@@ -22,9 +22,9 @@ resolve_s02() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S02-payara-mvnpm"
-    "$ROOT/../S02-payara-mvnpm"
-    "$ROOT/../../S02-payara-mvnpm"
+    "$ROOT/../../scenarios/payara-mvnpm"
+    "$ROOT/../payara-mvnpm"
+    "$ROOT/../../payara-mvnpm"
   )
 
   local candidate

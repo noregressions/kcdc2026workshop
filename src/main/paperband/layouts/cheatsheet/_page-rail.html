@@ -1,0 +1,17 @@
+{# The site's "On this page" rail for a scenario cheat sheet: its steps, not
+   the full lesson's headings, which this page doesn't carry. Each links to
+   the step's anchor, set on its list item in this view's _card-body.html.
+   A card with no steps keeps the default rail of its headings. #}
+{% if card.steps is empty %}{% include "default:_page-rail" %}{% else %}
+<nav class="page-rail" aria-label="Steps">
+  <p class="page-rail-heading">Steps</p>
+  <ol>
+    {% for s in card.steps %}
+    {% set n = s.block.directives.step %}
+    {% if s.block.anchor is not null %}
+    <li class="depth-{{ s.depth + 1 }}"><a href="#{{ s.block.anchor }}">{{ n }}. {{ s.block.heading | replace({('Step ' ~ n ~ ': '): '', ('Step ' ~ n ~ ' '): ''}) }}</a></li>
+    {% endif %}
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

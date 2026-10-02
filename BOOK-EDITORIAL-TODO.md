@@ -3,7 +3,7 @@
 From the full-book editorial pass (2026-08-29). Small fixes — filler, wordiness,
 stale beat lines, misplaced paragraphs — were applied directly; everything here
 was judged too big for a line edit. Grouped by theme, roughly most-urgent first.
-Companion files: `BOOK-REVIEW-TODO.md`, `BOOK-CONTENT-TRIM.md`.
+Companion files: `BOOK-REVIEW-TODO.md`, `OBSOLETE-BOOK-CONTENT-TRIM.md`.
 
 > **Note 2026-09-08:** several file names in this document predate the
 > OVERVIEW+TRACE merge — those pairs are now a single `LESSON.md` per lab.

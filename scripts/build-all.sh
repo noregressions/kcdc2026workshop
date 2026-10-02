@@ -243,7 +243,7 @@ fi
 
 banner "3. Scenarios"
 
-SCENARIOS="S01-spring-node S02-payara-mvnpm S03-python-pep517 S04-maven-plugin-hidden-content S05-node-prepack"
+SCENARIOS="spring-node payara-mvnpm python-pep517 maven-plugin-hidden-content node-prepack"
 
 if [[ "$DO_SCENARIOS" != 1 ]]; then
   skip_step "build scenarios" "--skip-scenarios"
@@ -273,11 +273,11 @@ elif [[ "$DOCKER_OK" != 1 ]]; then
 else
   # S01 -> registry.example.com/checkout-service:release-123
   run_step "build S01 image" \
-    in_dir scenarios/S01-spring-node ./scripts/image-trace.sh || true
+    in_dir scenarios/spring-node ./scripts/image-trace.sh || true
 
   # S02 -> payara-mvnpm-trace-lab:local  (builds the image only, starts nothing)
   run_step "build S02 image" \
-    in_dir scenarios/S02-payara-mvnpm ./scripts/image-trace.sh || true
+    in_dir scenarios/payara-mvnpm ./scripts/image-trace.sh || true
 fi
 
 # ---------------------------------------------------------------------------
@@ -300,14 +300,14 @@ else
   # dumping a full CVE table into the warm-up log.
   if have trivy; then
     run_step "trivy db download" \
-      sh -c 'trivy fs --scanners vuln --no-progress --quiet scenarios/S01-spring-node >/dev/null' || true
+      sh -c 'trivy fs --scanners vuln --no-progress --quiet scenarios/spring-node >/dev/null' || true
   else
     skip_step "trivy db download" "trivy not installed"
   fi
 
   if have syft; then
     run_step "syft warm" \
-      sh -c 'syft scenarios/S01-spring-node -o table >/dev/null' || true
+      sh -c 'syft scenarios/spring-node -o table >/dev/null' || true
   else
     skip_step "syft warm" "syft not installed"
   fi

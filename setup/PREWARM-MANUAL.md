@@ -52,9 +52,9 @@ echo "Base images available"
 Compile Java scenario modules to populate the local repository cache (`~/.m2/repository`):
 
 ```command
-cd scenarios/S01-spring-node && ./scripts/build.sh && cd ../..
-cd scenarios/S02-payara-mvnpm && ./scripts/build.sh && cd ../..
-cd scenarios/S04-maven-plugin-hidden-content && ./scripts/build.sh && cd ../..
+cd scenarios/spring-node && ./scripts/build.sh && cd ../..
+cd scenarios/payara-mvnpm && ./scripts/build.sh && cd ../..
+cd scenarios/maven-plugin-hidden-content && ./scripts/build.sh && cd ../..
 ```
 
 ## 4. Warm npm Dependencies
@@ -62,7 +62,7 @@ cd scenarios/S04-maven-plugin-hidden-content && ./scripts/build.sh && cd ../..
 Install npm dependencies and validate execution of package lifecycle hooks:
 
 ```command
-cd scenarios/S05-node-prepack && ./scripts/build.sh && cd ../..
+cd scenarios/node-prepack && ./scripts/build.sh && cd ../..
 ```
 
 ## 5. Warm Python Environment
@@ -70,7 +70,7 @@ cd scenarios/S05-node-prepack && ./scripts/build.sh && cd ../..
 Initialize the Python virtual environment and local package dependencies:
 
 ```command
-cd scenarios/S03-python-pep517 && ./scripts/build.sh && cd ../..
+cd scenarios/python-pep517 && ./scripts/build.sh && cd ../..
 ```
 
 ## 6. Initialize Grype Vulnerability Database
@@ -84,16 +84,16 @@ Confirm that `db status` reports an initialized local database.
 
 ## 7. Initialize Trivy Vulnerability Database
 
-Execute a filesystem scan against S01 to populate the local Trivy vulnerability database:
+Execute a filesystem scan against S1 to populate the local Trivy vulnerability database:
 
 ```command
-trivy fs --scanners vuln --no-progress scenarios/S01-spring-node
+trivy fs --scanners vuln --no-progress scenarios/spring-node
 ```
 
 ## 8. Initialize Syft Cache
 
 ```command
-syft scenarios/S01-spring-node -o table >/dev/null
+syft scenarios/spring-node -o table >/dev/null
 syft version
 ```
 

@@ -26,3 +26,6 @@ results/
 # IDE configuration
 .idea/
 *.iml
+
+# A Playwright render temp file, left behind only when a build is killed mid-render.
+.paperband-render-*.html

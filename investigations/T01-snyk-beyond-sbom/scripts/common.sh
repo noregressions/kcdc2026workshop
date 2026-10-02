@@ -11,9 +11,9 @@ resolve_s04() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S04-maven-plugin-hidden-content"
-    "$ROOT/../S04-maven-plugin-hidden-content"
-    "$ROOT/../../S04-maven-plugin-hidden-content"
+    "$ROOT/../../scenarios/maven-plugin-hidden-content"
+    "$ROOT/../maven-plugin-hidden-content"
+    "$ROOT/../../maven-plugin-hidden-content"
   )
 
   local candidate
@@ -66,9 +66,9 @@ resolve_s02() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S02-payara-mvnpm"
-    "$ROOT/../S02-payara-mvnpm"
-    "$ROOT/../../S02-payara-mvnpm"
+    "$ROOT/../../scenarios/payara-mvnpm"
+    "$ROOT/../payara-mvnpm"
+    "$ROOT/../../payara-mvnpm"
   )
 
   local candidate
@@ -90,9 +90,9 @@ resolve_s01() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S01-spring-node"
-    "$ROOT/../S01-spring-node"
-    "$ROOT/../../S01-spring-node"
+    "$ROOT/../../scenarios/spring-node"
+    "$ROOT/../spring-node"
+    "$ROOT/../../spring-node"
   )
 
   local candidate
@@ -114,9 +114,9 @@ resolve_s03() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S03-python-pep517"
-    "$ROOT/../S03-python-pep517"
-    "$ROOT/../../S03-python-pep517"
+    "$ROOT/../../scenarios/python-pep517"
+    "$ROOT/../python-pep517"
+    "$ROOT/../../python-pep517"
   )
 
   local candidate
@@ -137,9 +137,9 @@ resolve_s05() {
     return
   fi
   local candidates=(
-    "$ROOT/../../scenarios/S05-node-prepack"
-    "$ROOT/../S05-node-prepack"
-    "$ROOT/../../S05-node-prepack"
+    "$ROOT/../../scenarios/node-prepack"
+    "$ROOT/../node-prepack"
+    "$ROOT/../../node-prepack"
   )
   local candidate
   for candidate in "${candidates[@]}"; do

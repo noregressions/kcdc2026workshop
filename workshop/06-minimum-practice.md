@@ -32,10 +32,10 @@ caught anything you saw in Part 2.
 Run it now, against a project you have already built:
 
 ```command
-cd scenarios/S01-spring-node
+cd scenarios/spring-node
 ./scripts/build.sh          # if you have not already
 cd ../..
-./scripts/ship-check.sh scenarios/S01-spring-node
+./scripts/ship-check.sh scenarios/spring-node
 ```
 
 The script is forty lines of shell wrapping tools you already have. Read it —
@@ -46,16 +46,16 @@ today's against last release's.
 
 What to look at, in order:
 
-- **Section 3, first list — declared but not identifiable.** On S01 this is
+- **Section 3, first list — declared but not identifiable.** On [](card:spring-node) this is
   where your shading and bundling show up. Each entry is a component that is
   in your artefact and cannot be matched against any advisory database by
   anything downstream of you.
 - **Section 3, second list — in the artefact but not declared.** Point it at
-  S04 and this is where the plugin's payload appears. Anything here entered
+  [](card:maven-plugin-hidden-content) and this is where the plugin's payload appears. Anything here entered
   your build without passing through your dependency review.
 - **Section 4 — lifecycle.** Sorted by "nobody is fixing this any more"
   rather than by CVSS.
-- **Section 5 — provenance.** Currently a list of what is missing. S07 is how
+- **Section 5 — provenance.** Currently a list of what is missing. [](card:provenance-s01) is how
   you fill it in.
 
 An empty section 3 is a legitimate and good result. An unexamined section 3

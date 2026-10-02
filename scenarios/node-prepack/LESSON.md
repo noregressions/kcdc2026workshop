@@ -1,16 +1,12 @@
 ---
-id: s05-node-prepack
+id: node-prepack
 oneliner: "Follows a package through the prepack lifecycle hook into a tarball, into node_modules, and into a live endpoint."
 track: core
 ---
 
-# S05 — Node npm `prepack` Supply Chain Trace Lab
+# S{!number} — Node npm `prepack` Supply Chain Trace Lab
 
 This lab follows a Node package from source, through an npm lifecycle hook, into a packed tarball, into `node_modules`, and finally into runtime behaviour.
-
-The pattern is:
-
-**Why → Approach → Run → Observed output → Establish**
 
 ## What `prepack` means in this lab
 
@@ -80,7 +76,7 @@ No external npm packages are required.
 
 ---
 
-## The scenario
+## Scenario
 
 The application is a stdlib-only Node web service with one dependency:
 
@@ -107,9 +103,13 @@ packed tarball in `npm-repo/` with install scripts disabled — so the code
 the server mounts was manufactured entirely at packaging time, by
 package-owned code.
 
----
+# {!step} Start clean
 
-# 1. Start clean
+From the repository root:
+
+```command
+cd scenarios/node-prepack
+```
 
 We need to distinguish checked-in package inputs from files created by the npm lifecycle.
 
@@ -130,7 +130,7 @@ Unlike the other scenarios in this workshop, this one deliberately does **not** 
 
 Everything under `packages/trace-route-package/` other than `dist/` is checked-in source and remains.
 
-## Run
+Remove all generated and installed state; keeps application and package source. {.instructions}
 
 ```command
 ./scripts/clean.sh
@@ -142,15 +142,13 @@ S05 clean.
 Removed generated/installed state; kept application and package source.
 ```
 
-## Establish
+## Evidence
 
 The scenario has an explicit clean state in which the package's generated `dist/` directory is absent.
 
 The automated proof-check verifies this directly before packing.
 
----
-
-# 2. Pack and install the package
+# {!step} Pack and install the package
 
 The first execution boundary is `npm pack`: we want to see whether package-owned code executes before the tarball is assembled.
 
@@ -158,7 +156,7 @@ The first execution boundary is `npm pack`: we want to see whether package-owned
 
 **Pack the package into a local repository:**
 
-```command
+```command {.essence}
 npm pack --foreground-scripts --pack-destination ../../npm-repo
 ```
 
@@ -166,7 +164,7 @@ npm pack --foreground-scripts --pack-destination ../../npm-repo
 
 **Install the application's dependencies from that tarball:**
 
-```command
+```command {.essence}
 npm install --ignore-scripts
 ```
 
@@ -176,7 +174,7 @@ The build keeps both logs under `trace-output/` (`npm-pack.log` and `npm-install
 
 `build.sh` starts by removing `node_modules/`, `package-lock.json`, `npm-repo/`, `trace-output/` and the package's `dist/` directory — re-establishing step 1's clean state, so it is safe to re-run at any point.
 
-## Run
+Pack the package with its `prepack` script visible, then install it into the application with install scripts disabled. {.instructions}
 
 ```command
 ./scripts/build.sh
@@ -216,11 +214,11 @@ added 1 package in 167ms
 
 == Installed dependency tree ==
 
-node-prepack-trace-lab@1.0.0 .../scenarios/S05-node-prepack
+node-prepack-trace-lab@1.0.0 .../scenarios/node-prepack
 └── trace-route-package@1.0.0
 ```
 
-## Establish
+## Evidence
 
 `npm pack` did more than archive existing files. It first executed:
 
@@ -239,13 +237,11 @@ and those generated files immediately became tarball content.
 
 The exact tarball size, shasum and integrity digest are observations from this walkthrough, not invariants of the scenario.
 
----
-
-# 3. Inspect the package source after packing
+# {!step} Inspect the package source after packing
 
 After the lifecycle has run, the source workspace contains both original inputs and generated output.
 
-## Run
+List every file in the package workspace after packing. {.instructions}
 
 ```command
 find packages/trace-route-package -maxdepth 3 -type f -print | sort
@@ -260,7 +256,7 @@ packages/trace-route-package/package.json
 packages/trace-route-package/scripts/generate-dist.js
 ```
 
-## Establish
+## Evidence
 
 After `prepack`, three classes of evidence coexist in the package workspace:
 
@@ -270,13 +266,11 @@ After `prepack`, three classes of evidence coexist in the package workspace:
 
 `.DS_Store` is incidental local filesystem metadata and is not part of the scenario.
 
----
-
-# 4. Inspect the packed npm artefact
+# {!step} Inspect the packed npm artefact
 
 The distributable tarball is a different evidence view from the package source workspace.
 
-## Run
+List the contents of the packed tarball. {.instructions}
 
 ```command
 tar -tzf npm-repo/trace-route-package-1.0.0.tgz
@@ -288,7 +282,7 @@ package/package.json
 package/dist/prepack-evidence.json
 ```
 
-## Establish
+## Evidence
 
 The tarball contains the generated runtime output, but not:
 
@@ -297,22 +291,18 @@ The tarball contains the generated runtime output, but not:
 
 The publication boundary has therefore preserved the **result** of the lifecycle execution while removing the generator and its original input.
 
----
-
-# 5. Inspect provenance retained in the tarball
+# {!step} Inspect provenance retained in the tarball
 
 Although the actual generator and input are absent, this lab deliberately writes a provenance marker into the generated output so we can trace the transformation.
 
-## Run
+Read the provenance marker straight out of the tarball. {.instructions}
 
 ```command
 tar -xOzf npm-repo/trace-route-package-1.0.0.tgz \
   package/dist/prepack-evidence.json | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "event": "npm-prepack-generated",
   "package": "trace-route-package",
@@ -324,7 +314,7 @@ tar -xOzf npm-repo/trace-route-package-1.0.0.tgz \
 }
 ```
 
-## Establish
+## Evidence
 
 The distributed artefact retains an explicit statement that its runtime content was generated by:
 
@@ -336,13 +326,11 @@ scripts/generate-dist.js
 
 Without that marker, the tarball would preserve the generated result but say little about how it was produced.
 
----
-
-# 6. Inspect the installed package
+# {!step} Inspect the installed package
 
 Installation creates another evidence boundary. We want to see what survives into `node_modules`.
 
-## Run
+List every file in the installed package. {.instructions}
 
 ```command
 find node_modules/trace-route-package -maxdepth 3 -type f -print | sort
@@ -354,23 +342,19 @@ node_modules/trace-route-package/dist/prepack-evidence.json
 node_modules/trace-route-package/package.json
 ```
 
-## Establish
+## Evidence
 
 The installed package mirrors the packed artefact. It contains generated runtime code, generated provenance metadata and package metadata, but not the generator or original build input.
 
----
+# {!step} Inspect the installed provenance marker
 
-# 7. Inspect the installed provenance marker
-
-## Run
+Read the provenance marker from the installed package. {.instructions}
 
 ```command
 cat node_modules/trace-route-package/dist/prepack-evidence.json | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "event": "npm-prepack-generated",
   "package": "trace-route-package",
@@ -382,40 +366,36 @@ cat node_modules/trace-route-package/dist/prepack-evidence.json | jq
 }
 ```
 
-## Establish
+## Evidence
 
 The generated provenance marker survives unchanged from tarball to installed package.
 
----
+# {!step} Ask npm for the installed dependency view
 
-# 8. Ask npm for the installed dependency view
-
-## Run
+Ask npm for the full installed dependency tree. {.instructions}
 
 ```command
 npm ls --all
 ```
 
 ```output
-node-prepack-trace-lab@1.0.0 .../scenarios/S05-node-prepack
+node-prepack-trace-lab@1.0.0 .../scenarios/node-prepack
 └── trace-route-package@1.0.0
 ```
 
-## Establish
+## Evidence
 
 npm identifies the dependency relationship, but package identity alone does not explain how the package's runtime files were produced.
 
----
+# {!step} Generate npm's CycloneDX SBOM
 
-# 9. Generate npm's CycloneDX SBOM
-
-## Run
+Generate npm's CycloneDX SBOM into `trace-output/`. {.instructions}
 
 ```command
 npm sbom --sbom-format cyclonedx > trace-output/npm-sbom.json
 ```
 
-Then:
+Then search the SBOM for the application and the traced package. {.instructions}
 
 ```command
 jq -r '.components[]? | [.name, .version] | @tsv' trace-output/npm-sbom.json \
@@ -426,7 +406,7 @@ jq -r '.components[]? | [.name, .version] | @tsv' trace-output/npm-sbom.json \
 trace-route-package	1.0.0
 ```
 
-## Establish
+## Evidence
 
 npm's CycloneDX SBOM identifies `trace-route-package@1.0.0`, but that component identity does not describe:
 
@@ -440,11 +420,9 @@ dist/index.js
 
 The SBOM answers **what package is present**. It does not, in this view, answer **how the package's shipped runtime bytes were produced**.
 
----
+# {!step} Scan only the installed package directory with Syft
 
-# 10. Scan only the installed package directory with Syft
-
-## Run
+Scan only the installed package directory with Syft. {.instructions}
 
 ```command
 syft node_modules/trace-route-package
@@ -462,15 +440,13 @@ WARN no explicit name and version
 No packages discovered
 ```
 
-## Establish
+## Evidence
 
 When given only the isolated installed package directory, Syft did not identify an npm package in this walkthrough.
 
----
+# {!step} Give Syft the whole application context
 
-# 11. Give Syft the whole application context
-
-## Run
+Scan the whole application directory with Syft. {.instructions}
 
 ```command
 syft dir:.
@@ -490,7 +466,7 @@ node-prepack-trace-lab   1.0.0    npm
 trace-route-package      1.0.0    npm
 ```
 
-## Establish
+## Evidence
 
 With the surrounding project context, Syft recovers both npm package identities.
 
@@ -499,9 +475,7 @@ With the surrounding project context, Syft recovers both npm package identities.
 
 Neither package inventory view, by itself, exposes the `prepack` transformation that generated the runtime code.
 
----
-
-# 12. Run the application
+# {!step} Run the application
 
 Static inspection has shown the generated files exist in the installed package. The remaining question is whether they change what the application can do.
 
@@ -513,7 +487,7 @@ Three details of the script matter when reading the output:
 - It starts Node detached and records the process id in `.runtime.pid`, with output captured to `.runtime.log`.
 - It then polls `/health` for up to 30 seconds and only reports success once that endpoint identifies itself as this application. It also refuses to start if the port is already serving HTTP, so we cannot accidentally interrogate an unrelated service.
 
-## Run
+Start the application on port 8083. {.instructions}
 
 ```command
 ./scripts/run.sh
@@ -526,25 +500,21 @@ Health: http://localhost:8083/health
 Trace:  http://localhost:8083/hidden/prepack-info
 ```
 
-## Establish
+## Evidence
 
 The application starts successfully with the packed-and-installed dependency on port `8083`.
 
 The PID is an observation from this run, not an invariant.
 
----
+# {!step} Request the lifecycle-generated endpoint
 
-# 13. Request the lifecycle-generated endpoint
-
-## Run
+Call the endpoint generated during `prepack`. {.instructions}
 
 ```command
 curl -sS http://localhost:8083/hidden/prepack-info | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "event": "npm-prepack-generated",
   "package": "trace-route-package",
@@ -556,39 +526,33 @@ curl -sS http://localhost:8083/hidden/prepack-info | jq
 }
 ```
 
-## Establish
+## Evidence
 
 The generated package content does more than sit on disk: it changes runtime behaviour.
 
----
+# {!step} Verify the source-defined control endpoint
 
-# 14. Verify the source-defined control endpoint
-
-## Run
+Call the health endpoint the checked-in source defines. {.instructions}
 
 ```command
 curl -sS http://localhost:8083/health | jq
 ```
 
-## Observed output
-
-```json
+```output
 {
   "application": "node-prepack-trace-lab",
   "status": "UP"
 }
 ```
 
-## Establish
+## Evidence
 
 Both forms of behaviour coexist in the running process:
 
 - `/health` — source-defined application behaviour
 - `/hidden/prepack-info` — dependency behaviour generated during npm prepack
 
----
-
-# 15. Stop the runtime
+# {!step} Stop the runtime
 
 The runtime started in step 12 is detached and keeps holding port `8083` after the walkthrough ends.
 
@@ -598,7 +562,7 @@ Leaving it running also blocks a later re-run: `run.sh` refuses to start when th
 
 `clean.sh` removes the same PID and log files, so a later clean leaves no stale tracking state behind.
 
-## Run
+Stop the runtime and release port 8083. {.instructions}
 
 ```command
 ./scripts/stop.sh
@@ -608,11 +572,9 @@ Leaving it running also blocks a later re-run: `run.sh` refuses to start when th
 Stopped runtime PID 71203
 ```
 
-## Establish
+## Evidence
 
 Port `8083` is released and no scenario process remains from this walkthrough.
-
----
 
 # What this lab establishes
 
@@ -657,9 +619,9 @@ The evidence views are:
 - Syft whole project → both npm package identities
 - runtime → generated behaviour executes
 
----
+# {!step} Verify the lab still holds
 
-# Verify the lab still holds
+Re-run the lab from a clean start and check that every claim this walkthrough makes still holds. {.instructions}
 
 ```command
 ./scripts/proof-check.sh

@@ -54,10 +54,10 @@ Optional, and only for two stops: `snyk auth`, and an `NVD_API_KEY` export.
 | Part | Stops | Where |
 |---|---|---|
 | 1 — What is actually in our software? | the machine check above — nothing else to type | *this card* |
-| 2 — Can we identify what we ship? | S01, S04, S08, S05, S03, S02, T01 | *next card* |
+| 2 — Can we identify what we ship? | S1, S2, S3, S4, S5, S6, T01 | *next card* |
 | 3 — What does a CVE finding mean? | Ghostcat, T09 | |
 | 4 — CVEs aren't enough | Scorecard, deps.dev, EOL sweep | |
-| 5 — Someone is counting on that | T08, S07 | |
+| 5 — Someone is counting on that | T08, S7 | |
 | 6 — The minimum that keeps you honest | `ship-check.sh` | |
 
 T02–T07 are off the route and collected at the back.

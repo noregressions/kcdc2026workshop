@@ -1,0 +1,29 @@
+{# The scenario cheat sheet's first page: the title, and every scenario on
+   one list -- its S-number, name and summary -- linked to where it starts.
+   Replaces the bundled cover for the cheatsheet view only, so the main book
+   keeps its own. `cards` is the book's, in scope from book.html.
+
+   Only where the execution sets vars.scenarioIndex (the scenario cheat
+   sheet): the cheatsheets book shares this view and keeps its own cover,
+   the full-page image, through "default:_book-cover". #}
+{% if not vars.scenarioIndex %}{% include "default:_book-cover" %}{% else %}
+<section class="book-cover sheet-cover" id="book-cover">
+  <div class="sheet-cover-inner">
+    {% if book.subtitle %}<div class="series">{{ book.subtitle }}</div>{% endif %}
+    <h1>{{ book.title }}</h1>
+    <ol class="sheet-index">
+      {% for c in cards %}
+      {% set parts = c.title | split(' — ') %}
+      <li>
+        <a href="#card-{{ c.id }}">
+          <span class="sheet-badge">{{ parts[0] }}</span>
+          <span class="sheet-index-name">{{ c.title | replace({(parts[0] ~ ' — '): ''}) }}</span>
+        </a>
+        {% if c.frontmatter.oneliner %}<span class="sheet-index-oneliner">{{ c.frontmatter.oneliner }}</span>{% endif %}
+        <span class="sheet-index-steps">{{ c.steps | length }} steps</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endif %}

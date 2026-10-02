@@ -16,9 +16,9 @@ can rely on:
 
 | Gap you proved | What it is worth to an attacker |
 |---|---|
-| Builds execute arbitrary third-party code (S04, S05, S03) | Execution on your build machine, with your credentials |
-| Published source ≠ published artefact (S05) | The reviewable thing and the installed thing can differ |
-| Identity is lost in transformation (S01) | Code that no scanner can name cannot be matched to an advisory |
+| Builds execute arbitrary third-party code ([](card:maven-plugin-hidden-content), [](card:node-prepack), [](card:python-pep517)) | Execution on your build machine, with your credentials |
+| Published source ≠ published artefact ([](card:node-prepack)) | The reviewable thing and the installed thing can differ |
+| Identity is lost in transformation ([](card:spring-node)) | Code that no scanner can name cannot be matched to an advisory |
 | EOL components report clean (Part 4) | A target with no upstream defender and a green dashboard |
 
 None of these is a vulnerability in the sense a CVE describes. They are
@@ -76,13 +76,13 @@ followed by a backdoor placed **in the release tarball's build scripts but
 not in the git repository**. Anyone reading the source on the forge saw clean
 code. Anyone building from the released tarball got the backdoor.
 
-Which is exactly the mechanism you built yourself in S05.
+Which is exactly the mechanism you built yourself in [](card:node-prepack).
 
 ## Staying invisible
 
-Look back at the S05 finding with this in mind. `prepack` ran
+Look back at the [](card:node-prepack) finding with this in mind. `prepack` ran
 `generate-dist.js`, and the tarball shipped a `dist/` that exists in no
-commit. In S05 the generated output is harmless and the generator is honest.
+commit. In [](card:node-prepack) the generated output is harmless and the generator is honest.
 Change either and nothing else about the shape changes:
 
 ```text
@@ -108,11 +108,11 @@ the fair test of what is recoverable.
 
 Four probes:
 
-1. **The S05 published tarball.** Scores 0.0/10 — clean. Not because the
+1. **The [](card:node-prepack) published tarball.** Scores 0.0/10 — clean. Not because the
    scanner is weak, but because `files: ["dist"]` kept the generator script
    out of the tarball. The scanner read everything that shipped; the
    interesting code was not in it.
-2. **The S03 source distribution.** Also clean. The PEP 517 backend uses
+2. **The [](card:python-pep517) source distribution.** Also clean. The PEP 517 backend uses
    entirely standard packaging primitives; there is nothing anomalous to
    find, because generating a package at install time *is* the sanctioned
    behaviour.
@@ -125,16 +125,16 @@ metadata scanning cannot, and it is bounded by the same thing everything else
 in this workshop is bounded by — what is actually in the artefact you handed
 it. A scanner cannot read a file the packaging step excluded.
 
-## Lab — can you prove where it came from? (S07)
+## Lab — can you prove where it came from? (S7)
 
-Lab: *S07 — Reverse provenance*.
+Lab: *[](card:provenance-s01) — Reverse provenance*.
 
 Every part so far asked what is *in* an artefact. This one asks where it
 *came from* — which is the question you need answered at 2am when an advisory
 lands and you are holding a container image.
 
 ```command
-cd scenarios/S07-provenance-s01
+cd scenarios/provenance-s01
 ./scripts/build-baseline.sh
 ```
 
@@ -177,7 +177,7 @@ Three controls, in the order they pay off:
    the registry. A cache nobody verifies is an attack surface with a long
    memory.
 3. **Provenance you can verify.** Signed attestations bound to digests, as
-   built in S07 — so that when the question is "did this come from our
+   built in [](card:provenance-s01) — so that when the question is "did this come from our
    pipeline", the answer is evidence rather than assertion.
 
 Notice that none of the three is a scanner. Scanning tells you about known

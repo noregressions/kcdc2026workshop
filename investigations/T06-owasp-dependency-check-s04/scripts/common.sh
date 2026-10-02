@@ -30,9 +30,9 @@ resolve_s04() {
   fi
 
   local candidates=(
-    "$ROOT/../../scenarios/S04-maven-plugin-hidden-content"
-    "$ROOT/../S04-maven-plugin-hidden-content"
-    "$ROOT/../../S04-maven-plugin-hidden-content"
+    "$ROOT/../../scenarios/maven-plugin-hidden-content"
+    "$ROOT/../maven-plugin-hidden-content"
+    "$ROOT/../../maven-plugin-hidden-content"
   )
 
   local candidate

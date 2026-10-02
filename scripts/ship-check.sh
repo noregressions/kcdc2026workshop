@@ -18,7 +18,7 @@
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROJECT_DIR="${1:-$REPO_ROOT/scenarios/S01-spring-node}"
+PROJECT_DIR="${1:-$REPO_ROOT/scenarios/spring-node}"
 OUT_DIR="${SHIP_CHECK_OUT:-$PROJECT_DIR/ship-check}"
 
 if [[ ! -d "$PROJECT_DIR" ]]; then
@@ -172,7 +172,7 @@ if find . -maxdepth 3 -name '*.att' -o -maxdepth 3 -name '*.sig' 2>/dev/null | g
   echo "  signature/attestation artefacts present"
   found=1
 fi
-[[ $found -eq 0 ]] && skip "no provenance evidence found — see scenarios/S07-provenance-s01"
+[[ $found -eq 0 ]] && skip "no provenance evidence found — see scenarios/provenance-s01"
 
 rule "Done"
 echo "  Inventories written to $OUT_DIR"

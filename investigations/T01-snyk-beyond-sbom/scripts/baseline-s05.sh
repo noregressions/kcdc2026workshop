@@ -2,7 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 for cmd in npm node jq tar grep find; do require_command "$cmd"; done
-S05="$(resolve_s05)" || { echo "Could not find S05-node-prepack." >&2; echo "Set S05_DIR=/path/to/S05-node-prepack" >&2; exit 1; }
+S05="$(resolve_s05)" || { echo "Could not find node-prepack." >&2; echo "Set S05_DIR=/path/to/node-prepack" >&2; exit 1; }
 OUT="$ROOT/results/s05/baseline"
 mkdir -p "$OUT"
 echo "S05: $S05"

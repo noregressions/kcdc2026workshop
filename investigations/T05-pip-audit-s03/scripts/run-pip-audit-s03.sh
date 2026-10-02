@@ -8,7 +8,7 @@ for cmd in pip-audit jq python3; do
 done
 
 S03="$(resolve_s03)" || {
-  echo "Could not find S03-python-pep517. Set S03_DIR=/path/to/S03-python-pep517" >&2
+  echo "Could not find python-pep517. Set S03_DIR=/path/to/python-pep517" >&2
   exit 1
 }
 

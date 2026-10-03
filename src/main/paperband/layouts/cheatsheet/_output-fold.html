@@ -1,0 +1,15 @@
+{# One node of a cheat-sheet step, with an output folded on screen.
+
+   An output (a ```output or ```console fence) is written as a closed
+   <details> toggle followed by the output itself, not inside it: the
+   stylesheet hides the output on screen while its toggle is closed, and in
+   print hides the toggle and leaves the output alone. Putting the output
+   inside the <details> would need ::details-content (Chromium 131+) to print
+   it open; this way no renderer can lose an output from a PDF. The summary
+   carries the output's first words, so a result can often be checked
+   without opening it.
+
+   Expects: n, a node model. Anything that isn't an output is written as it
+   is, through | html, so a command keeps its block template and copy button. #}
+{% set isOutput = n.type == 'fence' and (n.lang == 'output' or n.lang == 'console' or (n.classes contains 'output')) %}
+{% if isOutput %}<details class="output-fold"><summary><span class="output-fold-label">Output</span><span class="output-fold-peek">{{ n.text | abbreviate(96) }}</span></summary></details>{{ n | html | raw }}{% else %}{{ n | html | raw }}{% endif %}

@@ -1,0 +1,5 @@
+{# A block's own content in the cheatsheet view, outputs folded on screen.
+   Used by the cheatsheets book's hand-written sheets, which keep the default
+   card body (see _card-body.html); the scenario sheets fold theirs in
+   _card-body.html. A block with no output prints as it always does. #}
+{% if block | find('pre.output, pre.console') is empty %}{{ block.html | raw }}{% else %}{% for n in block.nodes %}{% include "_output-fold" with {"n": n} %}{% endfor %}{% endif %}

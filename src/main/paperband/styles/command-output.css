@@ -8,9 +8,10 @@
  * and it should be answerable from across the desk.
  *
  * Commands take a brand tint — they are the thing you act on, so they come
- * forward. Output stays neutral and recedes. Both keep their labels and
- * borders, so the distinction survives greyscale printing, where the tint
- * differences collapse.
+ * forward. Output is dark text on white, with the theme's darker rule down its
+ * left edge: quieter than the command, but not grey on grey, which didn't
+ * read. Both keep their labels and borders, so the distinction survives
+ * greyscale printing, where the tint differences collapse.
  * ===========================================================================*/
 
 
@@ -26,12 +27,15 @@ pre.command {
   border-left-width: 3px;
 }
 
-pre.output {
-  background: var(--nr-surface-strong);
-  border-color: var(--nr-line);
+pre.output,
+pre.console {
+  background: var(--nr-page);
+  border: 1px solid var(--nr-line);
   border-left: 3px solid var(--nr-line-strong);
   color: var(--nr-text);
 }
+pre.output code,
+pre.console code { color: var(--nr-text); }
 
 /* Investigation cards recolour command furniture to the instrument hue; keep
    the tint in step with the border so the two do not disagree. */
@@ -62,8 +66,8 @@ article.card[id^="card-cheatsheet-"] pre.output code {
   line-height: 1.45;
 }
 
-/* Reclaim the card's side padding. Command and output must bleed by the same
-   amount or the joined slab below steps in and out at the seam. */
+/* Reclaim the card's side padding. Command and output bleed by the same
+   amount, so their edges line up down the page. */
 article.card[id^="card-cheatsheet-"] pre.command,
 article.card[id^="card-cheatsheet-"] pre.output {
   margin-left: -0.6rem;
@@ -73,9 +77,9 @@ article.card[id^="card-cheatsheet-"] pre.output {
 /* -----------------------------------------------------------------------------
  * A step is three things: what you are about to do, the command, and what it
  * should print. Markdown gives them to us as three siblings with no wrapper,
- * so they are bound with spacing and shape instead of a box — the heading sits
- * tight on its command, the command and its output join into a single slab,
- * and all the whitespace moves to the gap *between* steps. The reader should
+ * so they are bound with spacing instead of a box — the heading sits tight on
+ * its command, the output sits just under it, a small gap apart, and the
+ * larger whitespace goes *between* steps. The reader should
  * be able to see where one step ends without reading a word of it.
  *
  * :has() does the work; Chromium renders these books, so it is available. If a
@@ -83,18 +87,16 @@ article.card[id^="card-cheatsheet-"] pre.output {
  * than a broken one.
  * -------------------------------------------------------------------------- */
 
-/* Command and its output become one slab. */
-pre.command:has(+ pre.output) {
+/* An output sits just under its command, a small gap apart: two boxes, each
+   with its own border and corners, close enough to read as one step. */
+pre.command:has(+ pre.output),
+pre.command:has(+ pre.console) {
   margin-bottom: 0;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  border-bottom: 0;
 }
 
-pre.command + pre.output {
-  margin-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+pre.command + pre.output,
+pre.command + pre.console {
+  margin-top: 0.35rem;
 }
 
 /* The step heading: the paragraph immediately before a command. Scoped to the

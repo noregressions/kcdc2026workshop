@@ -6,7 +6,7 @@
    and the one-line summary from its frontmatter -- then each {!step} as a
    list item: the number in the margin, the step's name, and the parts
    vars.cheatsheetSelect picks (the .instructions paragraph, the command, its
-   output). No box per step: the margin number and a rule between steps carry
+   output, folded on screen by _output-fold.html). No box per step: the margin number and a rule between steps carry
    the structure, so the command blocks are the only boxes on the page.
 
    The title is "S1 — Software Supply Chain Trace Lab" (S{!number} in the
@@ -33,7 +33,7 @@
       <span class="sheet-step-num" aria-hidden="true">{{ n }}</span>
       <div class="sheet-step-body">
         <h3 class="sheet-step-title">{{ s.block.heading | replace({('Step ' ~ n ~ ': '): '', ('Step ' ~ n ~ ' '): ''}) }}</h3>
-        {{ s.block.html | select(keeps) | raw }}
+        {% for n in s.block | find(keeps) %}{% include "_output-fold" with {"n": n} %}{% endfor %}
       </div>
     </li>
   {% endfor %}

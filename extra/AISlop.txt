@@ -1,0 +1,271 @@
+# AI Package Hallucinations and Slopsquatting
+## Talk notes for segment 4, beats 2 and 3 ("You Don't Know What You're Shipping", Dev2Next)
+
+Every fact below was checked against its source on 2 October 2026. Registry states
+were checked live that day and will drift; re-run the check before the talk.
+Sources are listed at the end, numbered [n].
+
+
+### 1. Core concepts
+
+* **Typosquatting (the old way).** Registering a name a human is likely to
+  mistype, such as `requsts` for `requests`. It depends on a person's mistake.
+
+* **Package hallucination.** A code-generating model names a package that does
+  not exist, in an `import`, a `pip install` or an `npm install` line. It is not
+  usually a near-miss spelling: in the USENIX 2025 study, 48.6% of hallucinated
+  names were six or more edits away from any real package name. Typosquatting
+  defences that look for names close to popular ones do not catch most of them [2].
+
+* **Slopsquatting (the AI way).** Registering a name that models hallucinate,
+  so the next developer or agent that follows the model's advice installs it.
+  Seth Larson, a Developer-in-Residence at the Python Software Foundation,
+  coined the term in April 2025, and Andrew Nesbitt popularised it on
+  Mastodon [5]. The attacker does not need a mistake. They need a name a model
+  invents reliably, and section 2 shows models do.
+
+* **HalluSquatting (the agent version).** Published in July 2026 by researchers
+  at Tel Aviv University, Technion and Intuit [6][7]. The attacker pre-registers
+  repository, package or agent-skill names that AI agents commonly hallucinate
+  when asked to fetch something popular, then plants prompt-injection
+  instructions inside what they registered. An agent that hallucinates the name
+  fetches the attacker's content and follows its instructions. The attacker
+  never contacts the victim. Tested against Cursor, Windsurf, GitHub Copilot,
+  Cline, Gemini CLI and OpenClaw, the researchers reported hallucination rates
+  as high as 85% for repository-cloning prompts and 100% for skill
+  installations, with the same names recurring across models.
+
+  Correction to the earlier draft: in HalluSquatting the prompt injection lives
+  inside the squatted package or repo. It does not "force" the hallucination.
+
+
+### 2. Evidence: models invent the same names, repeatedly
+
+* **huggingface-cli (2023 to 2024) [1].**
+  * Bar Lanyado, a researcher at Lasso Security, saw models repeatedly tell
+    people to `pip install huggingface-cli`. The real command is
+    `pip install -U "huggingface_hub[cli]"`.
+  * He registered `huggingface-cli` on PyPI as an empty, benign package.
+  * It received more than 15,000 authentic downloads in three months. (Some
+    secondary sources, Wikipedia among them, say 30,000. The Register's
+    original report says 15,000 authentic downloads, so use that.)
+  * Alibaba's GraphTranslator repository README told users to install it.
+  * Lanyado also measured how often a hallucinated name came back: about 20%
+    for GPT-4, 14% for GPT-3.5 and Gemini, and 24% for Cohere.
+  * Today: the name is gone from PyPI. On npm, someone published two versions
+    under `huggingface-cli` on 28 March 2026, and npm replaced it with a
+    "security holding package" on 9 April 2026. The hallucination outlived the
+    original experiment and moved ecosystems.
+
+* **"We Have a Package for You!" (USENIX Security 2025) [2][3].**
+  * Joseph Spracklen and colleagues at the University of Texas at San Antonio,
+    the University of Oklahoma and Virginia Tech.
+  * 16 code-generating models, Python and JavaScript, 576,000 code samples.
+  * 19.7% of recommended packages did not exist. Commercial models averaged at
+    least 5.2%, open-source models 21.7%.
+  * 205,474 unique hallucinated package names.
+  * Persistence: they re-ran 500 prompts that had produced a hallucination, 10
+    times each. 43% of the hallucinated packages came back in all 10 runs, and
+    58% came back more than once. 39% never came back. The repeatable ones are
+    the valuable ones to an attacker: ask the question, note the name,
+    register it.
+  * The authors deliberately did not publish their list of hallucinated names,
+    because it would be an attacker's shopping list. They did publish their
+    prompts, which matters for the demo in section 5.
+
+* **The 2026 frontier models are better, but agree with each other [8][9].**
+  * Aleksandr Churilov, independent researcher, preprint May 2026, revised
+    August 2026.
+  * Five models released October 2025 to March 2026: Claude Sonnet 4.6, Claude
+    Haiku 4.5, GPT-5.4-mini, Gemini 2.5 Pro and DeepSeek V3.2, over 199,845
+    Python and JavaScript prompts.
+  * Hallucination rates were 4.62% to 6.10%, much lower and much closer
+    together than in 2024.
+  * All five models invented the same 127 names: 109 on PyPI and 18 on npm.
+    One registration would catch users of every one of those models.
+  * Coordinated disclosure with PyPI Security and Socket: PyPI's prohibited-name
+    and normalisation protections blocked 68 of them, Socket found 6 false
+    positives on npm, and 53 remained registrable (41 PyPI, 12 npm).
+  * Only three names were made public: `css-color-stop`, `dns-sd` and `dom-ains`.
+
+* **react-codeshift: a hallucination spreading through agent skills (January
+  2026) [4].**
+  * Charlie Eriksen at Aikido Security found AI tooling invoking
+    `npx react-codeshift`, a conflation of two real packages, `jscodeshift` and
+    `react-codemod`.
+  * It came from a single commit of 47 LLM-generated agent skills. By the time
+    he found it, it had spread to 237 repositories through forks and had been
+    translated into Japanese.
+  * The name had never been registered. Eriksen registered it as a placeholder
+    ("Placeholder to prevent dependency confusion" is its npm description).
+  * It still receives a few downloads a week from agents running those skills:
+    3 in the week before 2 October 2026. Nobody types that name; agents do.
+
+* **unused-imports: the malicious case [4][10][11].**
+  * A malicious npm package named like a shortened `eslint-plugin-unused-imports`.
+    Aikido reports coding assistants recommending it when asked for an
+    import-cleanup tool, and calls it potentially intentional slopsquatting.
+  * It was part of PhantomRaven, reported by Koi Security: 126 malicious npm
+    packages from August 2025, with more than 86,000 combined installs,
+    stealing GitHub, GitLab and Jenkins credentials plus system details.
+  * Its `package.json` looked clean. The payload arrived through a dependency
+    declared as a plain HTTP URL, fetched at install time. In the researchers'
+    words, "to every automated security system, these packages show
+    '0 Dependencies'". That is the workshop's theme in one package: the
+    metadata looked fine, and the thing that ran was never in it.
+  * npm placed it under a security hold on 27 October 2025, after versions
+    published in March and September 2025.
+
+* **Say this honestly on stage.** Most hallucinated names that got registered
+  were registered by researchers proving the point or defending the name.
+  unused-imports is the clearest malicious example, and even there the
+  slopsquatting intent is inferred, not confessed. The risk is real and
+  measured. A large, fully documented "hallucination to payload" attack is
+  still hard to find in public reporting.
+
+
+### 3. Do not use these (errors in the earlier draft)
+
+* **"30,000 downloads" for huggingface-cli.** The original report says 15,000.
+* **`crypto-secure-hash`, `aws-helper-sdk`, `fastapi-middleware`** as
+  "commonly hallucinated archetypes". They have no source. The first two exist
+  on neither registry. `fastapi-middleware` is a real PyPI package published in
+  April 2023, and calling it hallucinated would be wrong about someone's
+  project.
+* **`express-mongoose` as a hallucination.** Aikido uses it as a conflation
+  example, but it is a real npm package registered in May 2011.
+* **The 38% conflation, 13% typo, 51% fabrication split.** Secondary sources
+  attribute it to the USENIX paper, but it is not in the paper. Leave it out
+  unless you find its real source.
+* **Everything in the old "How these attacks are prevented today" section.**
+  It claimed AI tools are blocked from suggesting non-existent packages, that
+  "Build Action Firewalls" hard-stop new packages, and that you can no longer
+  auto-install a Python sdist that runs code. None of that holds. See section 4.
+
+
+### 4. What helps, and where each one stops
+
+Frame this as "what helps", not "solved". The talk's closing argument is that
+checks have to sit where the dependency decision is made.
+
+* **Check the name before installing it.** Does it exist? When was it first
+  published, how many versions has it had, who maintains it, and does it link
+  to a source repository? A name created last month with one empty version and
+  no repository is the signature in section 5. Registry metadata, Cloudsmith
+  Navigator and Socket all answer parts of this. *Limit:* a placeholder
+  registered by a defender looks identical to one registered by an attacker.
+
+* **Release-age cooldowns.** Refuse any version published less than N days ago.
+  This is now widely available: npm `min-release-age` (npm 11.10.0, February
+  2026), pnpm `minimumReleaseAge` (10.16, September 2025), Yarn
+  `npmMinimalAgeGate` (4.10.0), Bun `minimumReleaseAge` (1.3), uv
+  `--exclude-newer` with relative durations (0.9.17), pip
+  `--uploaded-prior-to` (26.0, relative durations from 26.1), and Poetry
+  `solver.min-release-age` (2.4.0) [12].
+  *Limit:* it only delays a new name. react-codeshift had been registered for
+  more than eight months by the time of this talk, and would pass any cooldown.
+
+* **Lockfiles and hash checking.** These pin what you already reviewed, so a
+  hallucinated name cannot slip in silently on a rebuild. *Limit:* they do
+  nothing for the first install of a new name. In Python, hash checking
+  (`pip install --require-hashes`) is opt-in, and pip still builds source
+  distributions and runs their build backend by default. The workshop's
+  python-pep517 lab shows that happening. `--only-binary :all:` refuses
+  sdists, at the cost of packages that ship no wheel.
+
+* **A curated internal registry or proxy.** Route installs through Cloudsmith,
+  Artifactory, Nexus or similar, allowing only approved packages. A
+  hallucinated name then fails to resolve. *Limit:* it is only as good as the
+  approval process, and agents running on developer laptops may bypass it.
+
+* **Registry-side protection.** PyPI's prohibited-name list blocked 68 of the
+  127 names in the 2026 study. npm's security holds removed unused-imports and
+  the npm huggingface-cli. *Limit:* both act after disclosure or detection.
+
+* **Fewer hallucinations at the source.** The USENIX study tested retrieval
+  (RAG), self-detection and fine-tuning. All reduced hallucinations, and
+  fine-tuning reduced them most. None eliminated them, and the 2026 frontier
+  models still hallucinate 4.6% to 6.1% of the time [2][8].
+
+* **Treat agents and skills as part of the supply chain.** react-codeshift
+  spread through agent skills, not through people. Review what an agent is
+  allowed to install, and give it the checks as tools: the HeroDevs EOL MCP
+  server or a registry-lookup tool in the same loop that picks the dependency.
+
+
+### 5. Names to check: "it exists, and it shouldn't"
+
+Live results from 2 October 2026. The point to land: hallucinated names do
+get registered, and the registry alone can't tell you who registered them or why.
+
+| Name | Ecosystem | Status on 2 Oct 2026 | Why it is interesting |
+|---|---|---|---|
+| `huggingface-cli` | npm | security hold since 9 Apr 2026; 2 versions published 28 Mar 2026 | Hallucinated PyPI name, later registered on npm, then pulled by npm |
+| `huggingface-cli` | PyPI | absent | The original experiment is gone |
+| `css-color-stop` | npm | exists: one empty 0.0.0, created 28 Jul 2026, no repository | Published in the 2026 study; registered six days after Socket's 22 July write-up. Probably defensive, but nothing says so |
+| `react-codeshift` | npm | exists: placeholder 1.0.0, created 14 Jan 2026, 3 downloads a week | Defender's placeholder, still installed by agents |
+| `unused-imports` | npm | security hold since 27 Oct 2025 | The malicious PhantomRaven package |
+| `dns-sd` | npm and PyPI | absent | Published 2026 name still unregistered |
+| `dom-ains` | npm and PyPI | absent | Published 2026 name still unregistered |
+| `express-mongoose` | npm | real package since 2011 | Control: a "hallucination example" that is real |
+| `fastapi-middleware` | PyPI | real package since 2023 | Control: the earlier draft's mistake |
+
+Do not register `dns-sd` or `dom-ains` yourself, even defensively, without
+coordinating with the registry. Show that they are still open.
+
+**Finding fresh names for the demo.** The strongest version uses names your own
+session produced, so nobody can say you cherry-picked:
+
+1. Take prompts from the USENIX study's published prompt files (`Data/Python`
+   and `Data/Javascript` in the Spracks/PackageHallucination repository) [3].
+2. Run 50 to 100 of them through two or three current assistants and keep
+   every `pip install`, `npm install` and `import` line.
+3. Check each name against npm and PyPI: exists or not, first-publish date,
+   version count, weekly downloads, source repository.
+4. Re-run the prompts that produced a non-existent name a few times. The
+   repeaters are what an attacker would register.
+5. Anything that does not exist goes on a slide. Anything that exists but was
+   created recently, has one version and no repository goes on the "it
+   shouldn't exist" slide.
+
+Expect conflations of two real packages, as with react-codeshift. Framework
+plus plugin names (`<framework>-<feature>`) and CLI wrappers for libraries
+(`<library>-cli`) are the patterns the published cases share.
+
+A read-only checker that does step 3 is `extra/check-names.py`:
+`./check-names.py css-color-stop react-codeshift dns-sd`.
+
+
+### Sources
+
+1. The Register, "AI bots hallucinate software packages and devs download them",
+   28 March 2024. https://theregister.com/2024/03/28/ai_bots_hallucinate_software_packages
+2. Spracklen et al., "We Have a Package for You! A Comprehensive Analysis of
+   Package Hallucinations by Code Generating LLMs", USENIX Security 2025.
+   https://www.usenix.org/system/files/conference/usenixsecurity25/sec25cycle1-prepub-742-spracklen.pdf
+3. Study code, prompts and data (hallucinated-name list withheld).
+   https://github.com/Spracks/PackageHallucination
+4. Aikido Security, "Slopsquatting: The AI Package Hallucination Attack Already
+   Happening". https://www.aikido.dev/blog/slopsquatting-ai-package-hallucination-attacks
+5. Wikipedia, "Slopsquatting". https://en.wikipedia.org/wiki/Slopsquatting
+6. SecurityWeek, "'HalluSquatting' Turns AI Hallucinations Into Botnet Delivery
+   Mechanism". https://www.securityweek.com/hallusquatting-turns-ai-hallucinations-into-botnet-delivery-mechanism/
+7. The Hacker News, "New HalluSquatting Attack Could Trick AI Coding Assistants
+   Into Installing Botnet Malware", July 2026.
+   https://thehackernews.com/2026/07/new-hallusquatting-attack-could-trick.html
+8. Churilov, "The Range Shrinks, the Threat Remains: Re-evaluating LLM Package
+   Hallucinations on the 2026 Frontier-Model Cohort", arXiv 2605.17062.
+   https://arxiv.org/abs/2605.17062
+9. Socket, "New Study Identifies 53 Slopsquatting Targets Across 5 Frontier
+   LLMs", 22 July 2026. https://socket.dev/blog/slopsquatting-targets-across-frontier-llms
+10. GitLab Advisory Database, "Malicious code in unused-imports (npm)".
+    https://advisories.gitlab.com/pkg/npm/unused-imports/
+11. CSO Online, "Malicious packages in npm evade dependency detection through
+    invisible URL links". https://www.csoonline.com/article/4082195/malicious-packages-in-npm-evade-dependency-detection-through-invisible-url-links-report.html
+12. Andrew Nesbitt, "Package Managers Need to Cool Down", 4 March 2026, for the
+    settings and versions, and "Package Manager Trends", 10 September 2026, for
+    the wider roll-out.
+    https://nesbitt.io/2026/03/04/package-managers-need-to-cool-down.html
+    https://nesbitt.io/2026/09/10/package-manager-trends.html
+13. Live registry checks against registry.npmjs.org, api.npmjs.org and
+    pypi.org, 2 October 2026.

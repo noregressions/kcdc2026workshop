@@ -184,7 +184,8 @@ h3.sheet-step-title {
   font-size: 0.78rem;
   line-height: 1.45;
 }
-/* Output is what you should see, not what you type: smaller and quieter.
+/* Output is what you should see, not what you type: smaller than the
+   command, but dark text on white, so it reads -- grey on grey didn't.
    A command never splits: half a command can't be pasted. */
 .scenario-sheet pre.command { break-inside: avoid; }
 .scenario-sheet pre.output,
@@ -193,7 +194,7 @@ h3.sheet-step-title {
 .scenario-sheet pre.console code {
   font-size: 0.68rem;
   line-height: 1.4;
-  color: var(--nr-muted);
+  color: var(--nr-text);
 }
 /* Nor does an output, so its OUTPUT label can't be left alone at the foot
    of a page with the lines it labels overleaf. One too long for a page still
@@ -213,8 +214,7 @@ h3.sheet-step-title {
     margin: 0 auto 3rem;
   }
   .sheet-cover { max-width: 52rem; margin: 0 auto 3rem; }
-  /* Long output scrolls inside its box, so the commands stay in view. */
-  .scenario-sheet pre.output { max-height: 18rem; overflow: auto; }
+
 }
 
 /* The cheatsheets book's hand-written sheets (setup, the parts, T01, off the
@@ -231,4 +231,84 @@ h3.sheet-step-title {
     break-after: auto;
     page-break-after: auto;
   }
+}
+
+/* --- Folded output (layouts/cheatsheet/_output-fold.html) -----------------
+ *
+ * On screen each output starts closed behind a one-line toggle: the OUTPUT
+ * label and the output's first words, so a result can often be checked
+ * without opening it. The output is the toggle's next sibling rather than
+ * its content, so print needs nothing from <details>: there the toggle is
+ * hidden and the output prints as before. */
+details.output-fold { margin: 0.35rem 0 0; }
+details.output-fold > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--nr-line);
+  border-left: 3px solid var(--nr-line-strong);
+  border-radius: var(--nr-radius-sm);
+  background: var(--nr-page);
+  cursor: pointer;
+  list-style: none;
+}
+details.output-fold > summary::-webkit-details-marker { display: none; }
+details.output-fold > summary::before {
+  content: "▸";
+  color: var(--nr-muted);
+  font-size: 0.7rem;
+}
+details.output-fold[open] > summary::before { content: "▾"; }
+.output-fold-label {
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--nr-muted);
+}
+.output-fold-peek {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--nr-text);
+}
+details.output-fold[open] .output-fold-peek { visibility: hidden; }
+details.output-fold > summary:hover,
+details.output-fold > summary:focus-visible { border-color: var(--nr-line-strong); }
+
+/* On the hand-written sheets, commands and outputs bleed 0.6rem into the
+   card's padding (command-output.css); the toggle bleeds with them, so its
+   edges line up with the boxes above and below it. */
+article.card[id^="card-cheatsheet-"] details.output-fold {
+  margin-left: -0.6rem;
+  margin-right: -0.6rem;
+}
+
+/* The command sits on its toggle as it sat on its output. */
+pre.command:has(+ details.output-fold) { margin-bottom: 0; }
+details.output-fold + pre.output,
+details.output-fold + pre.console { margin-top: 0.2rem; }
+
+@media screen {
+  details.output-fold:not([open]) + pre.output,
+  details.output-fold:not([open]) + pre.console { display: none; }
+  /* Open, the toggle already says OUTPUT: the output's own label would say
+     it twice. Print keeps it, since there is no toggle on paper. */
+  details.output-fold + pre.output::before,
+  details.output-fold + pre.console::before { display: none; }
+}
+
+@media print {
+  details.output-fold { display: none; }
+  /* With the toggle gone, the output sits a command's gap below it again. */
+  pre.command + details.output-fold + pre.output,
+  pre.command + details.output-fold + pre.console { margin-top: 0.35rem; }
+  /* The same keep-together rules as when the two were adjacent. */
+  .scenario-sheet details.output-fold + pre.output,
+  .scenario-sheet details.output-fold + pre.console { break-before: avoid; }
 }

@@ -1,0 +1,191 @@
+# How AI Assistants Choose Dependencies
+## Talk notes for segment 4, beat 1 ("Bigger trees", Dev2Next)
+
+Every fact below was checked against its source on 2 October 2026. Sources
+are listed at the end, numbered [n].
+
+
+### 1. The finding that changes this beat
+
+The outline calls this beat "Bigger trees". The published evidence does not
+support that as stated. The best study of real agent pull requests found
+that agents add a new dependency in only 1.3% of them [2]. Nothing I found
+measures AI-written code growing the dependency tree beyond what a human
+would add for the same feature.
+
+What the evidence does support, strongly and from several directions:
+
+* **Old versions.** Models pin versions they saw in training, and those
+  versions often carry CVEs that were public before the training cutoff [3].
+* **Versions that don't exist.** Asked for upgrades, a frontier model named
+  non-existent versions in more than a quarter of cases [6].
+* **Worse security outcomes than humans.** Agents' dependency changes added
+  more vulnerabilities than they fixed. Humans' changes fixed far more than
+  they added [4].
+* **Familiar libraries.** Direct LLM use favours popular libraries over
+  suitable ones [1]. Agents working in real repositories are more varied [2].
+
+Suggested new title: **"Not bigger trees: older ones."** The line to land:
+the assistant picks from the past, and the past has known CVEs and EOL
+versions in it. That sets up beat 4, where the EOL check runs inside the
+assistant.
+
+
+### 2. Evidence
+
+* **Popularity over suitability (ACL Findings 2026) [1].**
+  * Lukas Twist, Mark Harman, Don Syme, Joost Noppen, Helen Yannakoudakis,
+    Detlef Nauck and Jie M. Zhang. Eight LLMs.
+  * "We observe a strong tendency to overuse widely adopted libraries such as
+    NumPy; in up to 45% of cases, this usage is not required and deviates
+    from the ground-truth solutions."
+  * The authors conclude that LLMs "prioritise familiarity and popularity over
+    suitability and task-specific optimality".
+  * This is direct prompting, not agents working in a repository. See the next
+    study before generalising.
+
+* **Agents rarely add dependencies (MSR 2026) [2].**
+  * Lukas Twist and Jie M. Zhang. 26,760 agent-authored pull requests from the
+    AIDev dataset.
+  * Agents imported libraries in 29.5% of PRs, but added a new dependency in
+    only 1.3%.
+  * When they did add one, 75.0% specified a version, "an improvement on
+    direct LLM usage where versions are rarely mentioned".
+  * Agents drew on "a surprisingly diverse set of external libraries",
+    unlike the narrow preferences in the direct-prompting study.
+  * Same first author as [1]. Citing both together is the honest version:
+    the popularity bias is real in chat, weaker in agents.
+
+* **Versions with known CVEs (arXiv, May 2026) [3].**
+  * Chengjie Wang, Jingzheng Wu, Xiang Ling, Tianyue Luo and Chen Zhao.
+    Ten LLMs, 1,000 Stack Overflow tasks, Python only.
+  * When models specified versions, 36.70% to 55.70% of tasks contained at
+    least one known CVE, and 62.75% to 74.51% of those were Critical or High.
+  * 72.27% to 91.37% of those CVEs were public before the model's training
+    cutoff. The models had seen the fix and still picked the vulnerable
+    version.
+  * How often models pin at all varies widely: 26.83% to 95.18% when asked
+    directly, 6.45% to 59.19% in manifest files.
+  * Preprint, not yet peer reviewed.
+
+* **Agents versus humans on real dependency changes (arXiv, January 2026) [4].**
+  * Tanmay Singla, Berk Çakar, Paschal C. Amusuo and James C. Davis.
+    117,062 dependency changes from 33,596 agent PRs and 6,618 human PRs,
+    in 2,807 repositories across seven ecosystems.
+  * Agents picked a version already known to be vulnerable at PR time 2.46%
+    of the time, against 1.64% for humans.
+  * Net security impact (vulnerabilities fixed minus introduced): agents −98
+    (924 introduced, 826 fixed), humans +1,316 (659 introduced, 1,975 fixed).
+  * The authors note their dataset "does not indicate whether an added
+    dependency was necessary", so it can't answer the tree-size question
+    either. Preliminary study.
+
+* **Endor Labs, State of Dependency Management 2025 [5].**
+  * "Only 1 in 5 dependency versions recommended by AI coding assistants were
+    safe to use, containing neither hallucinations nor vulnerabilities."
+  * 44% to 49% of dependencies imported by coding agents had known
+    vulnerabilities, depending on the model.
+  * With security tools connected, safe recommendations rose from about 20%
+    to 57%. This is the vendor-neutral way to make beat 4's point.
+  * Vendor research. The press release doesn't give enough method detail to
+    reproduce it.
+
+* **Sonatype, State of the Software Supply Chain 2026 [6].**
+  * 36,870 upgrade recommendations from GPT-5 for 856 enterprise
+    applications, across Maven, npm, PyPI and NuGet.
+  * 27.76% referenced versions that don't exist: more than 10,000
+    hallucinated releases.
+  * GPT-5 was 98% accurate when it said it was highly confident, but said so
+    for only 3.68% of recommendations.
+  * It recommended `color` 5.0.1 and `color-string` 2.1.1, versions published
+    in a supply-chain compromise, and `sweetalert2` 11.21.2, which carries
+    protestware.
+  * Following its advice made 345 components less secure.
+  * Vendor research, and the comparison is with Sonatype's own grounded
+    product. Quote the GPT-5 numbers, not the product claim.
+
+
+### 3. Do not use these
+
+* **"AI makes dependency trees bigger"** as a measured fact. No study I found
+  measures it, and the best agent study points the other way [2].
+* **"In 48% of cases LLMs imported NumPy unnecessarily."** That was an early
+  version of [1]. The published abstract says "up to 45%".
+* **"Agents choose by popularity."** [1] shows it for direct prompting. [2]
+  found agents more varied. Say "models lean on what they've seen most".
+* **Endor's "34% of suggested dependencies didn't exist."** It appears on an
+  Endor Labs explainer page, not in the report's press release. Leave it out
+  unless you find it in the report itself.
+* **Endor's or Sonatype's numbers as independent research.** Both sell the
+  fix. Their numbers agree with the academic ones, which is the reason to
+  use them, but say whose they are.
+
+
+### 4. Redesigning the demo
+
+The outline's demo is one feature written by hand and by an assistant, with
+the two dependency trees side by side. With n=1, the tree sizes prove
+nothing. On the evidence above, it's also likely to show a small difference.
+Change what you measure: show which versions the assistant picked, not how
+many packages.
+
+1. **Pick a stack where version age matters.** Spring Boot is the best fit,
+   because the 3.5 line went EOL on 30 June 2026 and segment 2 has already
+   shown EOL DS flagging Spring Boot 3.5.12. A model trained before that will
+   often reach for 3.x.
+2. **Prompt in an empty project.** For example: "Create a Spring Boot REST
+   service with a health endpoint and a JSON parser, using Maven." Record the
+   session, and keep the generated `pom.xml`.
+3. **For each version it pinned, record:**
+   * the latest release on the registry today;
+   * the EOL DS verdict;
+   * the OSV or NVD CVEs;
+   * whether the version exists at all (`extra/check-names.py` covers names;
+     check versions by hand or extend the script).
+4. **Run it three times, ideally with two assistants.** Report what repeats.
+   Single runs vary.
+5. **Keep a hand-written version only as the control.** Mention the tree
+   sizes in one line if the difference turns out to be striking. Don't build
+   the beat on them.
+6. **Hand over to beat 4.** Run the same prompt with the HeroDevs EOL MCP
+   server connected, and show it flag the EOL pick as it is added. Endor's
+   20%-to-57% improvement with tools connected is the outside evidence that
+   this generalises [5].
+
+Navigator still fits here, in one slide: put the assistant's picks through it
+to show the quality and maintenance score of what it chose. Don't frame it as
+"chose by familiarity" unless the run shows that. See the open Navigator
+coverage question in the outline doc.
+
+
+### 5. Suggested slide sequence (about 2 of segment 4's 9 minutes)
+
+1. The claim people expect: "AI bloats your tree." Then [2]'s 1.3%: mostly,
+   it doesn't.
+2. What it does instead: the generated `pom.xml`, with version, latest and EOL
+   status side by side.
+3. One number from the research: [3]'s "the CVE was public before the
+   training cutoff" range, or [4]'s −98 against +1,316.
+4. Line: "It isn't adding more. It's picking from the past."
+
+
+### Sources
+
+1. Twist, Harman, Syme, Noppen, Yannakoudakis, Nauck and Zhang, "A Study of
+   LLMs' Preferences for Libraries and Programming Languages", Findings of
+   ACL 2026 (arXiv 2503.17181, v4 June 2026; v1 was titled "LLMs Love
+   Python"). https://arxiv.org/abs/2503.17181
+2. Twist and Zhang, "A Study of Library Usage in Agent-Authored Pull
+   Requests", MSR 2026 (arXiv 2512.11589). https://arxiv.org/abs/2512.11589
+3. Wang, Wu, Ling, Luo and Zhao, "Correct Code, Vulnerable Dependencies: A
+   Large Scale Measurement Study of LLM-Specified Library Versions", arXiv
+   2605.06279, May 2026. https://arxiv.org/abs/2605.06279
+4. Singla, Çakar, Amusuo and Davis, "Towards a Benchmark for Dependency
+   Decision-Making", arXiv 2601.00205, January 2026.
+   https://arxiv.org/abs/2601.00205
+5. Endor Labs, "State of Dependency Management 2025: Security in the AI-Code
+   Era", press release.
+   https://www.prnewswire.com/news-releases/endor-labs-launches-2025-state-of-dependency-management-report-finds-80-of-ai-suggested-dependencies-contain-risks-302603438.html
+6. Sonatype, "2026 State of the Software Supply Chain: Grounded AI Agents",
+   January 2026.
+   https://www.sonatype.com/state-of-the-software-supply-chain/2026/ai-agents

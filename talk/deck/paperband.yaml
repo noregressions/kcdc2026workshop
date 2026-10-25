@@ -1,0 +1,22 @@
+# Dev2Next talk deck: one card per 16:9 slide.
+#
+# Its own book, not a target of the workshop book: the workshop pom's shared
+# configuration (noregressions theme, Letter pages, the route's sections)
+# would otherwise apply to the deck too. Build with ./build-deck.sh or
+#   mvn -f talk/deck/pom.xml package
+#
+# Content follows extra/TalkOutline.md. Facts on the AI and malware slides
+# come from extra/AISlop.txt, extra/AIMalware.txt and extra/AITreeGrowth.txt,
+# which carry the sources.
+# No `title:` on purpose: a book title makes paperband print a text cover
+# page before the first card, and 00-title.md is already the title slide.
+theme: deck
+
+page:
+  size: 16x9
+  # Stated, not inherited: page.size replaces only the sheet.
+  margins: { top: 0, right: 0, bottom: 0, left: 0 }
+
+vars:
+  # A slide that overflows fails the build, naming the card.
+  maxPagesPerCard: 1
